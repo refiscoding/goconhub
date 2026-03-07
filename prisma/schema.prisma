@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  customer
+  vendor
+  admin
+}
+
+enum UserStatus {
+  active
+  pending
+  suspended
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  completed
+  declined
+}
+
+enum DisputeStatus {
+  open
+  resolved
+}
+
+enum ServiceUnit {
+  hr
+  job
+  day
+}
+
+model User {
+  id                String     @id @default(cuid())
+  email             String     @unique
+  phone             String?    @unique
+  passwordHash      String
+  role              Role       @default(customer)
+  status            UserStatus @default(active)
+  firstName         String
+  lastName          String
+  city              String?
+  area              String?
+  preferredServices String[]   @default([])
+  avatarUrl         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  vendor    Vendor?
+  bookings  Booking[]  @relation("CustomerBookings")
+  messages  Message[]
+  disputes  Dispute[]  @relation("CustomerDisputes")
+  reviews   Review[]   @relation("ReviewsGiven")
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bio         String   @default("")
+  category    String   @default("")
+  skills      String[] @default([])
+  location    String   @default("")
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+  available   Boolean  @default(true)
+  verified    Boolean  @default(false)
+
+  services  Service[]
+  bookings  Booking[]  @relation("VendorBookings")
+  disputes  Dispute[]  @relation("VendorDisputes")
+  reviews   Review[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Service {
+  id       String      @id @default(cuid())
+  vendorId String
+  vendor   Vendor      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  name   String
+  price  Float
+  unit   ServiceUnit @default(hr)
+  desc   String      @default("")
+  active Boolean     @default(true)
+
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Booking {
+  id         String        @id @default(cuid())
+  customerId String
+  customer   User          @relation("CustomerBookings", fields: [customerId], references: [id])
+  vendorId   String
+  vendor     Vendor        @relation("VendorBookings", fields: [vendorId], references: [id])
+  serviceId  String?
+  service    Service?      @relation(fields: [serviceId], references: [id])
+
+  serviceName String
+  date        String
+  time        String
+  location    String        @default("")
+  note        String        @default("")
+  amount      Float
+  status      BookingStatus @default(pending)
+
+  completedByVendor     Boolean   @default(false)
+  adminApprovedComplete Boolean   @default(false)
+  paymentStatus         String    @default("unpaid")  // unpaid | submitted | confirmed
+  paymentMethod         String?   // dpo | orange | ewallet
+  paymentReference      String?
+  paidAt                DateTime?
+  platformFee           Float     @default(0)   // 5% of amount
+  vendorAmount          Float     @default(0)   // 95% of amount
+  receiptEmail          String?
+
+  messages  Message[]
+  dispute   Dispute?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  vendorId   String
+  vendor     Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+
+  rating    Int      // 1-5
+  comment   String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([vendorId, reviewerId])
+}
+
+model Dispute {
+  id         String        @id @default(cuid())
+  bookingId  String        @unique
+  booking    Booking       @relation(fields: [bookingId], references: [id])
+  customerId String
+  customer   User          @relation("CustomerDisputes", fields: [customerId], references: [id])
+  vendorId   String
+  vendor     Vendor        @relation("VendorDisputes", fields: [vendorId], references: [id])
+
+  reason     String
+  amount     Float
+  status     DisputeStatus @default(open)
+  resolution String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

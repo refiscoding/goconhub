@@ -1,0 +1,182 @@
+"use client";
+import { FC, useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { IconLogout } from "@/components/icons";
+import { Toast } from "@/components/ui";
+import { useToast } from "@/hooks/useToast";
+import { AdminHeader } from "@/components/layout/AdminHeader";
+import { OverviewTab }  from "./tabs/OverviewTab";
+import { BookingsTab }  from "./tabs/BookingsTab";
+import { VendorsTab }   from "./tabs/VendorsTab";
+import { UsersTab }     from "./tabs/UsersTab";
+import { DisputesTab }  from "./tabs/DisputesTab";
+import { PaymentsTab }  from "./tabs/PaymentsTab";
+import type { AppUser, Booking, Dispute, UserStatus, DisputeStatus, AdminTab } from "@/lib/types";
+
+interface RawBooking {
+  id: string; serviceName: string; date: string; amount: number;
+  status: string; completedByVendor: boolean; adminApprovedComplete: boolean;
+  paymentStatus: string; paymentMethod: string | null; paymentReference: string | null; paidAt: string | null;
+  customer: { id: string; firstName: string; lastName: string };
+  vendor: { id: string; user: { firstName: string; lastName: string } };
+}
+
+export const AdminDash: FC = () => {
+  const router = useRouter();
+  const [tab,      setTab]     = useState<AdminTab>("overview");
+  const [users,    setUsers]   = useState<AppUser[]>([]);
+  const [bkgs,     setBkgs]    = useState<Booking[]>([]);
+  const [rawBkgs,  setRawBkgs] = useState<RawBooking[]>([]);
+  const [disps,    setDisps]   = useState<Dispute[]>([]);
+  const [loading,  setLoading] = useState(true);
+  const [toast, showToast] = useToast();
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [uRes, bRes, dRes] = await Promise.all([
+        fetch("/api/admin/users"),
+        fetch("/api/admin/bookings"),
+        fetch("/api/admin/disputes"),
+      ]);
+
+      if (uRes.status === 403 || bRes.status === 403) {
+        router.push("/admin");
+        return;
+      }
+
+      const [uData, bData, dData] = await Promise.all([uRes.json(), bRes.json(), dRes.json()]);
+
+      setUsers((uData.users ?? []).map((u: {
+        id: string; firstName: string; lastName: string; email: string; phone: string | null;
+        role: "customer" | "vendor"; status: UserStatus; createdAt: string;
+        _count: { bookings: number };
+      }) => ({
+        id: u.id,
+        name: `${u.firstName} ${u.lastName}`,
+        role: u.role,
+        email: u.email,
+        phone: u.phone ?? "",
+        joined: new Date(u.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        status: u.status,
+        bookings: u._count.bookings,
+      } satisfies AppUser)));
+
+      const rawBookings: RawBooking[] = bData.bookings ?? [];
+      setRawBkgs(rawBookings);
+      setBkgs(rawBookings.map((b) => ({
+        id: b.id,
+        customer: `${b.customer.firstName} ${b.customer.lastName}`,
+        vendor: `${b.vendor.user.firstName} ${b.vendor.user.lastName}`,
+        service: b.serviceName ?? "—",
+        date: b.date,
+        time: "—",
+        status: b.status as Booking["status"],
+        amount: b.amount,
+        loc: "—",
+      } satisfies Booking)));
+
+      setDisps((dData.disputes ?? []).map((d: {
+        id: string; reason: string; status: string; createdAt: string;
+        booking: { amount: number; customer: { firstName: string; lastName: string }; vendor: { user: { firstName: string; lastName: string } } };
+      }) => ({
+        id: d.id,
+        customer: `${d.booking.customer.firstName} ${d.booking.customer.lastName}`,
+        vendor: `${d.booking.vendor.user.firstName} ${d.booking.vendor.user.lastName}`,
+        reason: d.reason,
+        amount: d.booking.amount ?? 0,
+        status: d.status as DisputeStatus,
+        date: new Date(d.createdAt).toLocaleDateString("en-GB"),
+      } satisfies Dispute)));
+    } catch {
+      showToast("Failed to load data", "err");
+    } finally {
+      setLoading(false);
+    }
+  }, [router, showToast]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const vendors   = users.filter((u) => u.role === "vendor");
+  const customers = users.filter((u) => u.role === "customer");
+  const pendingV  = vendors.filter((v) => v.status === "pending").length;
+  const openD     = disps.filter((d) => d.status === "open").length;
+  const pendingPayments = rawBkgs.filter((b) =>
+    (b.completedByVendor && !b.adminApprovedComplete) || b.paymentStatus === "submitted"
+  ).length;
+
+  const updateUserStatus = async (id: string, status: UserStatus) => {
+    await fetch(`/api/admin/users/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    setUsers((prev) => prev.map((u) => u.id === id ? { ...u, status } : u));
+    showToast(status === "active" ? "User reactivated ✓" : "User suspended", status === "active" ? "ok" : "err");
+  };
+
+  const approveUser = (id: string) => updateUserStatus(id, "active");
+  const suspendUser = (id: string) => updateUserStatus(id, "suspended");
+
+  const resolveDisp = async (id: string) => {
+    await fetch(`/api/admin/disputes/${id}`, { method: "PATCH" });
+    setDisps((prev) => prev.map((d) => d.id === id ? { ...d, status: "resolved" } : d));
+    showToast("Dispute resolved ✓", "ok");
+  };
+
+  const approveJobComplete = async (id: string) => {
+    const res = await fetch(`/api/bookings/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminApprovedComplete: true }),
+    });
+    if (res.ok) {
+      setRawBkgs((prev) => prev.map((b) => b.id === id ? { ...b, adminApprovedComplete: true } : b));
+      showToast("Job completion approved — customer notified to pay ✓", "ok");
+    } else showToast("Failed to approve", "err");
+  };
+
+  const confirmPayment = async (id: string) => {
+    const res = await fetch(`/api/bookings/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentStatus: "confirmed" }),
+    });
+    if (res.ok) {
+      setRawBkgs((prev) => prev.map((b) => b.id === id ? { ...b, paymentStatus: "confirmed", status: "completed" } : b));
+      showToast("Payment confirmed — vendor notified ✓", "ok");
+    } else showToast("Failed to confirm payment", "err");
+  };
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/admin");
+  };
+
+  return (
+    <div data-theme="admin" style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      {toast && <Toast msg={toast.msg} type={toast.type} />}
+      <AdminHeader tab={tab} pendingVendors={pendingV} openDisputes={openD} pendingPayments={pendingPayments} onTabChange={(t) => setTab(t as AdminTab)} />
+      <div style={{ padding: "20px 22px 80px" }}>
+        {loading ? (
+          <p style={{ textAlign: "center", color: "var(--ink3)", padding: "60px 0" }}>Loading…</p>
+        ) : (
+          <>
+            {tab === "overview"  && <OverviewTab  bookings={bkgs} disputes={disps} vendorCount={vendors.length} customerCount={customers.length} pendingVendors={pendingV} />}
+            {tab === "bookings"  && <BookingsTab  bookings={bkgs} />}
+            {tab === "payments"  && <PaymentsTab  bookings={rawBkgs} onApproveComplete={approveJobComplete} onConfirmPayment={confirmPayment} />}
+            {tab === "vendors"   && <VendorsTab   vendors={vendors}   onApprove={approveUser} onSuspend={suspendUser} />}
+            {tab === "users"     && <UsersTab     customers={customers} onApprove={approveUser} onSuspend={suspendUser} />}
+            {tab === "disputes"  && <DisputesTab  disputes={disps} onResolve={resolveDisp} />}
+          </>
+        )}
+      </div>
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--bg2)", borderTop: "1px solid var(--border)", padding: "14px 22px 20px" }}>
+        <button onClick={handleLogout}
+          style={{ width: "100%", padding: 11, borderRadius: 10, background: "var(--red-bg)", border: "1px solid rgba(248,113,113,.2)", color: "var(--red)", fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <IconLogout style={{ width: 17, height: 17 }} /> Sign Out
+        </button>
+      </div>
+    </div>
+  );
+};
