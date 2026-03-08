@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Toast } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
@@ -40,7 +40,7 @@ function fmtExpiry(v: string) {
   return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
 }
 
-export default function CustomerBookingsPage() {
+function CustomerBookingsPage() {
   const [bookings,   setBookings]   = useState<ApiBooking[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [toast, showToast] = useToast();
@@ -350,5 +350,13 @@ export default function CustomerBookingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BookingsPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <CustomerBookingsPage />
+    </Suspense>
   );
 }

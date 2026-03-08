@@ -33,7 +33,7 @@ export default async function BookVendorPage({ params }: PageProps) {
     avail:    v.available,
     tags:     v.skills,
     bio:      v.bio,
-    services: v.services.map((s) => ({ id: s.id, name: s.name, price: s.price, unit: s.unit as "hr" | "job" | "day" })),
+    services: v.services.map((s: { id: string; name: string; price: number; unit: string }) => ({ id: s.id, name: s.name, price: s.price, unit: s.unit as "hr" | "job" | "day" })),
   };
 
   return (

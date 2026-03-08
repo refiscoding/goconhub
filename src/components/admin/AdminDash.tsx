@@ -1,10 +1,9 @@
 "use client";
 import { FC, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { IconLogout } from "@/components/icons";
 import { Toast } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
-import { AdminHeader } from "@/components/layout/AdminHeader";
+import { AdminNav } from "@/components/layout/AdminNav";
 import { OverviewTab }  from "./tabs/OverviewTab";
 import { BookingsTab }  from "./tabs/BookingsTab";
 import { VendorsTab }   from "./tabs/VendorsTab";
@@ -154,29 +153,32 @@ export const AdminDash: FC = () => {
   };
 
   return (
-    <div data-theme="admin" style={{ minHeight: "100vh", background: "var(--bg)" }}>
+    <div data-theme="admin" className="app-shell">
       {toast && <Toast msg={toast.msg} type={toast.type} />}
-      <AdminHeader tab={tab} pendingVendors={pendingV} openDisputes={openD} pendingPayments={pendingPayments} onTabChange={(t) => setTab(t as AdminTab)} />
-      <div style={{ padding: "20px 22px 80px" }}>
-        {loading ? (
-          <p style={{ textAlign: "center", color: "var(--ink3)", padding: "60px 0" }}>Loading…</p>
-        ) : (
-          <>
-            {tab === "overview"  && <OverviewTab  bookings={bkgs} disputes={disps} vendorCount={vendors.length} customerCount={customers.length} pendingVendors={pendingV} />}
-            {tab === "bookings"  && <BookingsTab  bookings={bkgs} />}
-            {tab === "payments"  && <PaymentsTab  bookings={rawBkgs} onApproveComplete={approveJobComplete} onConfirmPayment={confirmPayment} />}
-            {tab === "vendors"   && <VendorsTab   vendors={vendors}   onApprove={approveUser} onSuspend={suspendUser} />}
-            {tab === "users"     && <UsersTab     customers={customers} onApprove={approveUser} onSuspend={suspendUser} />}
-            {tab === "disputes"  && <DisputesTab  disputes={disps} onResolve={resolveDisp} />}
-          </>
-        )}
-      </div>
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--bg2)", borderTop: "1px solid var(--border)", padding: "14px 22px 20px" }}>
-        <button onClick={handleLogout}
-          style={{ width: "100%", padding: 11, borderRadius: 10, background: "var(--red-bg)", border: "1px solid rgba(248,113,113,.2)", color: "var(--red)", fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          <IconLogout style={{ width: 17, height: 17 }} /> Sign Out
-        </button>
-      </div>
+      <AdminNav
+        tab={tab}
+        onTabChange={(t) => setTab(t as AdminTab)}
+        pendingVendors={pendingV}
+        openDisputes={openD}
+        pendingPayments={pendingPayments}
+        onLogout={handleLogout}
+      />
+      <main className="app-content">
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 24px" }}>
+          {loading ? (
+            <p style={{ textAlign: "center", color: "var(--ink3)", padding: "80px 0" }}>Loading…</p>
+          ) : (
+            <>
+              {tab === "overview"  && <OverviewTab  bookings={bkgs} disputes={disps} vendorCount={vendors.length} customerCount={customers.length} pendingVendors={pendingV} />}
+              {tab === "bookings"  && <BookingsTab  bookings={bkgs} />}
+              {tab === "payments"  && <PaymentsTab  bookings={rawBkgs} onApproveComplete={approveJobComplete} onConfirmPayment={confirmPayment} />}
+              {tab === "vendors"   && <VendorsTab   vendors={vendors}   onApprove={approveUser} onSuspend={suspendUser} />}
+              {tab === "users"     && <UsersTab     customers={customers} onApprove={approveUser} onSuspend={suspendUser} />}
+              {tab === "disputes"  && <DisputesTab  disputes={disps} onResolve={resolveDisp} />}
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

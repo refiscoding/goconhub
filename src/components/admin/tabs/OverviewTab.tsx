@@ -1,4 +1,9 @@
-import { FC } from "react";
+"use client";
+import { FC, useState, useEffect } from "react";
+import {
+  Box, SimpleGrid, Card, CardBody, Stat, StatLabel, StatNumber, StatHelpText,
+  Flex, Text, Heading, Badge, Divider, Stack,
+} from "@chakra-ui/react";
 import type { Booking, Dispute } from "@/lib/types";
 import { STATUS_TAG } from "@/lib/constants";
 
@@ -10,58 +15,222 @@ interface OverviewTabProps {
   pendingVendors: number;
 }
 
-export const OverviewTab: FC<OverviewTabProps> = ({ bookings, disputes, vendorCount, customerCount, pendingVendors }) => {
-  const openDisputes = disputes.filter((d) => d.status === "open").length;
-  const STATS = [
-    { l: "Total Revenue", v: "P48,320", i: "💰", sub: "All time",                  c: "var(--green)" },
-    { l: "Bookings",      v: bookings.length, i: "📅", sub: `${bookings.filter((b) => b.status === "confirmed").length} upcoming`, c: "var(--acc)" },
-    { l: "Customers",     v: customerCount,   i: "👥", sub: "Registered",           c: "var(--acc)" },
-    { l: "Vendors",       v: vendorCount,     i: "🔧", sub: `${pendingVendors} pending approval`, c: "var(--amber)" },
+interface RevenueData {
+  totalRevenue: number;
+  totalTransacted: number;
+  totalVendorPaid: number;
+  count: number;
+}
+
+const fmt = (n: number) =>
+  n >= 1000 ? `P${(n / 1000).toFixed(1)}k` : `P${n.toFixed(0)}`;
+
+const SECTION_LABEL: React.CSSProperties = {
+  fontSize: 11, fontWeight: 700, color: "var(--ink3)",
+  textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 10,
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  confirmed: "blue", pending: "orange", completed: "green",
+  cancelled: "red", disputed: "purple",
+};
+
+export const OverviewTab: FC<OverviewTabProps> = ({
+  bookings, disputes, vendorCount, customerCount, pendingVendors,
+}) => {
+  const [rev, setRev] = useState<RevenueData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/revenue")
+      .then((r) => r.json())
+      .then((d: RevenueData) => setRev(d))
+      .catch(() => {});
+  }, []);
+
+  const openDisputes  = disputes.filter((d) => d.status === "open").length;
+  const completedBkgs = bookings.filter((b) => b.status === "completed").length;
+  const completionRate = bookings.length
+    ? `${Math.round((completedBkgs / bookings.length) * 100)}%`
+    : "—";
+
+  const FINANCE = [
+    { label: "Gross Transacted", value: rev ? fmt(rev.totalTransacted) : "—", sub: `${rev?.count ?? 0} confirmed payments`, icon: "💳", accent: "#0077B6" },
+    { label: "Platform Revenue",  value: rev ? fmt(rev.totalRevenue)    : "—", sub: "5% fee on transactions",                icon: "📈", accent: "#2D9A4E" },
+    { label: "Vendor Payouts",    value: rev ? fmt(rev.totalVendorPaid) : "—", sub: "95% disbursed to vendors",               icon: "💸", accent: "#C9A84C" },
+    { label: "Net Profit",        value: rev ? fmt(rev.totalRevenue)    : "—", sub: "After all payouts",                      icon: "🏦", accent: "#2D9A4E" },
   ];
-  const HEALTH = [
-    { l: "Booking completion rate", v: "87%",          c: "var(--green)" },
-    { l: "Average rating",          v: "4.8★",          c: "#f59e0b" },
-    { l: "Response time (avg)",     v: "14 min",        c: "var(--acc)" },
-    { l: "Open disputes",           v: openDisputes,    c: "var(--red)" },
+
+  const PLATFORM = [
+    { label: "Total Customers",  value: customerCount,    accent: "var(--acc)"   },
+    { label: "Total Vendors",    value: vendorCount,      accent: "var(--acc)"   },
+    { label: "Pending Approval", value: pendingVendors,   accent: "var(--amber)" },
+    { label: "Open Disputes",    value: openDisputes,     accent: "var(--red)"   },
+    { label: "Total Bookings",   value: bookings.length,  accent: "var(--ink)"   },
+    { label: "Completion Rate",  value: completionRate,   accent: "var(--green)" },
   ];
+
   return (
-    <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {STATS.map((s, i) => (
-          <div key={i} className="card" style={{ padding: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <span style={{ fontSize: 20 }}>{s.i}</span>
-              <span style={{ fontSize: 22, fontWeight: 800, color: s.c }}>{s.v}</span>
-            </div>
-            <p style={{ fontSize: 13, fontWeight: 600, marginTop: 10 }}>{s.l}</p>
-            <p style={{ fontSize: 11, color: "var(--ink3)", marginTop: 2 }}>{s.sub}</p>
-          </div>
+    <Box className="page-enter" maxW="1100px" w="100%">
+      {/* Page header */}
+      <Box mb={6}>
+        <Heading size="lg" fontFamily="'Sora', sans-serif" letterSpacing="-0.02em" color="var(--ink)">
+          Overview
+        </Heading>
+        <Text fontSize="sm" color="var(--ink3)" mt={1}>
+          Platform-wide metrics and recent activity
+        </Text>
+      </Box>
+
+      {/* Finance stat cards */}
+      <Box mb={2} style={SECTION_LABEL as React.CSSProperties}>Financials</Box>
+      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} mb={6}>
+        {FINANCE.map((s) => (
+          <Card
+            key={s.label}
+            bg="var(--card)"
+            borderColor="var(--border)"
+            borderWidth="1px"
+            borderRadius="14px"
+            shadow="none"
+            _hover={{ shadow: "sm" }}
+            transition="box-shadow .2s"
+          >
+            <CardBody p={4}>
+              <Flex justify="space-between" align="flex-start" mb={3}>
+                <Text fontSize="xl">{s.icon}</Text>
+                <Text
+                  fontFamily="'DM Mono', monospace"
+                  fontSize="lg"
+                  fontWeight="800"
+                  color={s.accent}
+                  letterSpacing="-0.02em"
+                >
+                  {s.value}
+                </Text>
+              </Flex>
+              <Stat>
+                <StatLabel
+                  fontSize="12px"
+                  fontWeight="700"
+                  color="var(--ink)"
+                  fontFamily="'Nunito', sans-serif"
+                >
+                  {s.label}
+                </StatLabel>
+                <StatHelpText fontSize="11px" color="var(--ink3)" mt={0.5} mb={0}>
+                  {s.sub}
+                </StatHelpText>
+              </Stat>
+            </CardBody>
+          </Card>
         ))}
-      </div>
-      <div className="card" style={{ padding: 18 }}>
-        <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 14 }}>Recent Bookings</p>
-        {bookings.slice(0, 4).map((b) => (
-          <div key={b.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
-            <div>
-              <p style={{ fontSize: 14, fontWeight: 600 }}>{b.customer}</p>
-              <p style={{ fontSize: 12, color: "var(--ink2)", marginTop: 2 }}>{b.service} · {b.vendor}</p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <span className={`tag ${STATUS_TAG[b.status] ?? "tag-ink"}`}>{b.status}</span>
-              <p style={{ fontSize: 12, fontWeight: 700, color: "var(--acc)", marginTop: 4 }}>P{b.amount}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="card" style={{ padding: 18 }}>
-        <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 14 }}>Platform Health</p>
-        {HEALTH.map((m) => (
-          <div key={m.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: "1px solid var(--border)", fontSize: 14 }}>
-            <span style={{ color: "var(--ink2)" }}>{m.l}</span>
-            <span style={{ fontWeight: 800, color: m.c }}>{m.v}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+      </SimpleGrid>
+
+      {/* Two-column section: metrics + recent bookings */}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4}>
+
+        {/* Platform metrics */}
+        <Box>
+          <Box mb={2} style={SECTION_LABEL as React.CSSProperties}>Platform Metrics</Box>
+          <Card
+            bg="var(--card)"
+            borderColor="var(--border)"
+            borderWidth="1px"
+            borderRadius="14px"
+            shadow="none"
+            overflow="hidden"
+          >
+            <CardBody p={0}>
+              {PLATFORM.map((m, i) => (
+                <Flex
+                  key={m.label}
+                  justify="space-between"
+                  align="center"
+                  px={5}
+                  py={3}
+                  borderTopWidth={i > 0 ? "1px" : "0"}
+                  borderColor="var(--border)"
+                >
+                  <Text fontSize="13px" color="var(--ink2)" fontWeight="500">
+                    {m.label}
+                  </Text>
+                  <Text
+                    fontFamily="'DM Mono', monospace"
+                    fontSize="15px"
+                    fontWeight="800"
+                    color={m.accent}
+                  >
+                    {m.value}
+                  </Text>
+                </Flex>
+              ))}
+            </CardBody>
+          </Card>
+        </Box>
+
+        {/* Recent bookings */}
+        <Box>
+          <Box mb={2} style={SECTION_LABEL as React.CSSProperties}>Recent Bookings</Box>
+          <Card
+            bg="var(--card)"
+            borderColor="var(--border)"
+            borderWidth="1px"
+            borderRadius="14px"
+            shadow="none"
+            overflow="hidden"
+          >
+            <CardBody p={0}>
+              {bookings.length === 0 ? (
+                <Text px={5} py={5} fontSize="13px" color="var(--ink3)">
+                  No bookings yet.
+                </Text>
+              ) : (
+                bookings.slice(0, 6).map((b, i) => (
+                  <Flex
+                    key={b.id}
+                    justify="space-between"
+                    align="center"
+                    px={5}
+                    py={3}
+                    borderTopWidth={i > 0 ? "1px" : "0"}
+                    borderColor="var(--border)"
+                    gap={2}
+                  >
+                    <Box minW={0}>
+                      <Text fontSize="13px" fontWeight="600" color="var(--ink)" noOfLines={1}>
+                        {b.customer}
+                      </Text>
+                      <Text fontSize="11px" color="var(--ink3)" mt={0.5} noOfLines={1}>
+                        {b.service} · {b.vendor}
+                      </Text>
+                    </Box>
+                    <Stack align="flex-end" spacing={1} flexShrink={0}>
+                      <Badge
+                        colorScheme={STATUS_COLOR[b.status] ?? "gray"}
+                        fontSize="10px"
+                        borderRadius="full"
+                        px={2}
+                        textTransform="capitalize"
+                      >
+                        {b.status}
+                      </Badge>
+                      <Text
+                        fontFamily="'DM Mono', monospace"
+                        fontSize="12px"
+                        fontWeight="700"
+                        color="var(--acc)"
+                      >
+                        P{b.amount}
+                      </Text>
+                    </Stack>
+                  </Flex>
+                ))
+              )}
+            </CardBody>
+          </Card>
+        </Box>
+
+      </SimpleGrid>
+    </Box>
   );
 };

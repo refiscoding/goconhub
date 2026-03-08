@@ -21,7 +21,8 @@ export async function GET() {
     orderBy: { paidAt: "desc" },
   });
 
-  const total = payments.reduce((sum, p) => sum + (p.vendorAmount || p.amount * 0.95), 0);
+  type Payment = typeof payments[number];
+  const total = payments.reduce((sum: number, p: Payment) => sum + (p.vendorAmount || p.amount * 0.95), 0);
 
   return NextResponse.json({ payments, total });
 }

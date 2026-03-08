@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, Stars, Toast } from "@/components/ui";
-import { IconChevL, IconMapPin } from "@/components/icons";
+import { IconChevL, IconMapPin, IconChat } from "@/components/icons";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
 
@@ -225,11 +225,17 @@ export default function VendorProfilePage({ params }: PageProps) {
         )}
       </div>
 
-      {/* Book Now sticky footer */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 20px 28px", background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
+      {/* CTA bar — sidebar-aware on desktop, compact on mobile */}
+      <div className="page-cta-bar">
         <button
-          className="btn-pri"
-          style={{ width: "100%", padding: 16, fontSize: 16, fontWeight: 700, borderRadius: 14 }}
+          className="btn-ghost page-cta-btn"
+          onClick={() => router.push("/customer/messages")}
+        >
+          <IconChat style={{ width: 17, height: 17 }} />
+          Message
+        </button>
+        <button
+          className="btn-pri page-cta-btn"
           onClick={() => router.push(`/customer/book/${vendorId}`)}
         >
           Book {fullName.split(" ")[0]}

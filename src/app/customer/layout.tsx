@@ -1,4 +1,5 @@
 import { CustomerNav } from "@/components/layout/CustomerNav";
+import { CustomerChakraProvider } from "@/components/providers/CustomerChakraProvider";
 
 /**
  * Customer shell layout — wraps all /customer/* routes.
@@ -6,11 +7,13 @@ import { CustomerNav } from "@/components/layout/CustomerNav";
  */
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div data-theme="customer" className="app-shell">
-      <CustomerNav unreadCount={2} />
-      <main className="app-content">
-        {children}
-      </main>
-    </div>
+    <CustomerChakraProvider>
+      <div data-theme="customer" className="app-shell">
+        <CustomerNav unreadCount={2} />
+        <main className="app-content">
+          {children}
+        </main>
+      </div>
+    </CustomerChakraProvider>
   );
 }
