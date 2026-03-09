@@ -1,5 +1,6 @@
 "use client";
 import { FC, useState } from "react";
+import { HandCoins, PiggyBank, BanknoteArrowUp } from "lucide-react";
 
 interface AdminBooking {
   id: string;
@@ -54,12 +55,12 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       {/* Revenue summary cards */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
         {[
-          { label: "Total Transacted", value: `P${totalTransacted.toFixed(2)}`, icon: "💰", color: "var(--acc)" },
-          { label: "Platform (5%)",    value: `P${totalPlatformFee.toFixed(2)}`, icon: "🏦", color: "#6366f1"  },
-          { label: "Vendor Payouts",   value: `P${totalVendorPaid.toFixed(2)}`,  icon: "👷", color: "var(--green)" },
+          { label: "Total Transacted", value: `P${totalTransacted.toFixed(2)}`, icon: <HandCoins size={18} />,       color: "var(--acc)" },
+          { label: "Platform (5%)",    value: `P${totalPlatformFee.toFixed(2)}`, icon: <PiggyBank size={18} />,       color: "#6366f1"    },
+          { label: "Vendor Payouts",   value: `P${totalVendorPaid.toFixed(2)}`,  icon: <BanknoteArrowUp size={18} />, color: "var(--green)" },
         ].map((s) => (
-          <div key={s.label} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
-            <span style={{ fontSize: 18 }}>{s.icon}</span>
+          <div key={s.label} style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
+            <span style={{ display: "flex", justifyContent: "center", color: s.color }}>{s.icon}</span>
             <p style={{ fontSize: 13, fontWeight: 800, color: s.color, marginTop: 6, wordBreak: "break-all" }}>{s.value}</p>
             <p style={{ fontSize: 9, color: "var(--ink3)", fontWeight: 700, marginTop: 3, textTransform: "uppercase", letterSpacing: ".04em" }}>{s.label}</p>
           </div>
@@ -67,7 +68,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       </div>
 
       {/* Jobs awaiting completion approval */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 16 }}>
+      <div style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 18, overflow: "hidden", marginBottom: 16 }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(245,158,11,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🔔</div>
           <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Jobs Marked Complete by Vendor</p>
@@ -98,7 +99,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       </div>
 
       {/* Payments submitted by customers */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 16 }}>
+      <div style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 18, overflow: "hidden", marginBottom: 16 }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(99,102,241,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💳</div>
           <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Payments Submitted by Customers</p>
@@ -151,7 +152,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       </div>
 
       {/* Confirmed payments history */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
+      <div style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 18, overflow: "hidden" }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(12,166,120,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>✅</div>
           <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Confirmed Payments</p>

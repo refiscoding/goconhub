@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCommissionRate } from "@/lib/settings";
 
 // GET /api/payments/dpo/callback
 // DPO Pay redirects here after the customer completes (or cancels) payment.
@@ -53,7 +54,8 @@ export async function GET(req: NextRequest) {
 
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (booking && booking.paymentStatus !== "confirmed") {
-      const platformFee  = Math.round(booking.amount * 0.05 * 100) / 100;
+      const rate         = await getCommissionRate();
+      const platformFee  = Math.round(booking.amount * rate * 100) / 100;
       const vendorAmount = Math.round((booking.amount - platformFee) * 100) / 100;
 
       await prisma.booking.update({

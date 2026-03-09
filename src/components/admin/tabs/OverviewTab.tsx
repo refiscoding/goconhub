@@ -88,11 +88,9 @@ export const OverviewTab: FC<OverviewTabProps> = ({
           <Card
             key={s.label}
             bg="var(--card)"
-            borderColor="var(--border)"
-            borderWidth="1px"
             borderRadius="14px"
-            shadow="none"
-            _hover={{ shadow: "sm" }}
+            shadow="md"
+            _hover={{ shadow: "lg" }}
             transition="box-shadow .2s"
           >
             <CardBody p={4}>
@@ -134,10 +132,8 @@ export const OverviewTab: FC<OverviewTabProps> = ({
           <Box mb={2} style={SECTION_LABEL as React.CSSProperties}>Platform Metrics</Box>
           <Card
             bg="var(--card)"
-            borderColor="var(--border)"
-            borderWidth="1px"
             borderRadius="14px"
-            shadow="none"
+            shadow="md"
             overflow="hidden"
           >
             <CardBody p={0}>
@@ -173,10 +169,8 @@ export const OverviewTab: FC<OverviewTabProps> = ({
           <Box mb={2} style={SECTION_LABEL as React.CSSProperties}>Recent Bookings</Box>
           <Card
             bg="var(--card)"
-            borderColor="var(--border)"
-            borderWidth="1px"
             borderRadius="14px"
-            shadow="none"
+            shadow="md"
             overflow="hidden"
           >
             <CardBody p={0}>

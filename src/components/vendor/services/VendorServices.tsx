@@ -1,7 +1,7 @@
 "use client";
 import { FC, useState, useEffect } from "react";
 import { IconPlus } from "@/components/icons";
-import { Toast } from "@/components/ui";
+import { Toast, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { ServiceCard } from "./ServiceCard";
 import { ServiceForm } from "./ServiceForm";
@@ -115,7 +115,7 @@ export const VendorServices: FC = () => {
         <div>
           <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em" }}>My Services</h1>
           <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 4 }}>
-            {loading ? "Loading…" : `${services.filter((s) => s.active).length}/${services.length} active`}
+            {loading ? <PageSpinner inline /> : `${services.filter((s) => s.active).length}/${services.length} active`}
           </p>
         </div>
         <button onClick={() => setAdding(true)}

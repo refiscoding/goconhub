@@ -1,40 +1,105 @@
 "use client";
-import { FC } from "react";
+import { FC, useState } from "react";
+import {
+  Box, Flex, Text, Badge, Button, ButtonGroup, Collapse, Divider,
+  Card, CardBody,
+} from "@chakra-ui/react";
 import { Avatar } from "@/components/ui";
 import type { AppUser } from "@/lib/types";
-import { STATUS_TAG } from "@/lib/constants";
 
 interface UsersTabProps {
   customers: AppUser[];
   onApprove: (id: string) => void;
   onSuspend: (id: string) => void;
+  onDelete:  (id: string) => void;
 }
 
-export const UsersTab: FC<UsersTabProps> = ({ customers, onApprove, onSuspend }) => (
-  <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-    <h2 className="serif" style={{ fontSize: 22, letterSpacing: "-.02em" }}>Customer Accounts</h2>
-    {customers.length === 0 && (
-      <p style={{ textAlign: "center", color: "var(--ink3)", padding: "40px 0" }}>No customers yet</p>
-    )}
-    {customers.map((u) => (
-      <div key={u.id} className="card" style={{ padding: "14px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-          <Avatar name={u.name} size={40} />
-          <div style={{ flex: 1 }}>
-            <p style={{ fontWeight: 700, fontSize: 14 }}>{u.name}</p>
-            <p style={{ fontSize: 12, color: "var(--ink2)", marginTop: 2 }}>{u.email}</p>
-            {u.phone && <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 1 }}>{u.phone}</p>}
-          </div>
-          <span className={`tag ${STATUS_TAG[u.status] ?? "tag-ink"}`}>{u.status}</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink2)", marginBottom: 10 }}>
-          <span>Joined: {u.joined}</span><span>{u.bookings} bookings</span>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {u.status === "active"    && <button className="btn-danger"  style={{ flex: 1, fontSize: 12, padding: "8px 0" }} onClick={() => onSuspend(u.id)}>Suspend Account</button>}
-          {u.status === "suspended" && <button className="btn-success" style={{ flex: 1, fontSize: 12, padding: "8px 0" }} onClick={() => onApprove(u.id)}>Reactivate</button>}
-        </div>
-      </div>
-    ))}
-  </div>
-);
+const STATUS_SCHEME: Record<string, string> = {
+  active: "green", suspended: "red", pending: "orange",
+};
+
+export const UsersTab: FC<UsersTabProps> = ({ customers, onApprove, onSuspend, onDelete }) => {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const toggle = (id: string) => setExpanded((prev) => (prev === id ? null : id));
+
+  return (
+    <Box className="page-enter">
+      <Text fontFamily="'Sora', sans-serif" fontSize="22px" fontWeight="800"
+        letterSpacing="-0.02em" color="var(--ink)" mb={5}>
+        Customer Accounts
+      </Text>
+
+      {customers.length === 0 && (
+        <Text textAlign="center" color="var(--ink3)" py={10}>No customers yet</Text>
+      )}
+
+      <Flex direction="column" gap={3}>
+        {customers.map((u) => (
+          <Card key={u.id} bg="var(--card)" borderRadius="14px" shadow="md">
+            <CardBody p={4}>
+              <Flex align="center" gap={3} mb={3}>
+                <Avatar name={u.name} size={40} />
+                <Box flex={1} minW={0}>
+                  <Text fontWeight={700} fontSize="14px" color="var(--ink)" noOfLines={1}>{u.name}</Text>
+                  <Text fontSize="12px" color="var(--ink2)" mt="2px" noOfLines={1}>{u.email}</Text>
+                </Box>
+                <Badge colorScheme={STATUS_SCHEME[u.status] ?? "gray"} borderRadius="full"
+                  px={2} fontSize="11px" textTransform="capitalize">
+                  {u.status}
+                </Badge>
+              </Flex>
+
+              <Flex justify="space-between" fontSize="12px" color="var(--ink3)" mb={3}>
+                <Text>Joined: {u.joined}</Text>
+                <Text>{u.bookings} booking{u.bookings !== 1 ? "s" : ""}</Text>
+              </Flex>
+
+              <Collapse in={expanded === u.id} animateOpacity>
+                <Divider borderColor="var(--border)" mb={3} />
+                <Flex direction="column" gap={1} mb={3} fontSize="12px">
+                  <Flex gap={2}>
+                    <Text color="var(--ink3)" w="60px">Phone</Text>
+                    <Text color="var(--ink)">{u.phone || "—"}</Text>
+                  </Flex>
+                  <Flex gap={2}>
+                    <Text color="var(--ink3)" w="60px">Role</Text>
+                    <Text color="var(--ink)" textTransform="capitalize">{u.role}</Text>
+                  </Flex>
+                  <Flex gap={2}>
+                    <Text color="var(--ink3)" w="60px">ID</Text>
+                    <Text color="var(--ink2)" fontFamily="'DM Mono', monospace" fontSize="11px">{u.id}</Text>
+                  </Flex>
+                </Flex>
+              </Collapse>
+
+              <ButtonGroup size="sm" spacing={2} w="100%">
+                <Button flex={1} variant="outline" borderColor="var(--border)" color="var(--ink)"
+                  fontSize="12px" onClick={() => toggle(u.id)}>
+                  {expanded === u.id ? "Hide" : "View"}
+                </Button>
+                {u.status === "active" && (
+                  <Button flex={1} colorScheme="orange" variant="outline" fontSize="12px"
+                    onClick={() => onSuspend(u.id)}>
+                    Suspend
+                  </Button>
+                )}
+                {u.status === "suspended" && (
+                  <Button flex={1} colorScheme="green" variant="outline" fontSize="12px"
+                    onClick={() => onApprove(u.id)}>
+                    Reactivate
+                  </Button>
+                )}
+                <Button flex={1} colorScheme="red" variant="outline" fontSize="12px"
+                  onClick={() => {
+                    if (window.confirm(`Delete ${u.name}? This cannot be undone.`)) onDelete(u.id);
+                  }}>
+                  Delete
+                </Button>
+              </ButtonGroup>
+            </CardBody>
+          </Card>
+        ))}
+      </Flex>
+    </Box>
+  );
+};

@@ -2,7 +2,7 @@
 import { FC, useState, ChangeEvent, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { IconEdit, IconCheck, IconMapPin, IconLogout, IconUser, IconBell, IconShield, IconWallet } from "@/components/icons";
-import { Toast, AvatarUpload } from "@/components/ui";
+import { Toast, AvatarUpload, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
 import type { ProfileData } from "@/lib/types";
@@ -112,7 +112,7 @@ export const CustProfile: FC = () => {
   const fullName = `${profile.fn} ${profile.ln}`.trim();
 
   if (userLoading) {
-    return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Loading…</div>;
+    return <PageSpinner paddingY="120px" />;
   }
 
   return (

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CalendarDays, CreditCard, Wrench,
   Users, AlertCircle, LogOut, ShieldCheck, ChevronLeft,
+  Tag, Settings,
 } from "lucide-react";
 
 interface AdminNavItem {
@@ -54,7 +55,9 @@ export const AdminNav: FC<AdminNavProps> = ({
     { key: "payments",  icon: <CreditCard      size={20} />, label: "Payments",  badge: pendingPayments },
     { key: "vendors",   icon: <Wrench          size={20} />, label: "Vendors",   badge: pendingVendors  },
     { key: "users",     icon: <Users           size={20} />, label: "Users"     },
-    { key: "disputes",  icon: <AlertCircle     size={20} />, label: "Disputes",  badge: openDisputes    },
+    { key: "disputes",   icon: <AlertCircle size={20} />, label: "Disputes",   badge: openDisputes },
+    { key: "categories", icon: <Tag         size={20} />, label: "Categories" },
+    { key: "settings",   icon: <Settings    size={20} />, label: "Settings"   },
   ];
 
   return (

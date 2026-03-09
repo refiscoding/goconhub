@@ -1,7 +1,7 @@
 "use client";
 import { FC, useState, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Toggle, Toast, AvatarUpload } from "@/components/ui";
+import { Toggle, Toast, AvatarUpload, PageSpinner } from "@/components/ui";
 import { IconEdit, IconCheck, IconLogout, IconUser, IconShield, IconMapPin, IconWrench } from "@/components/icons";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
@@ -114,7 +114,7 @@ export const VendorProfile: FC = () => {
   const fullName = `${profile.fn} ${profile.ln}`.trim();
 
   if (userLoading) {
-    return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Loading…</div>;
+    return <PageSpinner paddingY="120px" />;
   }
 
   return (

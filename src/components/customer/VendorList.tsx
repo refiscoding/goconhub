@@ -1,6 +1,7 @@
 "use client";
 import { FC, useState, ChangeEvent, useEffect, useCallback } from "react";
 import { IconSearch, IconBell } from "@/components/icons";
+import { PageSpinner } from "@/components/ui";
 import { VendorCard } from "./VendorCard";
 import { FILTER_CATS } from "@/lib/constants";
 import type { Vendor } from "@/lib/types";
@@ -94,7 +95,7 @@ export const VendorList: FC = () => {
 
       <div style={{ padding: "6px 22px", marginBottom: 8 }}>
         <p style={{ fontSize: 13, color: "var(--ink2)" }}>
-          {loading ? "Loading…" : <><strong style={{ color: "var(--ink)" }}>{vendors.length}</strong> found</>}
+          {loading ? <PageSpinner inline /> : <><strong style={{ color: "var(--ink)" }}>{vendors.length}</strong> found</>}
         </p>
       </div>
 

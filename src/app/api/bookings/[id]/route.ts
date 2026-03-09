@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { getCommissionRate } from "@/lib/settings";
 
 // PATCH /api/bookings/[id]
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -53,7 +54,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   // Admin confirms payment (Orange / eWallet — DPO is auto-confirmed via /api/payments/dpo)
   if (body.paymentStatus === "confirmed" && isAdmin) {
-    const fee    = Math.round(booking.amount * 0.05 * 100) / 100;
+    const rate   = await getCommissionRate();
+    const fee    = Math.round(booking.amount * rate * 100) / 100;
     data.paymentStatus = "confirmed";
     data.status        = "completed";
     data.paidAt        = new Date();

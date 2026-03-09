@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, Stars, Toast } from "@/components/ui";
+import { Avatar, Stars, Toast, PageSpinner } from "@/components/ui";
 import { IconChevL, IconMapPin, IconChat } from "@/components/icons";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
@@ -62,7 +62,7 @@ export default function VendorProfilePage({ params }: PageProps) {
     finally { setSubmitting(false); }
   };
 
-  if (loading) return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Loading…</div>;
+  if (loading) return <PageSpinner paddingY="120px" />;
   if (!vendor)  return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Vendor not found.</div>;
 
   const fullName = `${vendor.user.firstName} ${vendor.user.lastName}`;

@@ -1,6 +1,6 @@
 "use client";
 import { FC, useState, useEffect } from "react";
-import { Avatar } from "@/components/ui";
+import { Avatar, PageSpinner } from "@/components/ui";
 import { IconBell } from "@/components/icons";
 import { StatCard } from "./StatCard";
 import { BookingRequestCard } from "./BookingRequestCard";
@@ -130,7 +130,7 @@ export const VendorDash: FC = () => {
 
       <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 20 }}>
         {loading ? (
-          <p style={{ textAlign: "center", color: "var(--ink3)", padding: "32px 0" }}>Loading…</p>
+          <PageSpinner paddingY="32px" />
         ) : (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>

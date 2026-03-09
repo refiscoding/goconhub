@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Avatar } from "@/components/ui";
+import { Avatar, PageSpinner } from "@/components/ui";
 import { IconChevL, IconMapPin } from "@/components/icons";
 
 interface PageProps { params: { customerId: string } }
@@ -24,7 +24,7 @@ export default function CustomerProfilePage({ params }: PageProps) {
       .finally(() => setLoading(false));
   }, [customerId]);
 
-  if (loading) return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Loading…</div>;
+  if (loading) return <PageSpinner paddingY="120px" />;
   if (!customer) return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Customer not found.</div>;
 
   const fullName = `${customer.firstName} ${customer.lastName}`;

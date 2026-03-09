@@ -172,3 +172,16 @@ model Dispute {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ServiceCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

@@ -1,15 +1,17 @@
 "use client";
 import { FC, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Toast } from "@/components/ui";
+import { Toast, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { AdminNav } from "@/components/layout/AdminNav";
 import { OverviewTab }  from "./tabs/OverviewTab";
 import { BookingsTab }  from "./tabs/BookingsTab";
 import { VendorsTab }   from "./tabs/VendorsTab";
 import { UsersTab }     from "./tabs/UsersTab";
-import { DisputesTab }  from "./tabs/DisputesTab";
-import { PaymentsTab }  from "./tabs/PaymentsTab";
+import { DisputesTab }   from "./tabs/DisputesTab";
+import { PaymentsTab }   from "./tabs/PaymentsTab";
+import { CategoriesTab } from "./tabs/CategoriesTab";
+import { SettingsTab }   from "./tabs/SettingsTab";
 import type { AppUser, Booking, Dispute, UserStatus, DisputeStatus, AdminTab } from "@/lib/types";
 
 interface RawBooking {
@@ -117,6 +119,17 @@ export const AdminDash: FC = () => {
   const approveUser = (id: string) => updateUserStatus(id, "active");
   const suspendUser = (id: string) => updateUserStatus(id, "suspended");
 
+  const deleteUser = async (id: string) => {
+    const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      showToast("User deleted", "ok");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.message ?? "Cannot delete user", "err");
+    }
+  };
+
   const resolveDisp = async (id: string) => {
     await fetch(`/api/admin/disputes/${id}`, { method: "PATCH" });
     setDisps((prev) => prev.map((d) => d.id === id ? { ...d, status: "resolved" } : d));
@@ -166,15 +179,17 @@ export const AdminDash: FC = () => {
       <main className="app-content">
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 24px" }}>
           {loading ? (
-            <p style={{ textAlign: "center", color: "var(--ink3)", padding: "80px 0" }}>Loading…</p>
+            <PageSpinner paddingY="80px" />
           ) : (
             <>
               {tab === "overview"  && <OverviewTab  bookings={bkgs} disputes={disps} vendorCount={vendors.length} customerCount={customers.length} pendingVendors={pendingV} />}
               {tab === "bookings"  && <BookingsTab  bookings={bkgs} />}
               {tab === "payments"  && <PaymentsTab  bookings={rawBkgs} onApproveComplete={approveJobComplete} onConfirmPayment={confirmPayment} />}
-              {tab === "vendors"   && <VendorsTab   vendors={vendors}   onApprove={approveUser} onSuspend={suspendUser} />}
-              {tab === "users"     && <UsersTab     customers={customers} onApprove={approveUser} onSuspend={suspendUser} />}
-              {tab === "disputes"  && <DisputesTab  disputes={disps} onResolve={resolveDisp} />}
+              {tab === "vendors"    && <VendorsTab    vendors={vendors}     onApprove={approveUser} onSuspend={suspendUser} onDelete={deleteUser} />}
+              {tab === "users"      && <UsersTab      customers={customers} onApprove={approveUser} onSuspend={suspendUser} onDelete={deleteUser} />}
+              {tab === "disputes"   && <DisputesTab   disputes={disps} onResolve={resolveDisp} />}
+              {tab === "categories" && <CategoriesTab />}
+              {tab === "settings"   && <SettingsTab />}
             </>
           )}
         </div>

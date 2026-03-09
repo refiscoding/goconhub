@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { getCommissionRate } from "@/lib/settings";
 
 // GET /api/vendor/earnings — vendor's confirmed payment history
 export async function GET() {
@@ -21,8 +22,9 @@ export async function GET() {
     orderBy: { paidAt: "desc" },
   });
 
+  const rate = await getCommissionRate();
   type Payment = typeof payments[number];
-  const total = payments.reduce((sum: number, p: Payment) => sum + (p.vendorAmount || p.amount * 0.95), 0);
+  const total = payments.reduce((sum: number, p: Payment) => sum + (p.vendorAmount ?? p.amount * (1 - rate)), 0);
 
   return NextResponse.json({ payments, total });
 }

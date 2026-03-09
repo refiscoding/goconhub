@@ -26,3 +26,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   await prisma.user.update({ where: { id }, data: { status: parsed.data.status } });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { id } = await params;
+
+  try {
+    // Delete in FK-safe order
+    await prisma.$transaction([
+      prisma.message.deleteMany({ where: { senderId: id } }),
+      prisma.review.deleteMany({ where: { reviewerId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("[DELETE /api/admin/users/:id]", e);
+    return NextResponse.json({ message: "Cannot delete user with active bookings or disputes." }, { status: 409 });
+  }
+}

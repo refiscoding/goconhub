@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Toast } from "@/components/ui";
+import { Toast, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 
 interface ApiBooking {
@@ -171,7 +171,7 @@ function CustomerBookingsPage() {
 
       <div style={{ padding: "14px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
         {loading ? (
-          <p style={{ textAlign: "center", color: "var(--ink3)", padding: "48px 0" }}>Loading…</p>
+          <PageSpinner paddingY="48px" />
         ) : bookings.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 0", color: "var(--ink3)" }}>
             <p style={{ fontSize: 32, marginBottom: 8 }}>📋</p>

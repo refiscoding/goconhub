@@ -6,7 +6,7 @@ export type UserStatus     = "active" | "pending" | "suspended";
 export type DisputeStatus  = "open" | "resolved";
 export type ServiceUnit    = "hr" | "job" | "day";
 export type ToastType      = "ok" | "err" | "info";
-export type AdminTab       = "overview" | "bookings" | "payments" | "vendors" | "users" | "disputes";
+export type AdminTab       = "overview" | "bookings" | "payments" | "vendors" | "users" | "disputes" | "categories" | "settings";
 export type MessageSender  = "me" | "them";
 
 // ── Domain models ────────────────────────────────────────────────────────────
