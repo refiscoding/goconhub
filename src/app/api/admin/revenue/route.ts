@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/guards";
 
 // GET /api/admin/revenue — platform fee totals
 export async function GET() {
-  const session = await getSession();
-  if (!session || session.role !== "admin")
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  const { error } = await requireAdmin();
+  if (error) return error;
 
   const confirmed = await prisma.booking.findMany({
     where: { paymentStatus: "confirmed" },

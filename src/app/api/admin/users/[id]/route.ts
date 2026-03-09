@@ -1,20 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/guards";
+import { UpdateUserStatusSchema } from "@/lib/schemas";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session || session.role !== "admin") {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  }
+  const { error } = await requireAdmin();
+  if (error) return error;
 
   const { id } = await params;
-  const { status } = await req.json();
 
-  if (!["active", "suspended", "pending"].includes(status)) {
-    return NextResponse.json({ message: "Invalid status" }, { status: 400 });
+  let parsed: ReturnType<typeof UpdateUserStatusSchema.safeParse>;
+  try {
+    parsed = UpdateUserStatusSchema.safeParse(await req.json());
+  } catch {
+    return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
   }
 
-  await prisma.user.update({ where: { id }, data: { status } });
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: parsed.error.errors[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
+
+  await prisma.user.update({ where: { id }, data: { status: parsed.data.status } });
   return NextResponse.json({ ok: true });
 }

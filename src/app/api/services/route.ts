@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { CreateServiceSchema } from "@/lib/schemas";
 
 // GET /api/services — list current vendor's services
 export async function GET() {
@@ -30,21 +31,25 @@ export async function POST(req: NextRequest) {
   const vendor = await prisma.vendor.findUnique({ where: { userId: session.userId } });
   if (!vendor) return NextResponse.json({ message: "Vendor not found." }, { status: 404 });
 
-  const { name, price, unit, desc, active } = await req.json();
-  if (!name || price == null) {
-    return NextResponse.json({ message: "name and price are required." }, { status: 400 });
+  let parsed: ReturnType<typeof CreateServiceSchema.safeParse>;
+  try {
+    parsed = CreateServiceSchema.safeParse(await req.json());
+  } catch {
+    return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
   }
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: parsed.error.errors[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
+
+  const { name, price, unit, desc, active } = parsed.data;
 
   try {
     const service = await prisma.service.create({
-      data: {
-        vendorId: vendor.id,
-        name,
-        price:  Number(price),
-        unit:   unit ?? "hr",
-        desc:   desc ?? "",
-        active: active ?? true,
-      },
+      data: { vendorId: vendor.id, name, price, unit, desc, active },
     });
     return NextResponse.json({ service }, { status: 201 });
   } catch (e) {

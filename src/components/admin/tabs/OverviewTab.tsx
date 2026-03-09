@@ -1,11 +1,11 @@
 "use client";
 import { FC, useState, useEffect } from "react";
 import {
-  Box, SimpleGrid, Card, CardBody, Stat, StatLabel, StatNumber, StatHelpText,
-  Flex, Text, Heading, Badge, Divider, Stack,
+  Box, SimpleGrid, Card, CardBody, Stat, StatLabel, StatHelpText,
+  Flex, Text, Heading, Badge, Stack,
 } from "@chakra-ui/react";
+import { CreditCard, TrendingUp, Banknote, PiggyBank } from "lucide-react";
 import type { Booking, Dispute } from "@/lib/types";
-import { STATUS_TAG } from "@/lib/constants";
 
 interface OverviewTabProps {
   bookings: Booking[];
@@ -54,10 +54,10 @@ export const OverviewTab: FC<OverviewTabProps> = ({
     : "—";
 
   const FINANCE = [
-    { label: "Gross Transacted", value: rev ? fmt(rev.totalTransacted) : "—", sub: `${rev?.count ?? 0} confirmed payments`, icon: "💳", accent: "#0077B6" },
-    { label: "Platform Revenue",  value: rev ? fmt(rev.totalRevenue)    : "—", sub: "5% fee on transactions",                icon: "📈", accent: "#2D9A4E" },
-    { label: "Vendor Payouts",    value: rev ? fmt(rev.totalVendorPaid) : "—", sub: "95% disbursed to vendors",               icon: "💸", accent: "#C9A84C" },
-    { label: "Net Profit",        value: rev ? fmt(rev.totalRevenue)    : "—", sub: "After all payouts",                      icon: "🏦", accent: "#2D9A4E" },
+    { label: "Gross Transacted", value: rev ? fmt(rev.totalTransacted) : "—", sub: `${rev?.count ?? 0} confirmed payments`, icon: <CreditCard  size={18} />, accent: "#0077B6" },
+    { label: "Platform Revenue",  value: rev ? fmt(rev.totalRevenue)    : "—", sub: "5% fee on transactions",                icon: <TrendingUp  size={18} />, accent: "#2D9A4E" },
+    { label: "Vendor Payouts",    value: rev ? fmt(rev.totalVendorPaid) : "—", sub: "95% disbursed to vendors",               icon: <Banknote    size={18} />, accent: "#C9A84C" },
+    { label: "Net Profit",        value: rev ? fmt(rev.totalRevenue)    : "—", sub: "After all payouts",                      icon: <PiggyBank   size={18} />, accent: "#2D9A4E" },
   ];
 
   const PLATFORM = [
@@ -97,7 +97,7 @@ export const OverviewTab: FC<OverviewTabProps> = ({
           >
             <CardBody p={4}>
               <Flex justify="space-between" align="flex-start" mb={3}>
-                <Text fontSize="xl">{s.icon}</Text>
+                <Box color={s.accent} opacity={0.85}>{s.icon}</Box>
                 <Text
                   fontFamily="'DM Mono', monospace"
                   fontSize="lg"

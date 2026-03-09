@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { CreateBookingSchema } from "@/lib/schemas";
 
 // GET /api/bookings — list bookings for the current user
 export async function GET() {
@@ -38,18 +39,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
   }
 
+  let parsed: ReturnType<typeof CreateBookingSchema.safeParse>;
   try {
-    const { vendorId, serviceId, serviceName, date, time, location, note, amount } = await req.json();
+    parsed = CreateBookingSchema.safeParse(await req.json());
+  } catch {
+    return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+  }
 
-    if (!vendorId || !serviceName || !date || !time) {
-      return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
-    }
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: parsed.error.errors[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
 
-    // Validate serviceName length
-    if (typeof serviceName !== "string" || serviceName.length > 200) {
-      return NextResponse.json({ message: "Invalid service name." }, { status: 400 });
-    }
+  const { vendorId, serviceId, serviceName, date, time, location, note, amount } = parsed.data;
 
+  try {
     // Server-side amount: always use the price stored in DB when a serviceId is provided
     let finalAmount: number;
     if (serviceId) {
@@ -67,7 +73,6 @@ export async function POST(req: NextRequest) {
       }
       finalAmount = service.price;
     } else {
-      // No serviceId — validate client amount is a positive number
       finalAmount = Number(amount);
       if (!isFinite(finalAmount) || finalAmount <= 0) {
         return NextResponse.json({ message: "Invalid amount." }, { status: 400 });
@@ -82,8 +87,8 @@ export async function POST(req: NextRequest) {
         serviceName: serviceName.slice(0, 200),
         date,
         time,
-        location:    (location ?? "").slice(0, 300),
-        note:        (note ?? "").slice(0, 1000),
+        location:    location.slice(0, 300),
+        note:        note.slice(0, 1000),
         amount:      finalAmount,
         status:      "pending",
       },

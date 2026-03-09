@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, signToken, cookieOptions, COOKIE_NAME } from "@/lib/auth";
+import { RegisterSchema } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
+  let parsed: ReturnType<typeof RegisterSchema.safeParse>;
   try {
-    const { email, password, firstName, lastName, role } = await req.json();
+    parsed = RegisterSchema.safeParse(await req.json());
+  } catch {
+    return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+  }
 
-    if (!email || !password || !firstName || !lastName || !role) {
-      return NextResponse.json({ message: "All fields are required." }, { status: 400 });
-    }
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: parsed.error.errors[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
 
-    if (!["customer", "vendor"].includes(role)) {
-      return NextResponse.json({ message: "Invalid role." }, { status: 400 });
-    }
+  const { email, password, firstName, lastName, role } = parsed.data;
 
+  try {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json({ message: "An account with this email already exists." }, { status: 409 });
