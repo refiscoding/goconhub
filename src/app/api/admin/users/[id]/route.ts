@@ -18,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   if (!parsed.success) {
     return NextResponse.json(
-      { message: parsed.error.errors[0]?.message ?? "Invalid input." },
+      { message: parsed.error.issues[0]?.message ?? "Invalid input." },
       { status: 400 }
     );
   }
