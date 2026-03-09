@@ -35,7 +35,7 @@ export const CreateBookingSchema = z.object({
 export const CreateServiceSchema = z.object({
   name:   z.string().min(1, "name is required.").max(100).transform((s) => s.trim()),
   price:  z.number().positive("price must be a positive number."),
-  unit:   z.string().max(20).optional().default("hr"),
+  unit:   z.enum(["hr", "job", "day"]).optional().default("hr"),
   desc:   z.string().max(1000).optional().default(""),
   active: z.boolean().optional().default(true),
 });
