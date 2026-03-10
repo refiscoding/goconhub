@@ -2,7 +2,7 @@
 import { FC } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, Stars } from "@/components/ui";
-import { IconMapPin, IconChat } from "@/components/icons";
+import { IconMapPin } from "@/components/icons";
 import type { Vendor } from "@/lib/types";
 
 interface VendorCardProps { vendor: Vendor; }
@@ -10,7 +10,7 @@ interface VendorCardProps { vendor: Vendor; }
 export const VendorCard: FC<VendorCardProps> = ({ vendor: v }) => {
   const router = useRouter();
   return (
-    <div className="card" style={{ overflow: "hidden", transition: "transform .2s, box-shadow .2s" }}>
+    <div className="card" style={{ overflow: "hidden", transition: "transform .2s, box-shadow .2s", width: "100%", maxWidth: 450, minHeight: 207 }}>
       <div style={{ padding: "16px 16px 12px", display: "flex", gap: 12, cursor: "pointer" }} onClick={() => router.push(`/customer/vendors/${v.id}`)}>
         <Avatar name={v.name} size={50} src={v.avatarUrl ?? undefined} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -46,9 +46,9 @@ export const VendorCard: FC<VendorCardProps> = ({ vendor: v }) => {
           onClick={(e) => { e.stopPropagation(); router.push(`/customer/book/${v.id}`); }}>
           Book Now
         </button>
-        <button className="btn-ghost" style={{ padding: "10px 14px" }}
+        <button className="btn-ghost" style={{ flex: 1, padding: 11, fontSize: 14 }}
           onClick={(e) => { e.stopPropagation(); router.push("/customer/messages"); }}>
-          <IconChat style={{ width: 18, height: 18 }} />
+          Message
         </button>
       </div>
     </div>

@@ -100,6 +100,8 @@ export interface BookingSelection {
   date: SelectedDate | null;
   time: string | null;
   note: string;
+  issueDesc: string;
+  photos: File[];
 }
 
 export interface ProfileData {
@@ -151,4 +153,11 @@ export interface VendorOnboardData {
   bio: string;
   cat: string;
   skills: string[];
+  // Verification
+  entityType: "individual" | "company";
+  idNumber: string;
+  bankName: string;
+  accountNumber: string;
+  companyName: string;
+  companyRegNumber: string;
 }

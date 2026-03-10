@@ -1,6 +1,7 @@
 "use client";
 import { FC, useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { IconWrench, IconCheck, IconEye } from "@/components/icons";
 import { useUser } from "@/context/UserContext";
 import type { Role, AuthMode } from "@/lib/types";
@@ -114,6 +115,7 @@ export const AuthPage: FC = () => {
 
       {/* ── Right / Form panel ────────────────────────────────────── */}
       <div className="auth-body">
+        <div style={{ display: "flex", flexDirection: "column", width: "100%", maxWidth: 420, alignSelf: "stretch" }}>
         <div className="auth-form">
 
           <div className="auth-dsk-title">
@@ -199,6 +201,16 @@ export const AuthPage: FC = () => {
               <span onClick={() => router.push(`/forgot-password?role=${role}`)} style={{ color: "var(--acc)", fontWeight: 600, cursor: "pointer" }}>Reset it</span>
             </p>
           )}
+        </div>
+
+        {/* Legal footer */}
+        <div style={{ marginTop: "auto", paddingTop: 20, paddingBottom: 8, display: "flex", justifyContent: "center", gap: 18, flexWrap: "wrap" }}>
+          <Link href="/legal/terms"   style={{ fontSize: 11, color: "var(--ink3)", textDecoration: "none" }}>Terms & Conditions</Link>
+          <span style={{ color: "var(--ink3)", fontSize: 11 }}>·</span>
+          <Link href="/legal/privacy" style={{ fontSize: 11, color: "var(--ink3)", textDecoration: "none" }}>Privacy Policy</Link>
+          <span style={{ color: "var(--ink3)", fontSize: 11 }}>·</span>
+          <Link href="/legal/cookies" style={{ fontSize: 11, color: "var(--ink3)", textDecoration: "none" }}>Cookie Policy</Link>
+        </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,8 @@ import { MessageBubble } from "./MessageBubble";
 import { useUser } from "@/context/UserContext";
 import type { Message } from "@/lib/types";
 
+const CONTACT_RE = /(\b\d[\d\s\-().+]{6,}\d\b|[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}|whatsapp|wa\.me|telegram|@\w{3,})/i;
+
 interface ChatRoomProps {
   title: string;
   subtitle: string;
@@ -28,11 +30,13 @@ export const ChatRoom: FC<ChatRoomProps> = ({
 }) => {
   const router   = useRouter();
   const { user } = useUser();
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [input,    setInput]    = useState("");
-  const [showQR,   setShowQR]   = useState(false);
-  const [sending,  setSending]  = useState(false);
+  const [messages,     setMessages]     = useState<Message[]>(initialMessages);
+  const [input,        setInput]        = useState("");
+  const [showQR,       setShowQR]       = useState(false);
+  const [sending,      setSending]      = useState(false);
+  const [pendingText,  setPendingText]  = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef  = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!bookingId) return;
@@ -59,10 +63,8 @@ export const ChatRoom: FC<ChatRoomProps> = ({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = async (text?: string) => {
-    const t = text ?? input.trim();
+  const doSend = async (t: string) => {
     if (!t || sending) return;
-    setInput("");
     setShowQR(false);
 
     if (bookingId) {
@@ -99,6 +101,17 @@ export const ChatRoom: FC<ChatRoomProps> = ({
     }
   };
 
+  const send = (text?: string) => {
+    const t = text ?? input.trim();
+    if (!t || sending) return;
+    if (CONTACT_RE.test(t)) {
+      setPendingText(t);
+      return;
+    }
+    setInput("");
+    doSend(t);
+  };
+
   const goBack = () => backHref ? router.push(backHref) : router.back();
 
   return (
@@ -124,6 +137,10 @@ export const ChatRoom: FC<ChatRoomProps> = ({
           <p style={{ fontSize: 12, color: "var(--acc)", fontWeight: 500 }}>{banner}</p>
         </div>
       )}
+      <div style={{ background: "#fef3c7", borderBottom: "1px solid #fcd34d", padding: "8px 18px", display: "flex", gap: 8, alignItems: "flex-start" }}>
+        <span style={{ fontSize: 13, flexShrink: 0 }}>🛡️</span>
+        <p style={{ fontSize: 12, color: "#92400e", lineHeight: 1.5 }}>For your safety, all payments must be made through HandyHub. Payments made outside the platform are not protected.</p>
+      </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px 110px", display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ textAlign: "center", marginBottom: 4 }}>
@@ -152,6 +169,20 @@ export const ChatRoom: FC<ChatRoomProps> = ({
         </div>
       )}
 
+      {pendingText && (
+        <div style={{ position: "fixed", bottom: 72, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 28px)", maxWidth: 402, background: "var(--card)", border: "1px solid rgba(239,68,68,.35)", borderRadius: 12, padding: "14px 16px", zIndex: 70, boxShadow: "0 4px 20px rgba(0,0,0,.18)" }}>
+          <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: "var(--red, #ef4444)" }}>⚠️ Contact info detected</p>
+          <p style={{ fontSize: 13, color: "var(--ink2)", lineHeight: 1.5, marginBottom: 12 }}>
+            Sharing phone numbers, email addresses, or messaging app links is not allowed before a booking is confirmed.
+          </p>
+          <button
+            onClick={() => { setPendingText(null); setTimeout(() => inputRef.current?.focus(), 50); }}
+            style={{ width: "100%", padding: "9px 0", borderRadius: 8, background: "var(--bg3)", border: "1px solid var(--border)", fontWeight: 600, fontSize: 13, cursor: "pointer", color: "var(--ink)" }}>
+            OK, edit my message
+          </button>
+        </div>
+      )}
+
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--card)", borderTop: "1px solid var(--border)", padding: "10px 14px 22px", display: "flex", gap: 8, alignItems: "flex-end", zIndex: 55 }}>
         {quickReplies.length > 0 && (
           <button onClick={() => setShowQR((v) => !v)}
@@ -159,7 +190,7 @@ export const ChatRoom: FC<ChatRoomProps> = ({
             ⚡
           </button>
         )}
-        <input className="field" placeholder="Type a message…" value={input}
+        <input ref={inputRef} className="field" placeholder="Type a message…" value={input}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
           onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && send()}
           style={{ flex: 1 }} />

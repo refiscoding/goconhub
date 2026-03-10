@@ -126,7 +126,7 @@ export const VendorServices: FC = () => {
 
       <div style={{ padding: "16px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
         {adding && (
-          <div className="card pop-enter" style={{ padding: 18, borderColor: "var(--acc-bd)" }}>
+          <div className="card pop-enter" style={{ padding: 18 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: "var(--acc)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>New Service</p>
             <ServiceForm
               draft={newDraft}
@@ -139,7 +139,7 @@ export const VendorServices: FC = () => {
 
         {services.map((svc) =>
           editing === svc.id ? (
-            <div key={svc.id} className="card" style={{ padding: 16, borderTop: "2px solid var(--acc)" }}>
+            <div key={svc.id} className="card" style={{ padding: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--acc)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>Editing</p>
               <ServiceForm
                 draft={editDraft}

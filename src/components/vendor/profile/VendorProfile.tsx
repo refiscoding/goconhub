@@ -173,7 +173,7 @@ export const VendorProfile: FC = () => {
           { label: "Reviews",  value: String(user?.vendor?.reviewCount ?? 0),       color: "var(--acc)", icon: "💬" },
           { label: "Verified", value: user?.vendor?.verified ? "Yes" : "No",        color: "var(--green)", icon: "✓" },
         ].map((s) => (
-          <div key={s.label} style={{ flex: 1, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 8px", textAlign: "center" }}>
+          <div key={s.label} style={{ flex: 1, background: "var(--card)", borderRadius: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: "14px 8px", textAlign: "center" }}>
             <span style={{ fontSize: 20 }}>{s.icon}</span>
             <p style={{ fontSize: 17, fontWeight: 800, color: s.color, marginTop: 6 }}>{s.value}</p>
             <p style={{ fontSize: 10, color: "var(--ink3)", fontWeight: 700, marginTop: 2, textTransform: "uppercase", letterSpacing: ".05em" }}>{s.label}</p>
@@ -184,7 +184,7 @@ export const VendorProfile: FC = () => {
       <div style={{ padding: "16px 20px 0", display: "flex", flexDirection: "column", gap: 14 }}>
 
         {/* ── Personal info ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
+        <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--acc-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <IconUser style={{ width: 16, height: 16, color: "var(--acc)" }} />
@@ -202,7 +202,7 @@ export const VendorProfile: FC = () => {
         </div>
 
         {/* ── Bio ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
+        <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(99,102,241,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <IconWrench style={{ width: 16, height: 16, color: "#6366f1" }} />
@@ -218,7 +218,7 @@ export const VendorProfile: FC = () => {
         </div>
 
         {/* ── Security ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
+        <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--green-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <IconShield style={{ width: 16, height: 16, color: "var(--green)" }} />
@@ -261,13 +261,6 @@ export const VendorProfile: FC = () => {
           </div>
         </div>
 
-        {/* ── Sign out ── */}
-        <button
-          onClick={handleLogout}
-          style={{ width: "100%", padding: 16, borderRadius: 14, background: "var(--red-bg)", border: "1px solid rgba(224,49,49,.2)", color: "var(--red)", fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, cursor: "pointer" }}
-        >
-          <IconLogout style={{ width: 18, height: 18 }} /> Sign Out
-        </button>
       </div>
     </div>
   );

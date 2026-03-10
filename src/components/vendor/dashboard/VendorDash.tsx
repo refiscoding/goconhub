@@ -197,7 +197,7 @@ export const VendorDash: FC = () => {
             )}
 
             {/* Earnings / Payout History */}
-            <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
+            <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
               <div style={{ padding: "16px 18px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(45,212,191,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💰</div>

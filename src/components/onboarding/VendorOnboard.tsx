@@ -1,21 +1,59 @@
 "use client";
-import { FC, useState, ChangeEvent } from "react";
+import { FC, useState, useEffect, useRef, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { IconChevL, IconCheck, IconShield, IconWallet, IconPlus, IconTrash } from "@/components/icons";
+import { IconChevL, IconShield, IconWallet, IconPlus, IconTrash } from "@/components/icons";
 import { ProgressBar, Toggle } from "@/components/ui";
 import { VENDOR_CATS, VENDOR_SKILLS } from "@/lib/constants";
+import { useUser } from "@/context/UserContext";
 import type { VendorOnboardData, ServiceDraft } from "@/lib/types";
 
 const STEPS = ["Welcome", "Info", "Skills", "Services", "Verify", "Go Live!"];
-const DEFAULT_DATA: VendorOnboardData = { fn: "", ln: "", phone: "", city: "", area: "", bio: "", cat: "", skills: [] };
+const DEFAULT_DATA: VendorOnboardData = {
+  fn: "", ln: "", phone: "", city: "", area: "", bio: "", cat: "", skills: [],
+  entityType: "individual", idNumber: "", bankName: "", accountNumber: "", companyName: "", companyRegNumber: "",
+};
+
+interface LabelInputProps {
+  label: string;
+  field: keyof VendorOnboardData;
+  placeholder?: string;
+  data: VendorOnboardData;
+  set: <K extends keyof VendorOnboardData>(k: K, v: VendorOnboardData[K]) => void;
+}
+
+const LabelInput: FC<LabelInputProps> = ({ label, field, placeholder, data, set }) => (
+  <div>
+    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink2)", textTransform: "uppercase", letterSpacing: ".05em", display: "block", marginBottom: 5 }}>{label}</label>
+    <input className="field" placeholder={placeholder} value={data[field] as string} onChange={(e: ChangeEvent<HTMLInputElement>) => set(field, e.target.value)} />
+  </div>
+);
 
 export const VendorOnboard: FC = () => {
   const router = useRouter();
+  const { user } = useUser();
   const [step,     setStep]     = useState(0);
   const [data,     setData]     = useState<VendorOnboardData>(DEFAULT_DATA);
   const [services, setServices] = useState<ServiceDraft[]>([{ id: 1, name: "", price: "", unit: "hr", desc: "", active: true }]);
   const [busy,     setBusy]     = useState(false);
   const [error,    setError]    = useState("");
+  const [idFile,   setIdFile]   = useState<File | null>(null);
+  const [cipaFile, setCipaFile] = useState<File | null>(null);
+  const idFileRef   = useRef<HTMLInputElement>(null);
+  const cipaFileRef = useRef<HTMLInputElement>(null);
+
+  // Autofill from registration data once user is loaded
+  useEffect(() => {
+    if (user) {
+      setData((d) => ({
+        ...d,
+        fn:    d.fn    || user.firstName        || "",
+        ln:    d.ln    || user.lastName         || "",
+        phone: d.phone || user.phone            || "",
+        city:  d.city  || user.city             || "",
+        area:  d.area  || user.area             || "",
+      }));
+    }
+  }, [user]);
 
   const set = <K extends keyof VendorOnboardData>(k: K, v: VendorOnboardData[K]) => setData((d) => ({ ...d, [k]: v }));
   const toggleSkill = (s: string) => set("skills", data.skills.includes(s) ? data.skills.filter((x) => x !== s) : [...data.skills, s]);
@@ -24,13 +62,6 @@ export const VendorOnboard: FC = () => {
   const delSvc = (id: number) => setServices((s) => s.filter((x) => x.id !== id));
   const updSvc = (id: number, k: keyof ServiceDraft, v: string) =>
     setServices((s) => s.map((x) => x.id === id ? { ...x, [k]: v } : x));
-
-  const LabelInput: FC<{ label: string; field: keyof VendorOnboardData; placeholder?: string }> = ({ label, field, placeholder }) => (
-    <div>
-      <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink2)", textTransform: "uppercase", letterSpacing: ".05em", display: "block", marginBottom: 5 }}>{label}</label>
-      <input className="field" placeholder={placeholder} value={data[field] as string} onChange={(e: ChangeEvent<HTMLInputElement>) => set(field, e.target.value)} />
-    </div>
-  );
 
   return (
     <div data-theme="vendor" style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
@@ -57,12 +88,12 @@ export const VendorOnboard: FC = () => {
           <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <h2 className="serif" style={{ fontSize: 26 }}>Personal Info</h2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <LabelInput label="First Name" field="fn" placeholder="Marcus" />
-              <LabelInput label="Last Name"  field="ln" placeholder="Osei" />
+              <LabelInput label="First Name" field="fn" placeholder="Marcus" data={data} set={set} />
+              <LabelInput label="Last Name"  field="ln" placeholder="Osei"   data={data} set={set} />
             </div>
-            <LabelInput label="Phone"        field="phone" placeholder="+267 7x xxx xxx" />
-            <LabelInput label="City"         field="city"  placeholder="Gaborone" />
-            <LabelInput label="Service Area" field="area"  placeholder="e.g. CBD, Phase 2…" />
+            <LabelInput label="Phone"        field="phone" placeholder="+267 7x xxx xxx" data={data} set={set} />
+            <LabelInput label="City"         field="city"  placeholder="Gaborone"         data={data} set={set} />
+            <LabelInput label="Service Area" field="area"  placeholder="e.g. CBD, Phase 2…" data={data} set={set} />
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink2)", textTransform: "uppercase", letterSpacing: ".05em", display: "block", marginBottom: 5 }}>Bio</label>
               <textarea className="field" rows={3} placeholder="Tell customers about your experience…" value={data.bio} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => set("bio", e.target.value)} />
@@ -105,16 +136,82 @@ export const VendorOnboard: FC = () => {
 
         {step === 4 && (
           <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div><h2 className="serif" style={{ fontSize: 26 }}>Verification</h2><p style={{ color: "var(--ink2)", fontSize: 14, marginTop: 4 }}>Required to receive payments.</p></div>
-            <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}><IconShield style={{ width: 24, height: 24, color: "var(--acc)" }} /><p style={{ fontWeight: 700, fontSize: 15 }}>Identity</p></div>
-              <input className="field" placeholder="Omang / ID Number" />
-              <div style={{ background: "var(--bg3)", border: "2px dashed var(--border2)", borderRadius: 10, padding: 18, textAlign: "center", cursor: "pointer", color: "var(--ink2)" }}><p style={{ fontSize: 22, marginBottom: 6 }}>📄</p><p style={{ fontSize: 13, fontWeight: 700 }}>Upload ID / Passport</p></div>
+            <div>
+              <h2 className="serif" style={{ fontSize: 26 }}>Verification</h2>
+              <p style={{ color: "var(--ink2)", fontSize: 14, marginTop: 4 }}>Required to receive payments.</p>
             </div>
+
+            {/* Entity type selector */}
+            <div className="card" style={{ padding: 16 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink2)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>Account Type</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {(["individual", "company"] as const).map((type) => (
+                  <div key={type} onClick={() => { set("entityType", type); setError(""); }}
+                    style={{ border: `2px solid ${data.entityType === type ? "var(--acc)" : "var(--border)"}`, borderRadius: 10, padding: "12px 14px", cursor: "pointer", background: data.entityType === type ? "var(--acc-bg)" : "var(--bg3)", textAlign: "center", transition: "all .15s" }}>
+                    <p style={{ fontSize: 20, marginBottom: 4 }}>{type === "individual" ? "👤" : "🏢"}</p>
+                    <p style={{ fontWeight: 700, fontSize: 13, color: data.entityType === type ? "var(--acc)" : "var(--ink)" }}>{type === "individual" ? "Individual" : "Registered Company"}</p>
+                    <p style={{ fontSize: 11, color: "var(--ink3)", marginTop: 2 }}>{type === "individual" ? "Omang / ID" : "CIPA Registered"}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Individual path */}
+            {data.entityType === "individual" && (
+              <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <IconShield style={{ width: 22, height: 22, color: "var(--acc)" }} />
+                  <p style={{ fontWeight: 700, fontSize: 15 }}>Identity Verification</p>
+                </div>
+                <input className="field" placeholder="Omang / ID Number *"
+                  value={data.idNumber} onChange={(e: ChangeEvent<HTMLInputElement>) => set("idNumber", e.target.value)} />
+                <input ref={idFileRef} type="file" accept="image/*,.pdf" style={{ display: "none" }}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setIdFile(e.target.files?.[0] ?? null)} />
+                <div onClick={() => idFileRef.current?.click()}
+                  style={{ background: "var(--bg3)", border: `2px dashed ${idFile ? "var(--acc)" : "var(--border2)"}`, borderRadius: 10, padding: 18, textAlign: "center", cursor: "pointer", color: "var(--ink2)" }}>
+                  <p style={{ fontSize: 22, marginBottom: 6 }}>{idFile ? "✅" : "📄"}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: idFile ? "var(--acc)" : undefined }}>
+                    {idFile ? idFile.name : "Upload Omang / Passport *"}
+                  </p>
+                  {!idFile && <p style={{ fontSize: 11, marginTop: 2 }}>JPG, PNG or PDF</p>}
+                </div>
+              </div>
+            )}
+
+            {/* Company path */}
+            {data.entityType === "company" && (
+              <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <IconShield style={{ width: 22, height: 22, color: "var(--acc)" }} />
+                  <p style={{ fontWeight: 700, fontSize: 15 }}>Company Verification</p>
+                </div>
+                <input className="field" placeholder="Registered Company Name *"
+                  value={data.companyName} onChange={(e: ChangeEvent<HTMLInputElement>) => set("companyName", e.target.value)} />
+                <input className="field" placeholder="CIPA Registration Number *"
+                  value={data.companyRegNumber} onChange={(e: ChangeEvent<HTMLInputElement>) => set("companyRegNumber", e.target.value)} />
+                <input ref={cipaFileRef} type="file" accept="image/*,.pdf" style={{ display: "none" }}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setCipaFile(e.target.files?.[0] ?? null)} />
+                <div onClick={() => cipaFileRef.current?.click()}
+                  style={{ background: "var(--bg3)", border: `2px dashed ${cipaFile ? "var(--acc)" : "var(--border2)"}`, borderRadius: 10, padding: 18, textAlign: "center", cursor: "pointer", color: "var(--ink2)" }}>
+                  <p style={{ fontSize: 22, marginBottom: 6 }}>{cipaFile ? "✅" : "🏛️"}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: cipaFile ? "var(--acc)" : undefined }}>
+                    {cipaFile ? cipaFile.name : "Upload CIPA Certificate of Incorporation *"}
+                  </p>
+                  {!cipaFile && <p style={{ fontSize: 11, marginTop: 2 }}>JPG, PNG or PDF</p>}
+                </div>
+              </div>
+            )}
+
+            {/* Bank account — both paths */}
             <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}><IconWallet style={{ width: 24, height: 24, color: "var(--acc)" }} /><p style={{ fontWeight: 700, fontSize: 15 }}>Bank Account</p></div>
-              <input className="field" placeholder="Bank name (e.g. FNB, Standard Bank)" />
-              <input className="field" placeholder="Account number" />
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <IconWallet style={{ width: 22, height: 22, color: "var(--acc)" }} />
+                <p style={{ fontWeight: 700, fontSize: 15 }}>{data.entityType === "company" ? "Company Bank Account" : "Bank Account"}</p>
+              </div>
+              <input className="field" placeholder="Bank name (e.g. FNB, Standard Bank) *"
+                value={data.bankName} onChange={(e: ChangeEvent<HTMLInputElement>) => set("bankName", e.target.value)} />
+              <input className="field" placeholder="Account number *"
+                value={data.accountNumber} onChange={(e: ChangeEvent<HTMLInputElement>) => set("accountNumber", e.target.value)} />
             </div>
           </div>
         )}
@@ -137,6 +234,13 @@ export const VendorOnboard: FC = () => {
         {error && <p style={{ fontSize: 12, color: "#f87171", marginBottom: 8, textAlign: "center" }}>{error}</p>}
         <button className="btn-pri" disabled={busy} style={{ opacity: busy ? 0.7 : 1 }}
           onClick={async () => {
+            if (step === 4) {
+              const isIndividual = data.entityType === "individual";
+              if (isIndividual && (!data.idNumber.trim() || !idFile)) { setError("Please enter your ID number and upload your ID document."); return; }
+              if (!isIndividual && (!data.companyName.trim() || !data.companyRegNumber.trim() || !cipaFile)) { setError("Please fill in company details and upload your CIPA certificate."); return; }
+              if (!data.bankName.trim() || !data.accountNumber.trim()) { setError("Please enter your bank account details."); return; }
+              setError("");
+            }
             if (step < STEPS.length - 1) { setStep((s) => s + 1); return; }
             setBusy(true); setError("");
             try {
