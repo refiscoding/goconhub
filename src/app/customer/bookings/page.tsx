@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Toast, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
+import { fmtPrice } from "@/lib/fmt";
+import { Star } from "lucide-react";
 
 interface ApiBooking {
   id: string;
@@ -17,7 +19,7 @@ interface ApiBooking {
   paymentMethod: string | null;
   paymentReference: string | null;
   paidAt: string | null;
-  vendor: { user: { firstName: string; lastName: string } };
+  vendor: { id: string; user: { firstName: string; lastName: string } };
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -55,6 +57,35 @@ function CustomerBookingsPage() {
 
   // Orange / eWallet reference
   const [payRef, setPayRef] = useState("");
+
+  // Review
+  const [reviewTarget, setReviewTarget] = useState<ApiBooking | null>(null);
+  const [reviewRating,  setReviewRating]  = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewHover,   setReviewHover]   = useState(0);
+  const [reviewBusy,    setReviewBusy]    = useState(false);
+  const [reviewed,      setReviewed]      = useState<Set<string>>(new Set());
+
+  const openReview = (b: ApiBooking) => { setReviewTarget(b); setReviewRating(0); setReviewComment(""); };
+  const closeReview = () => { setReviewTarget(null); };
+
+  const submitReview = async () => {
+    if (!reviewTarget || !reviewRating) return;
+    setReviewBusy(true);
+    try {
+      const res = await fetch(`/api/vendors/${reviewTarget.vendor.id}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: reviewRating, comment: reviewComment }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.message ?? "Failed", "err"); return; }
+      setReviewed((s) => new Set(s).add(reviewTarget.id));
+      showToast("Review submitted ✓", "ok");
+      closeReview();
+    } catch { showToast("Network error", "err"); }
+    finally { setReviewBusy(false); }
+  };
 
   // Success data (from DPO callback query params)
   const [successRef,    setSuccessRef]    = useState("");
@@ -164,7 +195,7 @@ function CustomerBookingsPage() {
     <div style={{ paddingBottom: 88, minHeight: "100vh", background: "var(--bg)" }}>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "52px 22px 18px", position: "sticky", top: 0, zIndex: 50 }}>
+      <div className="page-top" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "0 22px 18px", position: "sticky", top: 0, zIndex: 50 }}>
         <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em" }}>My Bookings</h1>
         <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 3 }}>{bookings.length} total</p>
       </div>
@@ -194,17 +225,28 @@ function CustomerBookingsPage() {
                 <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: s.bg, color: s.color }}>{s.label}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10, borderTop: "1px solid var(--border)" }}>
-                <p style={{ fontWeight: 800, fontSize: 16, color: "var(--acc)" }}>P{b.amount}</p>
-                {paid && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "var(--green-bg)", color: "var(--green)" }}>Paid</span>
-                    {b.paidAt && <span style={{ fontSize: 11, color: "var(--ink3)" }}>{new Date(b.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>}
-                  </div>
-                )}
-                {submitted && <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "rgba(99,102,241,.12)", color: "#6366f1" }}>Payment Pending</span>}
-                {needsPay && (
-                  <button onClick={() => openPay(b)} className="btn-pri" style={{ padding: "8px 18px", fontSize: 13, fontWeight: 700 }}>Pay Now</button>
-                )}
+                <p style={{ fontWeight: 800, fontSize: 16, color: "var(--acc)" }}>{fmtPrice(b.amount)}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {paid && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "var(--green-bg)", color: "var(--green)" }}>Paid</span>
+                      {b.paidAt && <span style={{ fontSize: 11, color: "var(--ink3)" }}>{new Date(b.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>}
+                    </div>
+                  )}
+                  {submitted && <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "rgba(99,102,241,.12)", color: "#6366f1" }}>Payment Pending</span>}
+                  {needsPay && (
+                    <button onClick={() => openPay(b)} className="btn-pri" style={{ padding: "8px 18px", fontSize: 13, fontWeight: 700 }}>Pay Now</button>
+                  )}
+                  {b.status === "completed" && !reviewed.has(b.id) && (
+                    <button onClick={() => openReview(b)}
+                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 999, border: "1.5px solid #f59e0b", background: "rgba(245,158,11,.08)", color: "#d97706", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+                      <Star size={13} fill="#f59e0b" color="#f59e0b" /> Review
+                    </button>
+                  )}
+                  {b.status === "completed" && reviewed.has(b.id) && (
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "rgba(245,158,11,.1)", color: "#d97706" }}>✓ Reviewed</span>
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -223,7 +265,7 @@ function CustomerBookingsPage() {
               <>
                 <h3 className="serif" style={{ fontSize: 20, marginBottom: 4 }}>Pay for Service</h3>
                 <p style={{ fontSize: 13, color: "var(--ink3)", marginBottom: 20 }}>
-                  {payTarget.serviceName} · <strong style={{ color: "var(--acc)" }}>P{payTarget.amount}</strong>
+                  {payTarget.serviceName} · <strong style={{ color: "var(--acc)" }}>{fmtPrice(payTarget.amount)}</strong>
                 </p>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>Select Payment Method</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -263,7 +305,7 @@ function CustomerBookingsPage() {
                   <div>
                     <h3 className="serif" style={{ fontSize: 20 }}>{METHOD_NAMES[payMethod] || ""}</h3>
                     <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 1 }}>
-                      {payTarget.serviceName} · <strong style={{ color: "var(--acc)" }}>P{payTarget.amount}</strong>
+                      {payTarget.serviceName} · <strong style={{ color: "var(--acc)" }}>{fmtPrice(payTarget.amount)}</strong>
                     </p>
                   </div>
                 </div>
@@ -276,7 +318,7 @@ function CustomerBookingsPage() {
                       1. Open Orange Money on your phone<br />
                       2. Select <strong>Send Money</strong><br />
                       3. Enter number: <strong style={{ color: "var(--acc)", fontSize: 16 }}>74 000 000</strong><br />
-                      4. Amount: <strong style={{ color: "var(--acc)" }}>P{payTarget.amount}</strong><br />
+                      4. Amount: <strong style={{ color: "var(--acc)" }}>{fmtPrice(payTarget.amount)}</strong><br />
                       5. Reference: <strong>HH-{payTarget.id.slice(-6).toUpperCase()}</strong>
                     </p>
                   )}
@@ -285,7 +327,7 @@ function CustomerBookingsPage() {
                       1. Open your eWallet app<br />
                       2. Select <strong>Transfer</strong><br />
                       3. Enter number: <strong style={{ color: "var(--acc)", fontSize: 16 }}>72 000 000</strong><br />
-                      4. Amount: <strong style={{ color: "var(--acc)" }}>P{payTarget.amount}</strong><br />
+                      4. Amount: <strong style={{ color: "var(--acc)" }}>{fmtPrice(payTarget.amount)}</strong><br />
                       5. Reference: <strong>HH-{payTarget.id.slice(-6).toUpperCase()}</strong>
                     </p>
                   )}
@@ -316,7 +358,7 @@ function CustomerBookingsPage() {
                 <h3 className="serif" style={{ fontSize: 22, color: "var(--green)" }}>Payment Successful!</h3>
                 {successAmount && (
                   <p style={{ fontSize: 14, color: "var(--ink2)", marginTop: 8, lineHeight: 1.6 }}>
-                    <strong>P{successAmount}</strong> paid via DPO Pay.
+                    <strong>{fmtPrice(Number(successAmount))}</strong> paid via DPO Pay.
                   </p>
                 )}
                 {successRef && (
@@ -337,9 +379,42 @@ function CustomerBookingsPage() {
         </div>
       )}
 
+      {/* ── Review modal ── */}
+      {reviewTarget && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 100 }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.5)" }} onClick={closeReview} />
+          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--bg)", borderRadius: "24px 24px 0 0", padding: "24px 22px 44px" }}>
+            <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--border2)", margin: "0 auto 20px" }} />
+            <h3 className="serif" style={{ fontSize: 20, marginBottom: 4 }}>How was it?</h3>
+            <p style={{ fontSize: 13, color: "var(--ink3)", marginBottom: 20 }}>
+              {reviewTarget.serviceName} · {reviewTarget.vendor.user.firstName} {reviewTarget.vendor.user.lastName}
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 20 }}>
+              {[1,2,3,4,5].map((n) => (
+                <button key={n}
+                  onMouseEnter={() => setReviewHover(n)} onMouseLeave={() => setReviewHover(0)}
+                  onClick={() => setReviewRating(n)}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: 38, lineHeight: 1, color: n <= (reviewHover || reviewRating) ? "#f59e0b" : "var(--border2)", transition: "color .1s" }}>★</button>
+              ))}
+            </div>
+            {reviewRating > 0 && (
+              <p style={{ textAlign: "center", fontSize: 14, fontWeight: 700, color: "#d97706", marginBottom: 16 }}>
+                {["","Poor","Fair","Good","Great","Excellent"][reviewRating]}
+              </p>
+            )}
+            <textarea className="field" rows={3} placeholder="Share your experience (optional)…"
+              value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} style={{ resize: "vertical" }} />
+            <button onClick={submitReview} disabled={reviewBusy || !reviewRating} className="btn-pri"
+              style={{ width: "100%", padding: 15, fontSize: 15, fontWeight: 700, marginTop: 14, opacity: (!reviewRating || reviewBusy) ? 0.6 : 1 }}>
+              {reviewBusy ? "Submitting…" : "Submit Review"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Alert banner */}
       {awaitingPayment.length > 0 && !payTarget && (
-        <div style={{ position: "fixed", bottom: 80, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 40px)", maxWidth: 390, background: "var(--acc)", borderRadius: 14, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 40 }}>
+        <div className="pay-alert-banner">
           <p style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>
             {awaitingPayment.length} booking{awaitingPayment.length > 1 ? "s" : ""} ready to pay
           </p>

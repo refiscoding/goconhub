@@ -36,6 +36,18 @@ enum ServiceUnit {
   day
 }
 
+enum ListingStatus {
+  active
+  sold
+  removed
+}
+
+enum OrderStatus {
+  pending
+  approved
+  rejected
+}
+
 model User {
   id                String     @id @default(cuid())
   email             String     @unique
@@ -52,11 +64,13 @@ model User {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
-  vendor    Vendor?
-  bookings  Booking[]  @relation("CustomerBookings")
-  messages  Message[]
-  disputes  Dispute[]  @relation("CustomerDisputes")
-  reviews   Review[]   @relation("ReviewsGiven")
+  vendor        Vendor?
+  bookings      Booking[]      @relation("CustomerBookings")
+  messages      Message[]
+  disputes      Dispute[]      @relation("CustomerDisputes")
+  reviews       Review[]       @relation("ReviewsGiven")
+  listingOrders ListingOrder[] @relation("CustomerOrders")
+  notifications Notification[]
 }
 
 model Vendor {
@@ -77,6 +91,7 @@ model Vendor {
   bookings  Booking[]  @relation("VendorBookings")
   disputes  Dispute[]  @relation("VendorDisputes")
   reviews   Review[]
+  listings  Listing[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -173,6 +188,36 @@ model Dispute {
   updatedAt DateTime @updatedAt
 }
 
+model Listing {
+  id        String        @id @default(cuid())
+  vendorId  String
+  vendor    Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  title     String
+  desc      String        @default("")
+  price     Float
+  condition String        @default("used")
+  photos    String[]      @default([])
+  status    ListingStatus @default(active)
+
+  orders    ListingOrder[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ListingOrder {
+  id         String      @id @default(cuid())
+  listingId  String
+  listing    Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   User        @relation("CustomerOrders", fields: [customerId], references: [id])
+
+  status     OrderStatus @default(pending)
+  note       String      @default("")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
 model ServiceCategory {
   id        String   @id @default(cuid())
   name      String   @unique
@@ -184,4 +229,16 @@ model AdminSetting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // booking_request | booking_accepted | job_complete | payment_confirmed | payout_sent | new_review
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
 }

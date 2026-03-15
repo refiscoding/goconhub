@@ -2,21 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { CreateBookingSchema } from "@/lib/schemas";
+import { createNotification } from "@/lib/notifications";
 
 // GET /api/bookings — list bookings for the current user
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
 
-  const where =
+  const { searchParams } = new URL(req.url);
+  const vendorIdFilter = searchParams.get("vendorId");
+  const statusFilter   = searchParams.get("status");
+
+  const baseWhere =
     session.role === "customer"
       ? { customerId: session.userId }
       : session.role === "vendor"
       ? { vendor: { userId: session.userId } }
       : {};
 
+  const where: Record<string, unknown> = { ...baseWhere };
+  if (vendorIdFilter) where.vendorId = vendorIdFilter;
+  if (statusFilter)   where.status   = { in: statusFilter.split(",") };
+
   const bookings = await prisma.booking.findMany({
-    where,
+    where: where as Parameters<typeof prisma.booking.findMany>[0]["where"],
     select: {
       id: true, serviceName: true, date: true, time: true, location: true, note: true,
       amount: true, status: true, completedByVendor: true, adminApprovedComplete: true,
@@ -93,6 +102,21 @@ export async function POST(req: NextRequest) {
         status:      "pending",
       },
     });
+
+    // Notify vendor of new booking request
+    const vendor = await prisma.vendor.findUnique({
+      where: { id: vendorId },
+      select: { userId: true },
+    });
+    if (vendor) {
+      await createNotification({
+        userId:  vendor.userId,
+        type:    "booking_request",
+        title:   "New booking request",
+        body:    `A customer requested ${serviceName}.`,
+        linkUrl: `/vendor/dashboard`,
+      });
+    }
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (e) {

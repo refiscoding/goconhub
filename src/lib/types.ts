@@ -6,7 +6,9 @@ export type UserStatus     = "active" | "pending" | "suspended";
 export type DisputeStatus  = "open" | "resolved";
 export type ServiceUnit    = "hr" | "job" | "day";
 export type ToastType      = "ok" | "err" | "info";
-export type AdminTab       = "overview" | "bookings" | "payments" | "vendors" | "users" | "disputes" | "categories" | "settings";
+export type AdminTab       = "overview" | "bookings" | "payments" | "vendors" | "users" | "disputes" | "categories" | "settings" | "marketplace";
+export type ListingStatus  = "active" | "sold" | "removed";
+export type OrderStatus    = "pending" | "approved" | "rejected";
 export type MessageSender  = "me" | "them";
 
 // ── Domain models ────────────────────────────────────────────────────────────
@@ -20,6 +22,7 @@ export interface Vendor {
   price: number;
   unit: ServiceUnit;
   avail: boolean;
+  verified: boolean;
   tags: string[];
   bio: string;
   avatarUrl?: string | null;
@@ -73,6 +76,32 @@ export interface VendorService {
   unit: ServiceUnit;
   desc: string;
   active: boolean;
+}
+
+export interface Listing {
+  id: string;
+  title: string;
+  desc: string;
+  price: number;
+  condition: string;
+  photos: string[];
+  status: ListingStatus;
+  vendorId: string;
+  vendorName: string;
+  vendorAvatar?: string | null;
+  createdAt: string;
+}
+
+export interface ListingOrder {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  listingPrice: number;
+  customerName: string;
+  customerId: string;
+  note: string;
+  status: OrderStatus;
+  createdAt: string;
 }
 
 // ── UI / form models ──────────────────────────────────────────────────────────

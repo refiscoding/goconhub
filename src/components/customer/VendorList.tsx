@@ -15,6 +15,7 @@ interface ApiVendor {
   rating: number;
   reviewCount: number;
   available: boolean;
+  verified: boolean;
   user: { firstName: string; lastName: string; avatarUrl: string | null };
   services: { name: string; price: number; unit: string }[];
 }
@@ -30,7 +31,8 @@ function toVendor(v: ApiVendor): Vendor {
     rev:     v.reviewCount,
     price:   svc?.price ?? 0,
     unit:    (svc?.unit ?? "hr") as "hr" | "job" | "day",
-    avail:   v.available,
+    avail:    v.available,
+    verified: v.verified,
     tags:    v.skills,
     bio:     v.bio,
     avatarUrl: v.user.avatarUrl,
@@ -64,7 +66,7 @@ export const VendorList: FC = () => {
 
   return (
     <div style={{ paddingBottom: 88 }}>
-      <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "52px 22px 18px", position: "sticky", top: 0, zIndex: 50 }}>
+      <div className="page-top" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "0 22px 18px", position: "sticky", top: 0, zIndex: 50 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <div>
             <p style={{ fontSize: 12, color: "var(--acc)", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em" }}>📍 Gaborone</p>
@@ -99,7 +101,7 @@ export const VendorList: FC = () => {
         </p>
       </div>
 
-      <div style={{ padding: "0 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div className="vendor-grid" style={{ padding: "0 22px" }}>
         {vendors.map((v) => <VendorCard key={v.id} vendor={v} />)}
         {!loading && vendors.length === 0 && (
           <div style={{ textAlign: "center", padding: "48px 0", color: "var(--ink3)" }}>
