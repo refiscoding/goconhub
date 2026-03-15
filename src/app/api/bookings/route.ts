@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { CreateBookingSchema } from "@/lib/schemas";
 import { createNotification } from "@/lib/notifications";
+import { Prisma } from "@prisma/client";
 
 // GET /api/bookings — list bookings for the current user
 export async function GET(req: NextRequest) {
@@ -20,12 +21,12 @@ export async function GET(req: NextRequest) {
       ? { vendor: { userId: session.userId } }
       : {};
 
-  const where: Record<string, unknown> = { ...baseWhere };
+  const where: Prisma.BookingWhereInput = { ...baseWhere };
   if (vendorIdFilter) where.vendorId = vendorIdFilter;
-  if (statusFilter)   where.status   = { in: statusFilter.split(",") };
+  if (statusFilter)   where.status   = { in: statusFilter.split(",") as Prisma.EnumBookingStatusFilter["in"] };
 
   const bookings = await prisma.booking.findMany({
-    where: where as Parameters<typeof prisma.booking.findMany>[0]["where"],
+    where,
     select: {
       id: true, serviceName: true, date: true, time: true, location: true, note: true,
       amount: true, status: true, completedByVendor: true, adminApprovedComplete: true,
