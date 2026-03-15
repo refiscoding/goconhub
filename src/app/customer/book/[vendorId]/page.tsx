@@ -1,5 +1,6 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 import { BookingFlow } from "@/components/customer/booking/BookingFlow";
 import type { Vendor } from "@/lib/types";
 
@@ -8,6 +9,9 @@ interface PageProps {
 }
 
 export default async function BookVendorPage({ params }: PageProps) {
+  const session = await getSession();
+  if (!session || session.role !== "customer") redirect("/auth?next=/customer/explore");
+
   const { vendorId } = await params;
 
   const v = await prisma.vendor.findUnique({
@@ -31,6 +35,7 @@ export default async function BookVendorPage({ params }: PageProps) {
     price:    first?.price ?? 0,
     unit:     (first?.unit ?? "hr") as "hr" | "job" | "day",
     avail:    v.available,
+    verified: v.verified,
     tags:     v.skills,
     bio:      v.bio,
     services: v.services.map((s: { id: string; name: string; price: number; unit: string }) => ({ id: s.id, name: s.name, price: s.price, unit: s.unit as "hr" | "job" | "day" })),
