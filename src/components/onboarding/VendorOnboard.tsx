@@ -119,6 +119,19 @@ export const VendorOnboard: FC = () => {
     setServices((s) => s.map((x) => x.id === id ? { ...x, [k]: v } : x));
 
   const validate = (): string => {
+    if (step === 1) {
+      if (!data.fn.trim() || !data.ln.trim()) return "Please enter your first and last name.";
+      if (!data.phone.trim()) return "Please enter your phone number.";
+      if (!data.city.trim()) return "Please enter your city.";
+    }
+    if (step === 2) {
+      if (!data.cat) return "Please select your primary trade.";
+      if (data.skills.length === 0) return "Please select at least one skill.";
+    }
+    if (step === 3) {
+      const valid = services.filter((s) => s.name.trim() && s.price.trim());
+      if (valid.length === 0) return "Please add at least one service with a name and price.";
+    }
     if (step === 4) {
       if (data.entityType === "individual" && (!data.idNumber.trim() || !idFile)) return "Please enter your ID number and upload your ID document.";
       if (data.entityType === "company" && (!data.companyName.trim() || !data.companyRegNumber.trim() || !cipaFile)) return "Please fill in company details and upload your CIPA certificate.";
@@ -136,11 +149,6 @@ export const VendorOnboard: FC = () => {
 
       {/* illustration area */}
       <div style={{ flexShrink: 0, height: "30dvh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-        {step < STEPS.length - 1 && (
-          <button onClick={() => setStep(STEPS.length - 1)} style={{ position: "absolute", top: 52, right: 22, background: "none", border: "none", fontSize: 13, fontWeight: 700, color: "#78716c", cursor: "pointer" }}>
-            Skip
-          </button>
-        )}
         {step > 0 && step < STEPS.length - 1 && (
           <button onClick={() => { setError(""); setStep((s) => s - 1); }} style={{ position: "absolute", top: 48, left: 20, width: 36, height: 36, borderRadius: 12, background: "white", border: `1.5px solid ${AM}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${A}25` }}>
             <ChevronLeft size={18} color={A} strokeWidth={2.5} />

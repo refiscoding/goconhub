@@ -208,6 +208,21 @@ export const VendorProfile: FC = () => {
             <Field label="City"     field="city"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
             <Field label="Area"     field="area"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
             <div style={{ gridColumn: "1/-1" }}><Field label="Category" field="cat" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} /></div>
+            {user?.vendor?.entityType === "company" && user.vendor.companyName && (
+              <>
+                <div style={{ gridColumn: "1/-1", height: 1, background: "var(--border)", margin: "4px 0" }} />
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>Company Name</label>
+                  <p style={{ fontSize: 15, fontWeight: 500, padding: "2px 0", color: "var(--ink)" }}>{user.vendor.companyName}</p>
+                </div>
+                {user.vendor.companyRegNumber && (
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>Reg. Number</label>
+                    <p style={{ fontSize: 15, fontWeight: 500, padding: "2px 0", color: "var(--ink)" }}>{user.vendor.companyRegNumber}</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
 
