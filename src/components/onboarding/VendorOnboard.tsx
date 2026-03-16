@@ -426,40 +426,41 @@ export const VendorOnboard: FC = () => {
             <Dots cur={step} tot={STEPS.length} />
             <button
               onClick={async () => {
+                if (isLast) { router.push("/vendor/dashboard"); return; }
                 const err = validate();
                 if (err) { setError(err); return; }
-                if (!isLast) { setError(""); setStep((s) => s + 1); return; }
-                setBusy(true); setError("");
-                try {
-                  const toBase64 = (file: File): Promise<string> =>
-                    new Promise((res, rej) => {
-                      const r = new FileReader();
-                      r.onload = () => res(r.result as string);
-                      r.onerror = rej;
-                      r.readAsDataURL(file);
+                setError("");
+                // Submit API on the "Verify" step (second-to-last) before showing Go Live
+                if (step === STEPS.length - 2) {
+                  setBusy(true);
+                  try {
+                    const toBase64 = (file: File): Promise<string> =>
+                      new Promise((res, rej) => {
+                        const r = new FileReader();
+                        r.onload = () => res(r.result as string);
+                        r.onerror = rej;
+                        r.readAsDataURL(file);
+                      });
+                    const idDocumentUrl   = idFile   ? await toBase64(idFile)   : "";
+                    const cipaDocumentUrl = cipaFile ? await toBase64(cipaFile) : "";
+                    const res = await fetch("/api/onboarding", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, idDocumentUrl, cipaDocumentUrl, companyName: data.companyName, companyRegNumber: data.companyRegNumber } }),
                     });
-                  const idDocumentUrl   = idFile   ? await toBase64(idFile)   : "";
-                  const cipaDocumentUrl = cipaFile ? await toBase64(cipaFile) : "";
-                  const res = await fetch("/api/onboarding", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, idDocumentUrl, cipaDocumentUrl, companyName: data.companyName, companyRegNumber: data.companyRegNumber } }),
-                  });
-                  if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed."); return; }
-                  router.push("/vendor/dashboard");
-                } catch { setError("Network error."); }
-                finally { setBusy(false); }
+                    if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed."); return; }
+                    setStep((s) => s + 1);
+                  } catch { setError("Network error."); }
+                  finally { setBusy(false); }
+                } else {
+                  setStep((s) => s + 1);
+                }
               }}
               disabled={busy}
               style={{ width: 56, height: 56, borderRadius: "50%", background: "white", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.2)", flexShrink: 0, opacity: busy ? 0.7 : 1 }}>
               {isLast ? <CheckCircle2 size={24} color={A} strokeWidth={2.5} /> : <ArrowRight size={24} color={A} strokeWidth={2.5} />}
             </button>
           </div>
-          {isLast && (
-            <p style={{ textAlign: "center", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,.65)", marginTop: 12, cursor: "pointer" }}>
-              {busy ? "Saving…" : "Enter dashboard →"}
-            </p>
-          )}
         </div>
       </div>
     </div>

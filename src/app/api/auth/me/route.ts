@@ -16,6 +16,8 @@ export async function GET() {
         select: {
           id: true, bio: true, category: true, skills: true,
           location: true, rating: true, reviewCount: true, available: true, verified: true,
+          entityType: true, companyName: true, companyRegNumber: true,
+          idDocumentUrl: true, cipaDocumentUrl: true,
         },
       },
     },

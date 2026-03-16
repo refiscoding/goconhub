@@ -2,7 +2,8 @@
 import { FC, useState, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Toggle, Toast, AvatarUpload, PageSpinner } from "@/components/ui";
-import { IconEdit, IconCheck, IconLogout, IconUser, IconShield, IconMapPin, IconWrench } from "@/components/icons";
+import { IconEdit, IconCheck, IconUser, IconShield, IconMapPin, IconWrench } from "@/components/icons";
+import { BadgeCheck, Building2, CircleCheck, X } from "lucide-react";
 import { FileText, ShieldCheck, Cookie, ExternalLink, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
@@ -205,7 +206,8 @@ export const VendorProfile: FC = () => {
             <div style={{ gridColumn: "1/-1" }}><Field label="Email" field="email" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} type="email" /></div>
             <Field label="Phone"    field="phone" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} type="tel" />
             <Field label="City"     field="city"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
-            <Field label="Category" field="cat"   editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+            <Field label="Area"     field="area"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+            <div style={{ gridColumn: "1/-1" }}><Field label="Category" field="cat" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} /></div>
           </div>
         </div>
 
@@ -224,6 +226,70 @@ export const VendorProfile: FC = () => {
             }
           </div>
         </div>
+
+        {/* ── Skills ── */}
+        {(user?.vendor?.skills?.length ?? 0) > 0 && (
+          <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--acc-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <IconWrench style={{ width: 16, height: 16, color: "var(--acc)" }} />
+              </div>
+              <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Skills</p>
+            </div>
+            <div style={{ padding: "16px 20px", display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {user!.vendor!.skills.map((s) => (
+                <span key={s} style={{ padding: "5px 14px", borderRadius: 999, background: "var(--acc-bg)", border: "1px solid var(--acc-bd)", fontSize: 12, fontWeight: 600, color: "var(--acc)" }}>{s}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Identity Verification ── */}
+        {user?.vendor && (() => {
+          const isIndividual = !user.vendor!.entityType || user.vendor!.entityType === "individual";
+          const hasDoc = isIndividual ? !!user.vendor!.idDocumentUrl : !!user.vendor!.cipaDocumentUrl;
+          return (
+            <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+              <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(80,251,100,.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <BadgeCheck size={16} color="#16a34a" />
+                </div>
+                <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Identity Verification</p>
+              </div>
+              <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: isIndividual ? "rgba(99,102,241,.1)" : "rgba(217,119,6,.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {isIndividual ? <IconUser style={{ width: 15, height: 15, color: "#6366f1" }} /> : <Building2 size={15} color="#d97706" />}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".05em" }}>Entity Type</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginTop: 2, textTransform: "capitalize" }}>{user.vendor!.entityType || "Individual"}</p>
+                  </div>
+                </div>
+                {!isIndividual && user.vendor!.companyName && (
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".05em" }}>Company</p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginTop: 2 }}>{user.vendor!.companyName}</p>
+                    </div>
+                    {user.vendor!.companyRegNumber && (
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".05em" }}>Reg No.</p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginTop: 2 }}>{user.vendor!.companyRegNumber}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 12, background: hasDoc ? "rgba(80,251,100,.08)" : "rgba(243,18,18,.06)", border: `1px solid ${hasDoc ? "rgba(80,251,100,.3)" : "rgba(243,18,18,.2)"}` }}>
+                  {hasDoc ? <CircleCheck size={15} color="#50fb64" /> : <X size={15} color="#f31212" />}
+                  <p style={{ fontSize: 13, fontWeight: 700, color: hasDoc ? "#16a34a" : "#dc2626" }}>
+                    {isIndividual ? "Omang / Passport" : "CIPA Certificate"} — {hasDoc ? "Submitted" : "Not submitted"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Security ── */}
         <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
