@@ -90,7 +90,7 @@ const F: FC<{ label: string; placeholder?: string; value: string; onChange: (v: 
 /* ── main ────────────────────────────────────────────── */
 export const CustomerOnboard: FC = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, refresh } = useUser();
   const [step,  setStep]  = useState(0);
   const [data,  setData]  = useState<CustOnboardData>({
     ...EMPTY,
@@ -116,6 +116,7 @@ export const CustomerOnboard: FC = () => {
         body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, preferredServices: data.services }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed to save."); return; }
+      await refresh();
       router.push("/customer/explore");
     } catch { setError("Network error."); }
     finally { setBusy(false); }

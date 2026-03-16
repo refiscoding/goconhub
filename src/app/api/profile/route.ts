@@ -45,7 +45,7 @@ export async function PATCH(req: NextRequest) {
       data: {
         ...(data.firstName != null && { firstName: (data.firstName as string).trim() }),
         ...(data.lastName  != null && { lastName:  (data.lastName  as string).trim() }),
-        ...(data.phone     != null && { phone:     data.phone     as string }),
+        ...(data.phone     != null && { phone:     (data.phone as string) || null }),
         ...(data.city      != null && { city:      (data.city     as string).trim() }),
         ...(data.area      != null && { area:      (data.area     as string).trim() }),
         ...(data.preferredServices != null && { preferredServices: data.preferredServices as string[] }),

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     data: {
       ...(data.firstName != null && { firstName: data.firstName }),
       ...(data.lastName  != null && { lastName:  data.lastName }),
-      ...(data.phone     != null && { phone:     data.phone }),
+      ...(data.phone     != null && { phone:     data.phone || null }),
       ...(data.city      != null && { city:      data.city }),
       ...(data.area      != null && { area:      data.area }),
       ...(data.preferredServices != null && { preferredServices: data.preferredServices }),
