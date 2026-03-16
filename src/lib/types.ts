@@ -22,7 +22,7 @@ export interface Vendor {
   price: number;
   unit: ServiceUnit;
   avail: boolean;
-  verified: boolean;
+  verified?: boolean;
   tags: string[];
   bio: string;
   avatarUrl?: string | null;
