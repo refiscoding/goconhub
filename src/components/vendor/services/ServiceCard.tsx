@@ -3,6 +3,7 @@ import { FC } from "react";
 import { Toggle } from "@/components/ui";
 import { IconEdit, IconTrash } from "@/components/icons";
 import type { VendorService } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface ServiceCardProps {
   service: VendorService;
@@ -22,7 +23,7 @@ export const ServiceCard: FC<ServiceCardProps> = ({ service: s, onToggle, onEdit
           </div>
           <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 4 }}>{s.desc}</p>
           <p style={{ fontSize: 16, fontWeight: 800, color: "var(--acc)", marginTop: 8 }}>
-            P{s.price} <span style={{ fontSize: 12, fontWeight: 500, color: "var(--ink2)" }}>/{s.unit}</span>
+            {fmtPrice(s.price)} <span style={{ fontSize: 12, fontWeight: 500, color: "var(--ink2)" }}>/{s.unit}</span>
           </p>
         </div>
         <Toggle on={s.active} onChange={() => onToggle(s.id)} />

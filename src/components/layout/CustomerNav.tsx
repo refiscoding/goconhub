@@ -2,15 +2,18 @@
 import { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { IconSearch, IconChat, IconUser, IconWrench, IconChevL, IconServices, IconLogout } from "@/components/icons";
+import { Bell } from "lucide-react";
+import { IconSearch, IconChat, IconUser, IconWrench, IconChevL, IconServices, IconLogout, IconShop } from "@/components/icons";
 
-interface NavItem { href: string; icon: React.ReactNode; label: string; }
+interface NavItem { href: string; icon: React.ReactNode; label: string; badge?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/customer/explore",  icon: <IconSearch   style={{ width: 20, height: 20 }} />, label: "Explore"  },
-  { href: "/customer/bookings", icon: <IconServices style={{ width: 20, height: 20 }} />, label: "Bookings" },
-  { href: "/customer/messages", icon: <IconChat     style={{ width: 20, height: 20 }} />, label: "Messages" },
-  { href: "/customer/profile",  icon: <IconUser     style={{ width: 20, height: 20 }} />, label: "Profile"  },
+  { href: "/customer/explore",        icon: <IconSearch   style={{ width: 20, height: 20 }} />, label: "Explore"       },
+  { href: "/customer/bookings",       icon: <IconServices style={{ width: 20, height: 20 }} />, label: "Bookings"      },
+  { href: "/customer/marketplace",    icon: <IconShop     style={{ width: 20, height: 20 }} />, label: "Marketplace"   },
+  { href: "/customer/messages",       icon: <IconChat     style={{ width: 20, height: 20 }} />, label: "Messages"      },
+  { href: "/customer/notifications",  icon: <Bell         size={20}                          />, label: "Notifications", badge: true },
+  { href: "/customer/profile",        icon: <IconUser     style={{ width: 20, height: 20 }} />, label: "Profile"       },
 ];
 
 interface CustomerNavProps { unreadCount?: number; }
@@ -18,14 +21,21 @@ interface CustomerNavProps { unreadCount?: number; }
 export const CustomerNav: FC<CustomerNavProps> = ({ unreadCount = 0 }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed]   = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed]       = useState(false);
+  const [mobileOpen, setMobileOpen]     = useState(false);
+  const [unreadNotifs, setUnreadNotifs] = useState(unreadCount);
 
   useEffect(() => {
     const saved = localStorage.getItem("nav-collapsed") === "true";
     setCollapsed(saved);
     document.documentElement.dataset.navCollapsed = String(saved);
   }, []);
+
+  useEffect(() => {
+    fetch("/api/notifications").then((r) => r.ok ? r.json() : null).then((d) => {
+      if (d) setUnreadNotifs(d.unread);
+    });
+  }, [pathname]);
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
@@ -79,9 +89,17 @@ export const CustomerNav: FC<CustomerNavProps> = ({ unreadCount = 0 }) => {
         <div className="nav-items-wrap">
           {NAV_ITEMS.map((n) => {
             const active = pathname.startsWith(n.href);
+            const showBadge = n.badge && unreadNotifs > 0;
             return (
               <Link key={n.href} href={n.href} className={`nav-item ${active ? "on" : ""}`} style={{ textDecoration: "none" }} onClick={closeMobile}>
-                <div style={{ position: "relative", flexShrink: 0 }}>{n.icon}</div>
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  {n.icon}
+                  {showBadge && (
+                    <span style={{ position: "absolute", top: -4, right: -4, background: "var(--acc)", color: "white", borderRadius: 99, fontSize: 9, fontWeight: 800, minWidth: 14, height: 14, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", lineHeight: 1 }}>
+                      {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                    </span>
+                  )}
+                </div>
                 <span className="nav-label">{n.label}</span>
               </Link>
             );

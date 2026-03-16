@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Avatar, Stars } from "@/components/ui";
 import { IconCheck } from "@/components/icons";
 import type { Vendor, SelectedService } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface StepServiceProps {
   vendor: Vendor;
@@ -37,7 +38,7 @@ export const StepService: FC<StepServiceProps> = ({ vendor, selected, onSelect }
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <p style={{ fontWeight: 700, fontSize: 15 }}>{item.name}</p>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <p style={{ fontWeight: 800, color: "var(--acc)", fontSize: 16 }}>P{item.price}</p>
+                <p style={{ fontWeight: 800, color: "var(--acc)", fontSize: 16 }}>{fmtPrice(item.price)}</p>
                 {isSel && <IconCheck style={{ width: 20, height: 20, color: "var(--acc)" }} />}
               </div>
             </div>

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CalendarDays, CreditCard, Wrench,
   Users, AlertCircle, LogOut, ShieldCheck, ChevronLeft,
-  Tag, Settings,
+  Tag, Settings, ShoppingBag,
 } from "lucide-react";
 
 interface AdminNavItem {
@@ -20,12 +20,13 @@ interface AdminNavProps {
   pendingVendors?: number;
   openDisputes?: number;
   pendingPayments?: number;
+  pendingOrders?: number;
   onLogout: () => void;
 }
 
 export const AdminNav: FC<AdminNavProps> = ({
   tab, onTabChange,
-  pendingVendors = 0, openDisputes = 0, pendingPayments = 0,
+  pendingVendors = 0, openDisputes = 0, pendingPayments = 0, pendingOrders = 0,
   onLogout,
 }) => {
   const pathname = usePathname();
@@ -56,8 +57,9 @@ export const AdminNav: FC<AdminNavProps> = ({
     { key: "vendors",   icon: <Wrench          size={20} />, label: "Vendors",   badge: pendingVendors  },
     { key: "users",     icon: <Users           size={20} />, label: "Users"     },
     { key: "disputes",   icon: <AlertCircle size={20} />, label: "Disputes",   badge: openDisputes },
-    { key: "categories", icon: <Tag         size={20} />, label: "Categories" },
-    { key: "settings",   icon: <Settings    size={20} />, label: "Settings"   },
+    { key: "categories",  icon: <Tag          size={20} />, label: "Categories"  },
+    { key: "marketplace", icon: <ShoppingBag  size={20} />, label: "Marketplace", badge: pendingOrders },
+    { key: "settings",    icon: <Settings     size={20} />, label: "Settings"    },
   ];
 
   return (

@@ -6,6 +6,7 @@ import {
 } from "@chakra-ui/react";
 import { CreditCard, TrendingUp, Banknote, PiggyBank } from "lucide-react";
 import type { Booking, Dispute } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface OverviewTabProps {
   bookings: Booking[];
@@ -214,7 +215,7 @@ export const OverviewTab: FC<OverviewTabProps> = ({
                         fontWeight="700"
                         color="var(--acc)"
                       >
-                        P{b.amount}
+                        {fmtPrice(b.amount)}
                       </Text>
                     </Stack>
                   </Flex>

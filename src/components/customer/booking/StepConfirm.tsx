@@ -1,6 +1,7 @@
 "use client";
 import { FC, ChangeEvent, useRef } from "react";
 import type { BookingSelection, Vendor } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 const MIN_CHARS = 50;
 const MAX_CHARS = 500;
@@ -42,7 +43,7 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
         ))}
         <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 4px", fontSize: 16 }}>
           <span style={{ fontWeight: 700 }}>Estimated Total</span>
-          <span style={{ fontWeight: 800, color: "var(--acc)" }}>P{selection.service?.price ?? 0}</span>
+          <span style={{ fontWeight: 800, color: "var(--acc)" }}>{fmtPrice(selection.service?.price ?? 0)}</span>
         </div>
         <p style={{ fontSize: 12, color: "var(--ink3)", marginBottom: 6 }}>Final price may vary depending on inspection and work required.</p>
         <div style={{ background: "var(--acc-bg)", border: "1px solid var(--acc-bd)", borderRadius: 8, padding: "10px 12px", fontSize: 13, color: "var(--acc)" }}>

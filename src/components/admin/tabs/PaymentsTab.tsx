@@ -1,6 +1,7 @@
 "use client";
 import { FC, useState } from "react";
 import { HandCoins, PiggyBank, BanknoteArrowUp } from "lucide-react";
+import { fmtPrice } from "@/lib/fmt";
 
 interface AdminBooking {
   id: string;
@@ -55,9 +56,9 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       {/* Revenue summary cards */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
         {[
-          { label: "Total Transacted", value: `P${totalTransacted.toFixed(2)}`, icon: <HandCoins size={18} />,       color: "var(--acc)" },
-          { label: "Platform (5%)",    value: `P${totalPlatformFee.toFixed(2)}`, icon: <PiggyBank size={18} />,       color: "#6366f1"    },
-          { label: "Vendor Payouts",   value: `P${totalVendorPaid.toFixed(2)}`,  icon: <BanknoteArrowUp size={18} />, color: "var(--green)" },
+          { label: "Total Transacted", value: fmtPrice(totalTransacted), icon: <HandCoins size={18} />,       color: "var(--acc)" },
+          { label: "Platform (5%)",    value: fmtPrice(totalPlatformFee), icon: <PiggyBank size={18} />,       color: "#6366f1"    },
+          { label: "Vendor Payouts",   value: fmtPrice(totalVendorPaid),  icon: <BanknoteArrowUp size={18} />, color: "var(--green)" },
         ].map((s) => (
           <div key={s.label} style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
             <span style={{ display: "flex", justifyContent: "center", color: s.color }}>{s.icon}</span>
@@ -86,7 +87,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
                 <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>{b.date}</p>
               </div>
               <div style={{ textAlign: "right" }}>
-                <p style={{ fontWeight: 800, color: "var(--acc)", fontSize: 15 }}>P{b.amount}</p>
+                <p style={{ fontWeight: 800, color: "var(--acc)", fontSize: 15 }}>{fmtPrice(b.amount)}</p>
                 <button
                   onClick={() => handle(b.id, () => onApproveComplete(b.id))}
                   disabled={busy === b.id}
@@ -126,16 +127,16 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
                       <span style={{ fontSize: 12, color: "var(--ink3)" }}>Total Amount</span>
-                      <span style={{ fontSize: 14, fontWeight: 800, color: "var(--acc)" }}>P{b.amount}</span>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: "var(--acc)" }}>{fmtPrice(b.amount)}</span>
                     </div>
                     <div style={{ borderTop: "1px solid var(--border)", paddingTop: 6, marginTop: 2, display: "flex", flexDirection: "column", gap: 3 }}>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 11, color: "var(--ink3)" }}>Platform fee (5%)</span>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#6366f1" }}>P{(b.amount * 0.05).toFixed(2)}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#6366f1" }}>{fmtPrice(b.amount * 0.05)}</span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 11, color: "var(--ink3)" }}>Vendor receives (95%)</span>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--green)" }}>P{(b.amount * 0.95).toFixed(2)}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--green)" }}>{fmtPrice(b.amount * 0.95)}</span>
                       </div>
                     </div>
                   </div>
@@ -171,9 +172,9 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
                     {b.paidAt && <p style={{ fontSize: 11, color: "var(--ink3)", marginTop: 2 }}>{new Date(b.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} {new Date(b.paidAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</p>}
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <p style={{ fontWeight: 800, color: "var(--ink)", fontSize: 15 }}>P{b.amount.toFixed(2)}</p>
-                    <p style={{ fontSize: 11, color: "#6366f1", marginTop: 2 }}>Fee: P{fee.toFixed(2)}</p>
-                    <p style={{ fontSize: 11, color: "var(--green)" }}>Vendor: P{vendor.toFixed(2)}</p>
+                    <p style={{ fontWeight: 800, color: "var(--ink)", fontSize: 15 }}>{fmtPrice(b.amount)}</p>
+                    <p style={{ fontSize: 11, color: "#6366f1", marginTop: 2 }}>Fee: {fmtPrice(fee)}</p>
+                    <p style={{ fontSize: 11, color: "var(--green)" }}>Vendor: {fmtPrice(vendor)}</p>
                   </div>
                 </div>
               </div>

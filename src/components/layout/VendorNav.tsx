@@ -2,15 +2,18 @@
 import { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { IconGrid, IconServices, IconChat, IconUser, IconWrench, IconChevL, IconLogout } from "@/components/icons";
+import { Bell } from "lucide-react";
+import { IconGrid, IconServices, IconChat, IconUser, IconWrench, IconChevL, IconLogout, IconPackage } from "@/components/icons";
 
-interface NavItem { href: string; icon: React.ReactNode; label: string; }
+interface NavItem { href: string; icon: React.ReactNode; label: string; badge?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/vendor/dashboard", icon: <IconGrid     style={{ width: 20, height: 20 }} />, label: "Dashboard" },
-  { href: "/vendor/services",  icon: <IconServices style={{ width: 20, height: 20 }} />, label: "Services"  },
-  { href: "/vendor/messages",  icon: <IconChat     style={{ width: 20, height: 20 }} />, label: "Messages"  },
-  { href: "/vendor/profile",   icon: <IconUser     style={{ width: 20, height: 20 }} />, label: "Profile"   },
+  { href: "/vendor/dashboard",       icon: <IconGrid     style={{ width: 20, height: 20 }} />, label: "Dashboard"     },
+  { href: "/vendor/services",        icon: <IconServices style={{ width: 20, height: 20 }} />, label: "Services"      },
+  { href: "/vendor/listings",        icon: <IconPackage  style={{ width: 20, height: 20 }} />, label: "Listings"      },
+  { href: "/vendor/messages",        icon: <IconChat     style={{ width: 20, height: 20 }} />, label: "Messages"      },
+  { href: "/vendor/notifications",   icon: <Bell         size={20}                          />, label: "Notifications", badge: true },
+  { href: "/vendor/profile",         icon: <IconUser     style={{ width: 20, height: 20 }} />, label: "Profile"       },
 ];
 
 interface VendorNavProps { unreadCount?: number; }
@@ -18,14 +21,21 @@ interface VendorNavProps { unreadCount?: number; }
 export const VendorNav: FC<VendorNavProps> = ({ unreadCount = 0 }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed]   = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed]       = useState(false);
+  const [mobileOpen, setMobileOpen]     = useState(false);
+  const [unreadNotifs, setUnreadNotifs] = useState(unreadCount);
 
   useEffect(() => {
     const saved = localStorage.getItem("nav-collapsed") === "true";
     setCollapsed(saved);
     document.documentElement.dataset.navCollapsed = String(saved);
   }, []);
+
+  useEffect(() => {
+    fetch("/api/notifications").then((r) => r.ok ? r.json() : null).then((d) => {
+      if (d) setUnreadNotifs(d.unread);
+    });
+  }, [pathname]);
 
   // Close drawer on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -82,10 +92,16 @@ export const VendorNav: FC<VendorNavProps> = ({ unreadCount = 0 }) => {
         <div className="nav-items-wrap">
           {NAV_ITEMS.map((n) => {
             const active = pathname.startsWith(n.href);
+            const showBadge = n.badge && unreadNotifs > 0;
             return (
               <Link key={n.href} href={n.href} className={`nav-item ${active ? "on" : ""}`} style={{ textDecoration: "none" }} onClick={closeMobile}>
                 <div style={{ position: "relative", flexShrink: 0 }}>
                   {n.icon}
+                  {showBadge && (
+                    <span style={{ position: "absolute", top: -4, right: -4, background: "var(--acc)", color: "white", borderRadius: 99, fontSize: 9, fontWeight: 800, minWidth: 14, height: 14, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px", lineHeight: 1 }}>
+                      {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                    </span>
+                  )}
                 </div>
                 <span className="nav-label">{n.label}</span>
               </Link>

@@ -1,6 +1,7 @@
 import { FC } from "react";
 import type { Booking } from "@/lib/types";
 import { STATUS_TAG } from "@/lib/constants";
+import { fmtPrice } from "@/lib/fmt";
 
 export const BookingsTab: FC<{ bookings: Booking[] }> = ({ bookings }) => (
   <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -18,7 +19,7 @@ export const BookingsTab: FC<{ bookings: Booking[] }> = ({ bookings }) => (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 12 }}>
           <p style={{ color: "var(--ink2)" }}><span style={{ fontWeight: 600, color: "var(--ink)" }}>Vendor: </span>{b.vendor}</p>
           <p style={{ color: "var(--ink2)" }}><span style={{ fontWeight: 600, color: "var(--ink)" }}>Date: </span>{b.date}</p>
-          <p style={{ color: "var(--ink2)" }}><span style={{ fontWeight: 600, color: "var(--ink)" }}>Amount: </span><span style={{ color: "var(--acc)", fontWeight: 700 }}>P{b.amount}</span></p>
+          <p style={{ color: "var(--ink2)" }}><span style={{ fontWeight: 600, color: "var(--ink)" }}>Amount: </span><span style={{ color: "var(--acc)", fontWeight: 700 }}>{fmtPrice(b.amount)}</span></p>
           <p style={{ color: "var(--ink2)" }}><span style={{ fontWeight: 600, color: "var(--ink)" }}>Location: </span>{b.loc}</p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 import { FC } from "react";
 import type { Dispute } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface DisputesTabProps {
   disputes: Dispute[];
@@ -27,7 +28,7 @@ export const DisputesTab: FC<DisputesTabProps> = ({ disputes, onResolve }) => (
               <p style={{ fontSize: 14, fontWeight: 700 }}>{d.customer}</p>
               <p style={{ fontSize: 12, color: "var(--ink2)", marginTop: 2 }}>vs {d.vendor}</p>
             </div>
-            <p style={{ fontWeight: 800, color: "var(--acc)" }}>P{d.amount}</p>
+            <p style={{ fontWeight: 800, color: "var(--acc)" }}>{fmtPrice(d.amount)}</p>
           </div>
           <div style={{ background: "var(--bg3)", borderRadius: 10, padding: "10px 12px", borderLeft: "2px solid var(--acc)", marginBottom: 12 }}>
             <p style={{ fontSize: 13, color: "var(--ink2)", fontStyle: "italic" }}>"{d.reason}"</p>

@@ -111,7 +111,7 @@ export const VendorServices: FC = () => {
     <div style={{ paddingBottom: 88 }}>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <div style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "52px 22px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div className="page-top" style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "0 22px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em" }}>My Services</h1>
           <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 4 }}>

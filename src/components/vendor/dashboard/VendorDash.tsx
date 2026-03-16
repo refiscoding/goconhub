@@ -8,6 +8,7 @@ import { Toast } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
 import type { Booking, BookingStatus } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface ApiBooking {
   id: string;
@@ -115,7 +116,7 @@ export const VendorDash: FC = () => {
     <div style={{ paddingBottom: 88 }}>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <div style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "52px 22px 20px" }}>
+      <div className="page-top" style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "0 22px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <p style={{ fontSize: 12, color: "var(--acc)", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em" }}>Good morning 👋</p>
@@ -133,8 +134,8 @@ export const VendorDash: FC = () => {
           <PageSpinner paddingY="32px" />
         ) : (
           <>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <StatCard icon="💰" value={`P${totalPaid.toLocaleString()}`}                  label="Earned"   sub="Confirmed payments" />
+            <div className="stats-grid">
+              <StatCard icon="💰" value={fmtPrice(totalPaid)}                  label="Earned"   sub="Confirmed payments" />
               <StatCard icon="📅" value={bookings.length}                                   label="Bookings" sub={`${confirmed.length} upcoming`} />
               <StatCard icon="⏳" value={pending.length}                                     label="Pending"  sub="Needs response" />
               <StatCard icon="⭐" value={`${vendorInfo?.rating?.toFixed(1) ?? "—"}★`}       label="Rating"   sub={`${vendorInfo?.reviewCount ?? 0} reviews`} />
@@ -174,7 +175,7 @@ export const VendorDash: FC = () => {
                             : alreadyMarked
                               ? <span className="tag tag-amber">Awaiting Admin</span>
                               : <span className="tag tag-green">Confirmed</span>}
-                          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--acc)", marginTop: 4 }}>P{b.amount}</p>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--acc)", marginTop: 4 }}>{fmtPrice(b.amount)}</p>
                         </div>
                       </div>
                       {!alreadyMarked && !paid && (
@@ -203,7 +204,7 @@ export const VendorDash: FC = () => {
                   <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(45,212,191,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💰</div>
                   <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Earnings</p>
                 </div>
-                <p style={{ fontWeight: 800, fontSize: 18, color: "var(--acc)" }}>P{totalPaid.toLocaleString()}</p>
+                <p style={{ fontWeight: 800, fontSize: 18, color: "var(--acc)" }}>{fmtPrice(totalPaid)}</p>
               </div>
               {earnings.length === 0
                 ? <p style={{ padding: "16px 18px", fontSize: 13, color: "var(--ink3)" }}>No confirmed payments yet. Earnings appear here once admin confirms a customer payment.</p>
@@ -228,8 +229,8 @@ export const VendorDash: FC = () => {
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <p style={{ fontWeight: 800, fontSize: 16, color: "var(--green)" }}>+P{(e.vendorAmount ?? e.amount * 0.95).toFixed(2)}</p>
-                      <p style={{ fontSize: 10, color: "var(--ink3)", marginTop: 2 }}>of P{e.amount} total</p>
+                      <p style={{ fontWeight: 800, fontSize: 16, color: "var(--green)" }}>+{fmtPrice(e.vendorAmount ?? e.amount * 0.95)}</p>
+                      <p style={{ fontSize: 10, color: "var(--ink3)", marginTop: 2 }}>of {fmtPrice(e.amount)} total</p>
                     </div>
                   </div>
                 ))

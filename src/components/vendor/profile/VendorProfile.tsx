@@ -3,11 +3,28 @@ import { FC, useState, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Toggle, Toast, AvatarUpload, PageSpinner } from "@/components/ui";
 import { IconEdit, IconCheck, IconLogout, IconUser, IconShield, IconMapPin, IconWrench } from "@/components/icons";
+import { FileText, ShieldCheck, Cookie, ExternalLink, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
 import type { ProfileData } from "@/lib/types";
 
 const EMPTY: ProfileData = { fn: "", ln: "", email: "", phone: "", city: "", area: "", bio: "", cat: "" };
+
+type StrField = { [K in keyof ProfileData]: NonNullable<ProfileData[K]> extends string ? K : never }[keyof ProfileData] & string;
+
+interface FieldProps {
+  label: string; field: StrField; type?: string;
+  editing: boolean; draft: ProfileData; profile: ProfileData;
+  onChange: (f: StrField, v: string) => void;
+}
+const Field: FC<FieldProps> = ({ label, field, type = "text", editing, draft, profile, onChange }) => (
+  <div>
+    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>{label}</label>
+    {editing
+      ? <input type={type} className="field" value={draft[field] as string} onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value)} />
+      : <p style={{ fontSize: 15, fontWeight: 500, padding: "2px 0", color: "var(--ink)" }}>{(profile[field] as string) || <span style={{ color: "var(--ink3)" }}>Not set</span>}</p>}
+  </div>
+);
 
 export const VendorProfile: FC = () => {
   const router = useRouter();
@@ -100,16 +117,7 @@ export const VendorProfile: FC = () => {
     finally { setPwBusy(false); }
   };
 
-  type StrField = { [K in keyof ProfileData]: NonNullable<ProfileData[K]> extends string ? K : never }[keyof ProfileData] & string;
-
-  const Field: FC<{ label: string; field: StrField; type?: string }> = ({ label, field, type = "text" }) => (
-    <div>
-      <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>{label}</label>
-      {editing
-        ? <input type={type} className="field" value={draft[field] as string} onChange={(e: ChangeEvent<HTMLInputElement>) => setDraft((d) => ({ ...d, [field]: e.target.value }))} />
-        : <p style={{ fontSize: 15, fontWeight: 500, padding: "2px 0", color: "var(--ink)" }}>{(profile[field] as string) || <span style={{ color: "var(--ink3)" }}>Not set</span>}</p>}
-    </div>
-  );
+  const onFieldChange = (f: StrField, v: string) => setDraft((d) => ({ ...d, [f]: v }));
 
   const fullName = `${profile.fn} ${profile.ln}`.trim();
 
@@ -122,7 +130,7 @@ export const VendorProfile: FC = () => {
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       {/* ── Hero banner ── */}
-      <div style={{ height: 160, background: "linear-gradient(135deg,#0f1923 0%,#0d2333 100%)", position: "relative", overflow: "hidden" }}>
+      <div className="profile-hero-banner" style={{ background: "linear-gradient(135deg,#0f1923 0%,#0d2333 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(ellipse at 70% 50%,rgba(45,212,191,.25) 0%,transparent 65%)" }} />
         <div style={{ position: "absolute", top: -50, right: -50, width: 200, height: 200, borderRadius: "50%", background: "rgba(45,212,191,.06)" }} />
         <div style={{ position: "absolute", top: 16, right: 16 }}>
@@ -191,13 +199,13 @@ export const VendorProfile: FC = () => {
             </div>
             <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Personal Information</p>
           </div>
-          <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            <Field label="First Name" field="fn" />
-            <Field label="Last Name"  field="ln" />
-            <div style={{ gridColumn: "1/-1" }}><Field label="Email" field="email" type="email" /></div>
-            <Field label="Phone"    field="phone" type="tel" />
-            <Field label="City"     field="city" />
-            <Field label="Category" field="cat" />
+          <div className="info-grid" style={{ padding: "20px" }}>
+            <Field label="First Name" field="fn"    editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+            <Field label="Last Name"  field="ln"    editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+            <div style={{ gridColumn: "1/-1" }}><Field label="Email" field="email" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} type="email" /></div>
+            <Field label="Phone"    field="phone" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} type="tel" />
+            <Field label="City"     field="city"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+            <Field label="Category" field="cat"   editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
           </div>
         </div>
 
@@ -258,6 +266,54 @@ export const VendorProfile: FC = () => {
                 >{pwBusy ? "Saving…" : "Update Password"}</button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ── Privacy Centre ── */}
+        <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(13,148,136,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShieldCheck size={16} color="#0d9488" />
+            </div>
+            <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Privacy Centre</p>
+          </div>
+          <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              { href: "/legal/privacy", icon: <ShieldCheck size={15} color="#0d9488" />, label: "Privacy Policy",      desc: "How we handle your data as a vendor",    bg: "rgba(13,148,136,.08)" },
+              { href: "/legal/terms",   icon: <FileText    size={15} color="#d97706" />, label: "Terms & Conditions", desc: "Your obligations and rights on HandyHub", bg: "rgba(217,119,6,.08)"  },
+              { href: "/legal/cookies", icon: <Cookie      size={15} color="#6366f1" />, label: "Cookie Policy",      desc: "How we use cookies and local storage",    bg: "rgba(99,102,241,.08)" },
+            ].map((item) => (
+              <a key={item.href} href={item.href} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 12, background: "var(--bg)", border: "1px solid var(--border)", textDecoration: "none" }}>
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{item.icon}</div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 700, fontSize: 13, color: "var(--ink)", margin: 0 }}>{item.label}</p>
+                  <p style={{ fontSize: 11, color: "var(--ink3)", margin: 0, marginTop: 1 }}>{item.desc}</p>
+                </div>
+                <ExternalLink size={13} color="var(--ink3)" />
+              </a>
+            ))}
+            <div style={{ marginTop: 4, padding: "12px 14px", borderRadius: 12, background: "var(--bg)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(99,102,241,.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Cookie size={15} color="#6366f1" />
+                </div>
+                <div>
+                  <p style={{ fontWeight: 700, fontSize: 13, color: "var(--ink)", margin: 0 }}>Cookie Preferences</p>
+                  <p style={{ fontSize: 11, color: "var(--ink3)", margin: 0 }}>Reset your consent settings</p>
+                </div>
+              </div>
+              <button onClick={() => { localStorage.removeItem("hh_cookie_consent"); window.location.reload(); }} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--acc)", background: "var(--acc-bg)", padding: "6px 12px", borderRadius: 999, border: "1px solid var(--acc-bd)", cursor: "pointer", flexShrink: 0 }}>
+                <RotateCcw size={11} />
+                Reset
+              </button>
+            </div>
+            <div style={{ padding: "12px 14px", borderRadius: 12, background: "#f0fdfa", border: "1px solid #ccfbf1" }}>
+              <p style={{ fontWeight: 700, fontSize: 12, color: "#0d9488", marginBottom: 4 }}>Your Data Rights</p>
+              <p style={{ fontSize: 12, color: "#44403c", lineHeight: 1.6, margin: 0 }}>
+                To access, correct, or delete your personal data, contact{" "}
+                <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#0d9488", fontWeight: 700 }}>privacy@handyhub.co.bw</a>
+              </p>
+            </div>
           </div>
         </div>
 

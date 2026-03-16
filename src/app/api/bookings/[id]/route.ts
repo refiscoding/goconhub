@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { getCommissionRate } from "@/lib/settings";
+import { createNotification } from "@/lib/notifications";
 
 // PATCH /api/bookings/[id]
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -68,5 +69,49 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const updated = await prisma.booking.update({ where: { id: params.id }, data });
+
+  // ── Notifications ──────────────────────────────────────────────────
+  // Vendor confirmed booking → notify customer
+  if (data.status === "confirmed" && isVendor) {
+    await createNotification({
+      userId:  booking.customerId,
+      type:    "booking_accepted",
+      title:   "Booking confirmed!",
+      body:    `Your booking for ${booking.serviceName} has been accepted.`,
+      linkUrl: `/customer/bookings`,
+    });
+  }
+
+  // Vendor marked job complete → notify customer
+  if (data.completedByVendor === true && isVendor) {
+    await createNotification({
+      userId:  booking.customerId,
+      type:    "job_complete",
+      title:   "Job marked complete",
+      body:    `Your handyman marked the job "${booking.serviceName}" as done. Please review and confirm.`,
+      linkUrl: `/customer/bookings`,
+    });
+  }
+
+  // Admin confirmed payment → notify vendor of payout
+  if (data.paymentStatus === "confirmed" && isAdmin) {
+    const vendorUserId = booking.vendor.userId;
+    await createNotification({
+      userId:  vendorUserId,
+      type:    "payout_sent",
+      title:   "Payout approved",
+      body:    `Payment for "${booking.serviceName}" has been confirmed. Your earnings are on the way.`,
+      linkUrl: `/vendor/dashboard`,
+    });
+    // Also notify customer
+    await createNotification({
+      userId:  booking.customerId,
+      type:    "payment_confirmed",
+      title:   "Payment confirmed",
+      body:    `Your payment for "${booking.serviceName}" has been confirmed.`,
+      linkUrl: `/customer/bookings`,
+    });
+  }
+
   return NextResponse.json({ booking: updated });
 }

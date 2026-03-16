@@ -23,4 +23,6 @@ export {
   ClipboardList as IconServices,
   LogOut        as IconLogout,
   Camera        as IconCamera,
+  ShoppingBag   as IconShop,
+  Package       as IconPackage,
 } from "lucide-react";
