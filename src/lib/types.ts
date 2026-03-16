@@ -50,12 +50,18 @@ export interface AppUser {
   joined: string;
   status: UserStatus;
   bookings: number;
-  // vendor-only identity fields
+  // vendor-only fields
   vendorId?: string;
   verified?: boolean;
   entityType?: string;
   idDocumentUrl?: string;
   cipaDocumentUrl?: string;
+  companyName?: string;
+  companyRegNumber?: string;
+  bankName?: string;
+  accountNumber?: string;
+  category?: string;
+  location?: string;
 }
 
 export interface Dispute {

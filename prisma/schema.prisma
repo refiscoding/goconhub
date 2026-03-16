@@ -92,6 +92,8 @@ model Vendor {
   cipaDocumentUrl  String   @default("")
   companyName      String   @default("")
   companyRegNumber String   @default("")
+  bankName         String   @default("")
+  accountNumber    String   @default("")
 
   services  Service[]
   bookings  Booking[]  @relation("VendorBookings")

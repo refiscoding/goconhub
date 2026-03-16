@@ -86,8 +86,8 @@ const F: FC<{ label: string; placeholder?: string; value: string; onChange: (v: 
 
 /* ── main ────────────────────────────────────────────── */
 export const VendorOnboard: FC = () => {
-  const router   = useRouter();
-  const { user } = useUser();
+  const router         = useRouter();
+  const { user, refresh } = useUser();
   const [step,     setStep]     = useState(0);
   const [data,     setData]     = useState<VendorOnboardData>(DEFAULT_DATA);
   const [services, setServices] = useState<ServiceDraft[]>([{ id: 1, name: "", price: "", unit: "hr", desc: "", active: true }]);
@@ -454,9 +454,10 @@ export const VendorOnboard: FC = () => {
                     const res = await fetch("/api/onboarding", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, idDocumentUrl, cipaDocumentUrl, companyName: data.companyName, companyRegNumber: data.companyRegNumber } }),
+                      body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, idDocumentUrl, cipaDocumentUrl, companyName: data.companyName, companyRegNumber: data.companyRegNumber, bankName: data.bankName, accountNumber: data.accountNumber } }),
                     });
                     if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed."); return; }
+                    await refresh();
                     setStep((s) => s + 1);
                   } catch { setError("Network error."); }
                   finally { setBusy(false); }

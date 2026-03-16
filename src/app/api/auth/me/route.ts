@@ -18,6 +18,7 @@ export async function GET() {
           location: true, rating: true, reviewCount: true, available: true, verified: true,
           entityType: true, companyName: true, companyRegNumber: true,
           idDocumentUrl: true, cipaDocumentUrl: true,
+          bankName: true, accountNumber: true,
         },
       },
     },

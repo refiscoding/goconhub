@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
           ...(vd.cipaDocumentUrl != null && { cipaDocumentUrl: vd.cipaDocumentUrl }),
           ...(vd.companyName     != null && { companyName:     vd.companyName }),
           ...(vd.companyRegNumber != null && { companyRegNumber: vd.companyRegNumber }),
+          ...(vd.bankName        != null && { bankName:        vd.bankName }),
+          ...(vd.accountNumber   != null && { accountNumber:   vd.accountNumber }),
         },
       });
 

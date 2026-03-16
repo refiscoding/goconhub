@@ -55,7 +55,7 @@ export const AdminDash: FC = () => {
         id: string; firstName: string; lastName: string; email: string; phone: string | null;
         role: "customer" | "vendor"; status: UserStatus; createdAt: string;
         _count: { bookings: number };
-        vendor?: { id: string; verified: boolean; entityType: string; idDocumentUrl: string; cipaDocumentUrl: string } | null;
+        vendor?: { id: string; verified: boolean; entityType: string; idDocumentUrl: string; cipaDocumentUrl: string; companyName: string; companyRegNumber: string; bankName: string; accountNumber: string; category: string; location: string } | null;
       }) => ({
         id: u.id,
         name: `${u.firstName} ${u.lastName}`,
@@ -70,6 +70,12 @@ export const AdminDash: FC = () => {
         entityType:      u.vendor?.entityType,
         idDocumentUrl:   u.vendor?.idDocumentUrl,
         cipaDocumentUrl: u.vendor?.cipaDocumentUrl,
+        companyName:     u.vendor?.companyName,
+        companyRegNumber: u.vendor?.companyRegNumber,
+        bankName:        u.vendor?.bankName,
+        accountNumber:   u.vendor?.accountNumber,
+        category:        u.vendor?.category,
+        location:        u.vendor?.location,
       } satisfies AppUser)));
 
       const rawBookings: RawBooking[] = bData.bookings ?? [];

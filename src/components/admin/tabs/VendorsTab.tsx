@@ -4,7 +4,7 @@ import {
   Box, Flex, Text, Badge, Button, ButtonGroup, Collapse, Divider,
   Card, CardBody,
 } from "@chakra-ui/react";
-import { CircleCheck, X, ShieldCheck } from "lucide-react";
+import { CircleCheck, X, ShieldCheck, CircleDot, CircleCheckBig } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import type { AppUser } from "@/lib/types";
 
@@ -19,6 +19,15 @@ interface VendorsTabProps {
 const STATUS_SCHEME: Record<string, string> = {
   active: "green", suspended: "red", pending: "orange",
 };
+
+const Row: FC<{ label: string; value?: string | null; mono?: boolean }> = ({ label, value, mono }) => (
+  <Flex gap={2} fontSize="12px">
+    <Text color="var(--ink3)" minW="90px" flexShrink={0}>{label}</Text>
+    <Text color="var(--ink)" fontFamily={mono ? "'DM Mono', monospace" : undefined} fontSize={mono ? "11px" : "12px"}>
+      {value || "—"}
+    </Text>
+  </Flex>
+);
 
 export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend, onDelete, onVerify }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -46,112 +55,117 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
       )}
 
       <Flex direction="column" gap={3}>
-        {vendors.map((v) => (
-          <Card key={v.id} bg="var(--card)" borderRadius="14px" shadow="md">
-            <CardBody p={4}>
-              <Flex align="center" gap={3} mb={3}>
-                <Avatar name={v.name} size={40} />
-                <Box flex={1} minW={0}>
-                  <Text fontWeight={700} fontSize="14px" color="var(--ink)" noOfLines={1}>{v.name}</Text>
-                  <Text fontSize="12px" color="var(--ink2)" mt="2px" noOfLines={1}>{v.email}</Text>
-                </Box>
-                <Badge colorScheme={STATUS_SCHEME[v.status] ?? "gray"} borderRadius="full"
-                  px={2} fontSize="11px" textTransform="capitalize">
-                  {v.status}
-                </Badge>
-              </Flex>
+        {vendors.map((v) => {
+          const isIndividual = !v.entityType || v.entityType === "individual";
+          const hasDoc = isIndividual ? !!v.idDocumentUrl : !!v.cipaDocumentUrl;
+          const docLabel = isIndividual ? "Omang / Passport" : "CIPA Certificate";
 
-              <Flex justify="space-between" fontSize="12px" color="var(--ink3)" mb={3}>
-                <Text>Joined: {v.joined}</Text>
-                <Text>{v.bookings} booking{v.bookings !== 1 ? "s" : ""}</Text>
-              </Flex>
-
-              {/* Identity verification badge */}
-              {v.role === "vendor" && (() => {
-                const isIndividual = !v.entityType || v.entityType === "individual";
-                const hasDoc = isIndividual ? !!v.idDocumentUrl : !!v.cipaDocumentUrl;
-                const label  = isIndividual ? "Identity Verification" : "Company Certificate";
-                return (
-                  <Flex align="center" gap={2} mb={3}>
-                    {hasDoc
-                      ? <CircleCheck size={15} color="#50fb64" />
-                      : <X size={15} color="#f31212" />}
-                    <Text fontSize="12px" fontWeight={600} color={hasDoc ? "#50fb64" : "#f31212"}>
-                      {label}
-                    </Text>
-                  </Flex>
-                );
-              })()}
-
-              <Collapse in={expanded === v.id} animateOpacity>
-                <Divider borderColor="var(--border)" mb={3} />
-                <Flex direction="column" gap={1} mb={3} fontSize="12px">
-                  <Flex gap={2}>
-                    <Text color="var(--ink3)" w="60px">Phone</Text>
-                    <Text color="var(--ink)">{v.phone || "—"}</Text>
-                  </Flex>
-                  <Flex gap={2}>
-                    <Text color="var(--ink3)" w="60px">Role</Text>
-                    <Text color="var(--ink)" textTransform="capitalize">{v.role}</Text>
-                  </Flex>
-                  <Flex gap={2}>
-                    <Text color="var(--ink3)" w="60px">ID</Text>
-                    <Text color="var(--ink2)" fontFamily="'DM Mono', monospace" fontSize="11px">{v.id}</Text>
-                  </Flex>
-                  <Flex gap={2}>
-                    <Text color="var(--ink3)" w="60px">Type</Text>
-                    <Text color="var(--ink)" textTransform="capitalize">{v.entityType ?? "individual"}</Text>
-                  </Flex>
+          return (
+            <Card key={v.id} bg="var(--card)" borderRadius="14px" shadow="md">
+              <CardBody p={4}>
+                {/* Header row */}
+                <Flex align="center" gap={3} mb={3}>
+                  <Avatar name={v.name} size={40} />
+                  <Box flex={1} minW={0}>
+                    <Text fontWeight={700} fontSize="14px" color="var(--ink)" noOfLines={1}>{v.name}</Text>
+                    <Text fontSize="12px" color="var(--ink2)" mt="2px" noOfLines={1}>{v.email}</Text>
+                  </Box>
+                  <Badge colorScheme={STATUS_SCHEME[v.status] ?? "gray"} borderRadius="full"
+                    px={2} fontSize="11px" textTransform="capitalize">
+                    {v.status}
+                  </Badge>
                 </Flex>
-              </Collapse>
 
-              <ButtonGroup size="sm" spacing={2} w="100%" flexWrap="wrap">
-                <Button flex={1} variant="outline" borderColor="var(--border)" color="var(--ink)"
-                  fontSize="12px" onClick={() => toggle(v.id)}>
-                  {expanded === v.id ? "Hide" : "View"}
-                </Button>
-                {v.status === "pending" && (
-                  <Button flex={1} colorScheme="green" variant="outline" fontSize="12px"
-                    onClick={() => onApprove(v.id)}>
-                    Approve
+                {/* Meta row */}
+                <Flex justify="space-between" fontSize="12px" color="var(--ink3)" mb={3}>
+                  <Text>Joined: {v.joined}</Text>
+                  <Text>{v.bookings} booking{v.bookings !== 1 ? "s" : ""}</Text>
+                </Flex>
+
+                {/* Identity & verification status */}
+                <Flex align="center" gap={2} mb={hasDoc ? 2 : 3}>
+                  {hasDoc
+                    ? <CircleCheck size={15} color="#50fb64" />
+                    : <X size={15} color="#f31212" />}
+                  <Text fontSize="12px" fontWeight={600} color={hasDoc ? "#50fb64" : "#f31212"}>
+                    {docLabel}
+                  </Text>
+                  <Box flex={1} />
+                  {v.verified
+                    ? <Flex align="center" gap={1}><CircleCheckBig size={14} color="#449235" /><Text fontSize="11px" fontWeight={700} color="#449235">Verified</Text></Flex>
+                    : <Flex align="center" gap={1}><CircleDot size={14} color="#d1aa1f" /><Text fontSize="11px" fontWeight={700} color="#d1aa1f">Pending</Text></Flex>}
+                </Flex>
+
+                {/* Expanded details */}
+                <Collapse in={expanded === v.id} animateOpacity>
+                  <Divider borderColor="var(--border)" mb={3} />
+                  <Flex direction="column" gap="8px" mb={3}>
+                    <Row label="Phone"    value={v.phone} />
+                    <Row label="Category" value={v.category} />
+                    <Row label="Location" value={v.location} />
+                    <Row label="Entity"   value={v.entityType ?? "individual"} />
+                    {!isIndividual && (
+                      <>
+                        <Row label="Company"  value={v.companyName} />
+                        <Row label="Reg. No." value={v.companyRegNumber} />
+                      </>
+                    )}
+                    <Divider borderColor="var(--border)" my={1} />
+                    <Row label="Bank"     value={v.bankName} />
+                    <Row label="Acct No." value={v.accountNumber} mono />
+                    <Divider borderColor="var(--border)" my={1} />
+                    <Row label="User ID"  value={v.id} mono />
+                  </Flex>
+                </Collapse>
+
+                <ButtonGroup size="sm" spacing={2} w="100%" flexWrap="wrap">
+                  <Button flex={1} variant="outline" borderColor="var(--border)" color="var(--ink)"
+                    fontSize="12px" onClick={() => toggle(v.id)}>
+                    {expanded === v.id ? "Hide" : "View"}
                   </Button>
-                )}
-                {v.status === "active" && (
-                  <Button flex={1} colorScheme="orange" variant="outline" fontSize="12px"
-                    onClick={() => onSuspend(v.id)}>
-                    Suspend
+                  {v.status === "pending" && (
+                    <Button flex={1} colorScheme="green" variant="outline" fontSize="12px"
+                      onClick={() => onApprove(v.id)}>
+                      Approve
+                    </Button>
+                  )}
+                  {v.status === "active" && (
+                    <Button flex={1} colorScheme="orange" variant="outline" fontSize="12px"
+                      onClick={() => onSuspend(v.id)}>
+                      Suspend
+                    </Button>
+                  )}
+                  {v.status === "suspended" && (
+                    <Button flex={1} colorScheme="green" variant="outline" fontSize="12px"
+                      onClick={() => onApprove(v.id)}>
+                      Reactivate
+                    </Button>
+                  )}
+                  {!v.verified && (
+                    <Button flex={1} colorScheme="teal" variant="outline" fontSize="12px"
+                      leftIcon={<ShieldCheck size={13} />}
+                      onClick={() => { if (window.confirm(`Verify ${v.name}?`)) onVerify(v.id); }}>
+                      Verify
+                    </Button>
+                  )}
+                  {v.verified && (
+                    <Button flex={1} variant="outline" fontSize="12px" isDisabled
+                      leftIcon={<ShieldCheck size={13} />}
+                      borderColor="var(--green)" color="var(--green)">
+                      Verified
+                    </Button>
+                  )}
+                  <Button flex={1} colorScheme="red" variant="outline" fontSize="12px"
+                    onClick={() => {
+                      if (window.confirm(`Delete ${v.name}? This cannot be undone.`)) onDelete(v.id);
+                    }}>
+                    Delete
                   </Button>
-                )}
-                {v.status === "suspended" && (
-                  <Button flex={1} colorScheme="green" variant="outline" fontSize="12px"
-                    onClick={() => onApprove(v.id)}>
-                    Reactivate
-                  </Button>
-                )}
-                {v.role === "vendor" && !v.verified && (
-                  <Button flex={1} colorScheme="teal" variant="outline" fontSize="12px"
-                    leftIcon={<ShieldCheck size={13} />}
-                    onClick={() => { if (window.confirm(`Verify ${v.name}?`)) onVerify(v.id); }}>
-                    Verify
-                  </Button>
-                )}
-                {v.role === "vendor" && v.verified && (
-                  <Button flex={1} variant="outline" fontSize="12px" isDisabled
-                    leftIcon={<ShieldCheck size={13} />}
-                    borderColor="var(--green)" color="var(--green)">
-                    Verified
-                  </Button>
-                )}
-                <Button flex={1} colorScheme="red" variant="outline" fontSize="12px"
-                  onClick={() => {
-                    if (window.confirm(`Delete ${v.name}? This cannot be undone.`)) onDelete(v.id);
-                  }}>
-                  Delete
-                </Button>
-              </ButtonGroup>
-            </CardBody>
-          </Card>
-        ))}
+                </ButtonGroup>
+              </CardBody>
+            </Card>
+          );
+        })}
       </Flex>
     </Box>
   );

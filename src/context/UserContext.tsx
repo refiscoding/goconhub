@@ -16,6 +16,8 @@ export interface VendorProfile {
   companyRegNumber: string;
   idDocumentUrl: string;
   cipaDocumentUrl: string;
+  bankName: string;
+  accountNumber: string;
 }
 
 export interface AuthUser {
