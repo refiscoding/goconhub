@@ -55,6 +55,7 @@ export const AdminDash: FC = () => {
         id: string; firstName: string; lastName: string; email: string; phone: string | null;
         role: "customer" | "vendor"; status: UserStatus; createdAt: string;
         _count: { bookings: number };
+        vendor?: { id: string; verified: boolean; entityType: string; idDocumentUrl: string; cipaDocumentUrl: string } | null;
       }) => ({
         id: u.id,
         name: `${u.firstName} ${u.lastName}`,
@@ -64,6 +65,11 @@ export const AdminDash: FC = () => {
         joined: new Date(u.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
         status: u.status,
         bookings: u._count.bookings,
+        vendorId:        u.vendor?.id,
+        verified:        u.vendor?.verified,
+        entityType:      u.vendor?.entityType,
+        idDocumentUrl:   u.vendor?.idDocumentUrl,
+        cipaDocumentUrl: u.vendor?.cipaDocumentUrl,
       } satisfies AppUser)));
 
       const rawBookings: RawBooking[] = bData.bookings ?? [];
@@ -138,6 +144,20 @@ export const AdminDash: FC = () => {
 
   const approveUser = (id: string) => updateUserStatus(id, "active");
   const suspendUser = (id: string) => updateUserStatus(id, "suspended");
+
+  const verifyVendor = async (id: string) => {
+    const res = await fetch(`/api/admin/users/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "verify" }),
+    });
+    if (res.ok) {
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, verified: true } : u));
+      showToast("Vendor verified ✓", "ok");
+    } else {
+      showToast("Failed to verify vendor", "err");
+    }
+  };
 
   const deleteUser = async (id: string) => {
     const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
@@ -229,7 +249,7 @@ export const AdminDash: FC = () => {
               {tab === "overview"  && <OverviewTab  bookings={bkgs} disputes={disps} vendorCount={vendors.length} customerCount={customers.length} pendingVendors={pendingV} />}
               {tab === "bookings"  && <BookingsTab  bookings={bkgs} />}
               {tab === "payments"  && <PaymentsTab  bookings={rawBkgs} onApproveComplete={approveJobComplete} onConfirmPayment={confirmPayment} />}
-              {tab === "vendors"    && <VendorsTab    vendors={vendors}     onApprove={approveUser} onSuspend={suspendUser} onDelete={deleteUser} />}
+              {tab === "vendors"    && <VendorsTab    vendors={vendors}     onApprove={approveUser} onSuspend={suspendUser} onDelete={deleteUser} onVerify={verifyVendor} />}
               {tab === "users"      && <UsersTab      customers={customers} onApprove={approveUser} onSuspend={suspendUser} onDelete={deleteUser} />}
               {tab === "disputes"   && <DisputesTab   disputes={disps} onResolve={resolveDisp} />}
               {tab === "categories"  && <CategoriesTab />}

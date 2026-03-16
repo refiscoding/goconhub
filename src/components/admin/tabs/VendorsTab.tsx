@@ -4,6 +4,7 @@ import {
   Box, Flex, Text, Badge, Button, ButtonGroup, Collapse, Divider,
   Card, CardBody,
 } from "@chakra-ui/react";
+import { CircleCheck, X, ShieldCheck } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import type { AppUser } from "@/lib/types";
 
@@ -12,13 +13,14 @@ interface VendorsTabProps {
   onApprove: (id: string) => void;
   onSuspend: (id: string) => void;
   onDelete:  (id: string) => void;
+  onVerify:  (id: string) => void;
 }
 
 const STATUS_SCHEME: Record<string, string> = {
   active: "green", suspended: "red", pending: "orange",
 };
 
-export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend, onDelete }) => {
+export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend, onDelete, onVerify }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const toggle = (id: string) => setExpanded((prev) => (prev === id ? null : id));
 
@@ -64,6 +66,23 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
                 <Text>{v.bookings} booking{v.bookings !== 1 ? "s" : ""}</Text>
               </Flex>
 
+              {/* Identity verification badge */}
+              {v.role === "vendor" && (() => {
+                const isIndividual = !v.entityType || v.entityType === "individual";
+                const hasDoc = isIndividual ? !!v.idDocumentUrl : !!v.cipaDocumentUrl;
+                const label  = isIndividual ? "Identity Verification" : "Company Certificate";
+                return (
+                  <Flex align="center" gap={2} mb={3}>
+                    {hasDoc
+                      ? <CircleCheck size={15} color="#50fb64" />
+                      : <X size={15} color="#f31212" />}
+                    <Text fontSize="12px" fontWeight={600} color={hasDoc ? "#50fb64" : "#f31212"}>
+                      {label}
+                    </Text>
+                  </Flex>
+                );
+              })()}
+
               <Collapse in={expanded === v.id} animateOpacity>
                 <Divider borderColor="var(--border)" mb={3} />
                 <Flex direction="column" gap={1} mb={3} fontSize="12px">
@@ -79,10 +98,14 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
                     <Text color="var(--ink3)" w="60px">ID</Text>
                     <Text color="var(--ink2)" fontFamily="'DM Mono', monospace" fontSize="11px">{v.id}</Text>
                   </Flex>
+                  <Flex gap={2}>
+                    <Text color="var(--ink3)" w="60px">Type</Text>
+                    <Text color="var(--ink)" textTransform="capitalize">{v.entityType ?? "individual"}</Text>
+                  </Flex>
                 </Flex>
               </Collapse>
 
-              <ButtonGroup size="sm" spacing={2} w="100%">
+              <ButtonGroup size="sm" spacing={2} w="100%" flexWrap="wrap">
                 <Button flex={1} variant="outline" borderColor="var(--border)" color="var(--ink)"
                   fontSize="12px" onClick={() => toggle(v.id)}>
                   {expanded === v.id ? "Hide" : "View"}
@@ -103,6 +126,20 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
                   <Button flex={1} colorScheme="green" variant="outline" fontSize="12px"
                     onClick={() => onApprove(v.id)}>
                     Reactivate
+                  </Button>
+                )}
+                {v.role === "vendor" && !v.verified && (
+                  <Button flex={1} colorScheme="teal" variant="outline" fontSize="12px"
+                    leftIcon={<ShieldCheck size={13} />}
+                    onClick={() => { if (window.confirm(`Verify ${v.name}?`)) onVerify(v.id); }}>
+                    Verify
+                  </Button>
+                )}
+                {v.role === "vendor" && v.verified && (
+                  <Button flex={1} variant="outline" fontSize="12px" isDisabled
+                    leftIcon={<ShieldCheck size={13} />}
+                    borderColor="var(--green)" color="var(--green)">
+                    Verified
                   </Button>
                 )}
                 <Button flex={1} colorScheme="red" variant="outline" fontSize="12px"

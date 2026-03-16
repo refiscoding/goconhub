@@ -431,10 +431,19 @@ export const VendorOnboard: FC = () => {
                 if (!isLast) { setError(""); setStep((s) => s + 1); return; }
                 setBusy(true); setError("");
                 try {
+                  const toBase64 = (file: File): Promise<string> =>
+                    new Promise((res, rej) => {
+                      const r = new FileReader();
+                      r.onload = () => res(r.result as string);
+                      r.onerror = rej;
+                      r.readAsDataURL(file);
+                    });
+                  const idDocumentUrl   = idFile   ? await toBase64(idFile)   : "";
+                  const cipaDocumentUrl = cipaFile ? await toBase64(cipaFile) : "";
                   const res = await fetch("/api/onboarding", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services } }),
+                    body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, idDocumentUrl, cipaDocumentUrl, companyName: data.companyName, companyRegNumber: data.companyRegNumber } }),
                   });
                   if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed."); return; }
                   router.push("/vendor/dashboard");

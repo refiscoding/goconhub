@@ -42,6 +42,7 @@ export const CreateServiceSchema = z.object({
 
 /* ── Admin ────────────────────────────────────────────────────────── */
 
-export const UpdateUserStatusSchema = z.object({
-  status: z.enum(["active", "suspended", "pending"], { message: "Invalid status." }),
-});
+export const UpdateUserStatusSchema = z.union([
+  z.object({ status: z.enum(["active", "suspended", "pending"], { message: "Invalid status." }) }),
+  z.object({ action: z.literal("verify") }),
+]);

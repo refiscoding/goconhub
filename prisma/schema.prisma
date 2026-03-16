@@ -84,8 +84,14 @@ model Vendor {
   location    String   @default("")
   rating      Float    @default(0)
   reviewCount Int      @default(0)
-  available   Boolean  @default(true)
-  verified    Boolean  @default(false)
+  available        Boolean  @default(true)
+  verified         Boolean  @default(false)
+
+  entityType       String   @default("individual")
+  idDocumentUrl    String   @default("")
+  cipaDocumentUrl  String   @default("")
+  companyName      String   @default("")
+  companyRegNumber String   @default("")
 
   services  Service[]
   bookings  Booking[]  @relation("VendorBookings")

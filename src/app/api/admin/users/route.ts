@@ -18,6 +18,15 @@ export async function GET() {
       status: true,
       createdAt: true,
       _count: { select: { bookings: true } },
+      vendor: {
+        select: {
+          id: true,
+          verified: true,
+          entityType: true,
+          idDocumentUrl: true,
+          cipaDocumentUrl: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

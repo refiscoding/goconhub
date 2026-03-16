@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/guards";
 import { UpdateUserStatusSchema } from "@/lib/schemas";
+import { createNotification } from "@/lib/notifications";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireAdmin();
@@ -23,7 +24,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     );
   }
 
-  await prisma.user.update({ where: { id }, data: { status: parsed.data.status } });
+  // Handle verify action separately
+  const body = parsed.data as { status?: string; action?: string };
+  if (body.action === "verify") {
+    const vendor = await prisma.vendor.findUnique({ where: { userId: id } });
+    if (!vendor) return NextResponse.json({ message: "Vendor not found." }, { status: 404 });
+    await prisma.vendor.update({ where: { id: vendor.id }, data: { verified: true } });
+    await createNotification({
+      userId:  id,
+      type:    "account_verified",
+      title:   "Account Verified ✓",
+      body:    "Congratulations! Your HandyHub account has been verified by our team. You are now visible to customers.",
+      linkUrl: "/vendor/profile",
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (!body.status) return NextResponse.json({ message: "Invalid input." }, { status: 400 });
+  await prisma.user.update({ where: { id }, data: { status: body.status as "active" | "pending" | "suspended" } });
   return NextResponse.json({ ok: true });
 }
 

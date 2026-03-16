@@ -31,10 +31,15 @@ export async function POST(req: NextRequest) {
       await prisma.vendor.update({
         where: { id: vendor.id },
         data: {
-          ...(vd.bio      != null && { bio:      vd.bio }),
-          ...(vd.category != null && { category: vd.category }),
-          ...(vd.skills   != null && { skills:   vd.skills }),
-          ...(vd.city     != null && { location: vd.city }),
+          ...(vd.bio             != null && { bio:             vd.bio }),
+          ...(vd.category        != null && { category:        vd.category }),
+          ...(vd.skills          != null && { skills:          vd.skills }),
+          ...(vd.city            != null && { location:        vd.city }),
+          ...(vd.entityType      != null && { entityType:      vd.entityType }),
+          ...(vd.idDocumentUrl   != null && { idDocumentUrl:   vd.idDocumentUrl }),
+          ...(vd.cipaDocumentUrl != null && { cipaDocumentUrl: vd.cipaDocumentUrl }),
+          ...(vd.companyName     != null && { companyName:     vd.companyName }),
+          ...(vd.companyRegNumber != null && { companyRegNumber: vd.companyRegNumber }),
         },
       });
 
