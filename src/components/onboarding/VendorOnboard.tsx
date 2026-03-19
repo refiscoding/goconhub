@@ -451,17 +451,28 @@ export const VendorOnboard: FC = () => {
                     if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed."); return; }
                     setStep((s) => s + 1);
                     refresh();
-                    // Upload identity documents in the background
+                    // Upload identity documents in the background via storage
                     const uploadDocs = async () => {
-                      const toBase64 = (file: File): Promise<string> =>
-                        new Promise((resolve, reject) => {
+                      const uploadFile = async (file: File, type: string): Promise<string | undefined> => {
+                        const form = new FormData();
+                        form.append("file", file);
+                        form.append("bucket", "documents");
+                        form.append("type", type);
+                        const res = await fetch("/api/upload", { method: "POST", body: form });
+                        if (res.ok) {
+                          const { url } = await res.json();
+                          return url;
+                        }
+                        // Fallback to base64 if storage is not configured
+                        return new Promise((resolve, reject) => {
                           const r = new FileReader();
                           r.onload = () => resolve(r.result as string);
                           r.onerror = reject;
                           r.readAsDataURL(file);
                         });
-                      const idDocumentUrl   = idFile   ? await toBase64(idFile)   : undefined;
-                      const cipaDocumentUrl = cipaFile ? await toBase64(cipaFile) : undefined;
+                      };
+                      const idDocumentUrl   = idFile   ? await uploadFile(idFile, "id-document")     : undefined;
+                      const cipaDocumentUrl = cipaFile ? await uploadFile(cipaFile, "cipa-document") : undefined;
                       if (idDocumentUrl || cipaDocumentUrl) {
                         await fetch("/api/onboarding", {
                           method: "POST",

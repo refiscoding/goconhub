@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
-const MAX_AVATAR_BYTES  = 512 * 1024;  // 512 KB base64 string limit
+const MAX_AVATAR_BYTES  = 512 * 1024;  // 512 KB base64 string limit (legacy)
+const MAX_URL_LEN       = 2048;       // URL length limit for storage URLs
 const MAX_NAME_LEN      = 100;
 const MAX_BIO_LEN       = 1000;
 const MAX_CITY_LEN      = 100;
@@ -31,11 +32,14 @@ export async function PATCH(req: NextRequest) {
   if (data.bio != null && (typeof data.bio !== "string" || data.bio.length > MAX_BIO_LEN))
     return NextResponse.json({ message: `Bio cannot exceed ${MAX_BIO_LEN} characters.` }, { status: 400 });
 
-  // avatarUrl size guard (base64-encoded images can be large)
+  // avatarUrl validation — accepts storage URLs or legacy base64
   if (data.avatarUrl != null) {
     if (typeof data.avatarUrl !== "string")
       return NextResponse.json({ message: "Invalid avatar." }, { status: 400 });
-    if (data.avatarUrl.length > MAX_AVATAR_BYTES)
+    const isUrl = (data.avatarUrl as string).startsWith("https://");
+    if (isUrl && (data.avatarUrl as string).length > MAX_URL_LEN)
+      return NextResponse.json({ message: "Avatar URL too long." }, { status: 400 });
+    if (!isUrl && (data.avatarUrl as string).length > MAX_AVATAR_BYTES)
       return NextResponse.json({ message: "Image is too large. Please use a smaller photo (max 512 KB)." }, { status: 400 });
   }
 
