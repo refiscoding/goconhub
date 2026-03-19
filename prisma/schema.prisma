@@ -233,6 +233,25 @@ model ServiceCategory {
   updatedAt DateTime @updatedAt
 }
 
+enum TicketStatus {
+  open
+  in_progress
+  resolved
+}
+
+model SupportTicket {
+  id        String       @id @default(cuid())
+  name      String
+  email     String
+  role      String       // customer | vendor | other
+  issueType String       // billing | booking | account | verification | other
+  message   String
+  status    TicketStatus @default(open)
+  adminNote String       @default("")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
 model AdminSetting {
   key       String   @id
   value     String

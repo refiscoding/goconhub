@@ -6,7 +6,8 @@ export type UserStatus     = "active" | "pending" | "suspended";
 export type DisputeStatus  = "open" | "resolved";
 export type ServiceUnit    = "hr" | "job" | "day";
 export type ToastType      = "ok" | "err" | "info";
-export type AdminTab       = "overview" | "bookings" | "payments" | "vendors" | "users" | "disputes" | "categories" | "settings" | "marketplace";
+export type AdminTab       = "overview" | "bookings" | "payments" | "vendors" | "users" | "disputes" | "categories" | "settings" | "marketplace" | "support";
+export type TicketStatus   = "open" | "in_progress" | "resolved";
 export type ListingStatus  = "active" | "sold" | "removed";
 export type OrderStatus    = "pending" | "approved" | "rejected";
 export type MessageSender  = "me" | "them";
@@ -101,6 +102,18 @@ export interface Listing {
   vendorId: string;
   vendorName: string;
   vendorAvatar?: string | null;
+  createdAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  issueType: string;
+  message: string;
+  status: TicketStatus;
+  adminNote: string;
   createdAt: string;
 }
 
