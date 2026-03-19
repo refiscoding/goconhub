@@ -13,6 +13,7 @@ import { PaymentsTab }    from "./tabs/PaymentsTab";
 import { CategoriesTab }  from "./tabs/CategoriesTab";
 import { SettingsTab }    from "./tabs/SettingsTab";
 import { MarketplaceTab } from "./tabs/MarketplaceTab";
+import { SupportTab }    from "./tabs/SupportTab";
 import type { AppUser, Booking, Dispute, ListingOrder, UserStatus, DisputeStatus, AdminTab } from "@/lib/types";
 
 interface RawBooking {
@@ -261,6 +262,7 @@ export const AdminDash: FC = () => {
               {tab === "categories"  && <CategoriesTab />}
               {tab === "settings"    && <SettingsTab />}
               {tab === "marketplace" && <MarketplaceTab orders={orders} onApprove={approveOrder} onReject={rejectOrder} />}
+              {tab === "support"     && <SupportTab />}
             </>
           )}
         </div>
