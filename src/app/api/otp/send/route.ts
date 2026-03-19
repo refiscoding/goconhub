@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { otpStore } from "@/lib/otpStore";
+import { logger } from "@/lib/logger";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // To go live, pick ONE option and fill in your .env.local, then uncomment it.
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, message: `Code sent to ${contact}.` });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Failed to send OTP.";
-    console.error("[OTP send error]", msg);
+    logger.error("OTP send failed", { error: msg });
     return NextResponse.json({ message: msg }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCommissionRate } from "@/lib/settings";
+import { logger } from "@/lib/logger";
 
 // GET /api/payments/dpo/callback
 // DPO Pay redirects here after the customer completes (or cancels) payment.
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
                   ?? transToken;
 
     if (result !== "000") {
-      console.error("[DPO callback] verifyToken failed:", text);
+      logger.error("DPO callback verifyToken failed", { result, transToken });
       return NextResponse.redirect(`${baseUrl}/customer/bookings?payment=failed`);
     }
 
@@ -76,7 +77,7 @@ export async function GET(req: NextRequest) {
       `${baseUrl}/customer/bookings?payment=success&ref=${encodeURIComponent(transRef)}&amount=${booking?.amount ?? ""}`
     );
   } catch (e) {
-    console.error("[DPO callback network]", e);
+    logger.error("DPO callback network error", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.redirect(`${baseUrl}/customer/bookings?payment=failed`);
   }
 }

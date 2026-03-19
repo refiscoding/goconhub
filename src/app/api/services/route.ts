@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { CreateServiceSchema } from "@/lib/schemas";
+import { logger } from "@/lib/logger";
 
 // GET /api/services — list current vendor's services
 export async function GET() {
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ service }, { status: 201 });
   } catch (e) {
-    console.error("[POST /api/services]", e);
+    logger.error("Service creation failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Failed to save service. Please try again." }, { status: 500 });
   }
 }

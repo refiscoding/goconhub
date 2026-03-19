@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { CreateBookingSchema } from "@/lib/schemas";
 import { createNotification } from "@/lib/notifications";
+import { logger } from "@/lib/logger";
 import { Prisma } from "@prisma/client";
 
 // GET /api/bookings — list bookings for the current user
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (e) {
-    console.error("[bookings POST]", e);
+    logger.error("Booking creation failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Failed to create booking." }, { status: 500 });
   }
 }

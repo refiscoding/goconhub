@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { createNotification } from "@/lib/notifications";
+import { logger } from "@/lib/logger";
 
 // POST /api/vendors/[id]/reviews
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     return NextResponse.json({ review });
   } catch (err) {
-    console.error("[POST /api/vendors/[id]/reviews]", err);
+    logger.error("Review submission failed", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ message: "Failed to save review" }, { status: 500 });
   }
 }

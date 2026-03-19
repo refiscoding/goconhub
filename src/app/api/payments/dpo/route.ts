@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 // POST /api/payments/dpo
 // Creates a DPO Pay payment token and returns the redirect URL to DPO's hosted checkout.
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
     const explanation = text.match(/<ResultExplanation>([^<]+)<\/ResultExplanation>/)?.[1];
 
     if (result !== "000" || !token) {
-      console.error("[DPO createToken]", explanation, text);
+      logger.error("DPO createToken failed", { explanation, result });
       return NextResponse.json({ message: explanation ?? "Failed to create DPO payment token." }, { status: 400 });
     }
 
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
       token,
     });
   } catch (e) {
-    console.error("[DPO createToken network]", e);
+    logger.error("DPO createToken network error", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Could not reach DPO gateway." }, { status: 502 });
   }
 }

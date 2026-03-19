@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -19,7 +20,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     if (!vendor) return NextResponse.json({ message: "Not found" }, { status: 404 });
     return NextResponse.json({ vendor: { ...vendor, completedBookings: completedCount } });
   } catch (err) {
-    console.error("[GET /api/vendors/[id]]", err);
+    logger.error("Vendor fetch failed", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ message: "Server error", error: String(err) }, { status: 500 });
   }
 }

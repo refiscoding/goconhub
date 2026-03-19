@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/guards";
 import { UpdateUserStatusSchema } from "@/lib/schemas";
 import { createNotification } from "@/lib/notifications";
+import { logger } from "@/lib/logger";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireAdmin();
@@ -60,7 +61,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     ]);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    console.error("[DELETE /api/admin/users/:id]", e);
+    logger.error("Admin user delete failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Cannot delete user with active bookings or disputes." }, { status: 409 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 // GET /api/listings — browse active listings (or vendor's own if ?mine=1)
 export async function GET(req: NextRequest) {
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ listing }, { status: 201 });
   } catch (err) {
-    console.error("POST /api/listings error:", err);
+    logger.error("Listing creation failed", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ message: "Server error. Please try again." }, { status: 500 });
   }
 }
