@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Toast, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { fmtPrice } from "@/lib/fmt";
-import { Star } from "lucide-react";
+import { Star, AlertTriangle } from "lucide-react";
 
 interface ApiBooking {
   id: string;
@@ -57,6 +57,33 @@ function CustomerBookingsPage() {
 
   // Orange / eWallet reference
   const [payRef, setPayRef] = useState("");
+
+  // Dispute
+  const [disputeTarget,  setDisputeTarget]  = useState<ApiBooking | null>(null);
+  const [disputeReason,  setDisputeReason]  = useState("");
+  const [disputeBusy,    setDisputeBusy]    = useState(false);
+  const [disputed,       setDisputed]       = useState<Set<string>>(new Set());
+
+  const openDispute  = (b: ApiBooking) => { setDisputeTarget(b); setDisputeReason(""); };
+  const closeDispute = () => setDisputeTarget(null);
+
+  const submitDispute = async () => {
+    if (!disputeTarget || !disputeReason.trim()) return;
+    setDisputeBusy(true);
+    try {
+      const res  = await fetch("/api/disputes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: disputeTarget.id, reason: disputeReason.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.message ?? "Failed to raise dispute", "err"); return; }
+      setDisputed((s) => new Set(s).add(disputeTarget.id));
+      showToast("Dispute submitted — admin will review shortly", "ok");
+      closeDispute();
+    } catch { showToast("Network error", "err"); }
+    finally { setDisputeBusy(false); }
+  };
 
   // Review
   const [reviewTarget, setReviewTarget] = useState<ApiBooking | null>(null);
@@ -246,6 +273,15 @@ function CustomerBookingsPage() {
                   {b.status === "completed" && reviewed.has(b.id) && (
                     <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "rgba(245,158,11,.1)", color: "#d97706" }}>✓ Reviewed</span>
                   )}
+                  {(b.status === "confirmed" || b.status === "completed") && !disputed.has(b.id) && (
+                    <button onClick={() => openDispute(b)}
+                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 999, border: "1.5px solid var(--red)", background: "var(--red-bg)", color: "var(--red)", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+                      <AlertTriangle size={12} /> Dispute
+                    </button>
+                  )}
+                  {disputed.has(b.id) && (
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "var(--red-bg)", color: "var(--red)" }}>Disputed</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -408,6 +444,44 @@ function CustomerBookingsPage() {
               style={{ width: "100%", padding: 15, fontSize: 15, fontWeight: 700, marginTop: 14, opacity: (!reviewRating || reviewBusy) ? 0.6 : 1 }}>
               {reviewBusy ? "Submitting…" : "Submit Review"}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Dispute modal ── */}
+      {disputeTarget && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 100 }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.5)" }} onClick={closeDispute} />
+          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--bg)", borderRadius: "24px 24px 0 0", padding: "24px 22px 44px" }}>
+            <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--border2)", margin: "0 auto 20px" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--red-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AlertTriangle size={18} color="var(--red)" />
+              </div>
+              <h3 className="serif" style={{ fontSize: 20 }}>Raise a Dispute</h3>
+            </div>
+            <p style={{ fontSize: 13, color: "var(--ink3)", marginBottom: 20 }}>
+              {disputeTarget.serviceName} · {disputeTarget.vendor?.user.firstName} {disputeTarget.vendor?.user.lastName}
+            </p>
+            <div style={{ background: "var(--red-bg)", border: "1px solid rgba(220,38,38,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 18 }}>
+              <p style={{ fontSize: 12, color: "var(--red)", lineHeight: 1.6 }}>
+                Disputes are reviewed by admin within 24–48 hours. Please describe the issue clearly so we can resolve it quickly.
+              </p>
+            </div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 7 }}>
+              Describe the issue *
+            </label>
+            <textarea className="field" rows={4}
+              placeholder="e.g. The vendor did not show up, work was incomplete, quality was poor…"
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+              style={{ resize: "vertical", minHeight: 100 }}
+            />
+            <button
+              onClick={submitDispute}
+              disabled={disputeBusy || !disputeReason.trim()}
+              style={{ width: "100%", padding: 15, fontSize: 15, fontWeight: 700, marginTop: 14, borderRadius: 14, border: "none", background: "var(--red)", color: "#fff", cursor: disputeBusy || !disputeReason.trim() ? "not-allowed" : "pointer", opacity: (disputeBusy || !disputeReason.trim()) ? 0.6 : 1 }}
+            >{disputeBusy ? "Submitting…" : "Submit Dispute"}</button>
           </div>
         </div>
       )}
