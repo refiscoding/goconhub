@@ -1,11 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { isRateLimited, recordFailure, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session || session.role !== "customer") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const ip = getClientIp(req);
+  const rlKey = `dispute:${ip}`;
+  if (isRateLimited(rlKey, RATE_LIMITS.dispute)) {
+    return NextResponse.json({ message: "Too many disputes submitted. Please try again later." }, { status: 429 });
   }
 
   const { bookingId, reason } = await req.json();
@@ -39,5 +46,6 @@ export async function POST(req: Request) {
     },
   });
 
+  recordFailure(rlKey, RATE_LIMITS.dispute);
   return NextResponse.json({ dispute }, { status: 201 });
 }

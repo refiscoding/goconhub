@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, signToken, cookieOptions, COOKIE_NAME } from "@/lib/auth";
 import { LoginSchema } from "@/lib/schemas";
-import { isRateLimited, recordFailure, clearFailures } from "@/lib/rateLimit";
+import { isRateLimited, recordFailure, clearFailures, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   // Rate limiting — keyed by IP
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  const ip = getClientIp(req);
+  const rlKey = `login:${ip}`;
 
-  if (isRateLimited(ip)) {
+  if (isRateLimited(rlKey, RATE_LIMITS.auth)) {
     return NextResponse.json(
       { message: "Too many login attempts. Please try again in 15 minutes." },
       { status: 429 }
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      recordFailure(ip);
+      recordFailure(rlKey, RATE_LIMITS.auth);
       return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
     }
 
@@ -49,11 +51,11 @@ export async function POST(req: NextRequest) {
 
     const ok = await verifyPassword(password, user.passwordHash);
     if (!ok) {
-      recordFailure(ip);
+      recordFailure(rlKey, RATE_LIMITS.auth);
       return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
     }
 
-    clearFailures(ip);
+    clearFailures(rlKey);
     const token = await signToken({ userId: user.id, role: user.role, email: user.email });
 
     const { passwordHash: _, ...safeUser } = user;
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
     res.cookies.set(COOKIE_NAME, token, cookieOptions());
     return res;
   } catch (e) {
-    console.error("[login]", e);
+    logger.error("Login failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Login failed." }, { status: 500 });
   }
 }

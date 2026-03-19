@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, signToken, cookieOptions, COOKIE_NAME } from "@/lib/auth";
 import { RegisterSchema } from "@/lib/schemas";
+import { isRateLimited, recordFailure, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const rlKey = `register:${ip}`;
+  if (isRateLimited(rlKey, RATE_LIMITS.auth)) {
+    return NextResponse.json({ message: "Too many attempts. Please try again later." }, { status: 429 });
+  }
+
   let parsed: ReturnType<typeof RegisterSchema.safeParse>;
   try {
     parsed = RegisterSchema.safeParse(await req.json());
@@ -23,6 +31,7 @@ export async function POST(req: NextRequest) {
   try {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
+      recordFailure(rlKey, RATE_LIMITS.auth);
       return NextResponse.json({ message: "An account with this email already exists." }, { status: 409 });
     }
 
@@ -49,7 +58,7 @@ export async function POST(req: NextRequest) {
     res.cookies.set(COOKIE_NAME, token, cookieOptions());
     return res;
   } catch (e) {
-    console.error("[register]", e);
+    logger.error("Registration failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Registration failed." }, { status: 500 });
   }
 }
