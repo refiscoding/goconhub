@@ -2,7 +2,7 @@
 import { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell } from "lucide-react";
+import { Bell, LifeBuoy } from "lucide-react";
 import { IconSearch, IconChat, IconUser, IconWrench, IconChevL, IconServices, IconLogout, IconShop } from "@/components/icons";
 
 interface NavItem { href: string; icon: React.ReactNode; label: string; badge?: boolean }
@@ -106,8 +106,12 @@ export const CustomerNav: FC<CustomerNavProps> = ({ unreadCount = 0 }) => {
           })}
         </div>
 
-        {/* Sign out */}
-        <div className="nav-signout-wrap">
+        {/* Help & Sign out */}
+        <div className="nav-signout-wrap" style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Link href="/customer/support" className={`nav-item${pathname.startsWith("/customer/support") ? " on" : ""}`} style={{ textDecoration: "none" }} onClick={closeMobile}>
+            <LifeBuoy size={18} style={{ flexShrink: 0 }} />
+            <span className="nav-label">Help &amp; Support</span>
+          </Link>
           <button className="nav-signout" onClick={handleSignOut}>
             <IconLogout style={{ width: 18, height: 18, flexShrink: 0 }} />
             <span className="nav-label">Sign Out</span>
