@@ -3,8 +3,8 @@ import { FC, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CalendarDays, CreditCard, Wrench,
-  Users, AlertCircle, LogOut, ShieldCheck, ChevronLeft,
-  Tag, Settings, ShoppingBag,
+  Users, LogOut, ShieldCheck, ChevronLeft,
+  Tag, Settings, ShoppingBag, LifeBuoy,
 } from "lucide-react";
 
 interface AdminNavItem {
@@ -56,9 +56,9 @@ export const AdminNav: FC<AdminNavProps> = ({
     { key: "payments",  icon: <CreditCard      size={20} />, label: "Payments",  badge: pendingPayments },
     { key: "vendors",   icon: <Wrench          size={20} />, label: "Vendors",   badge: pendingVendors  },
     { key: "users",     icon: <Users           size={20} />, label: "Users"     },
-    { key: "disputes",   icon: <AlertCircle size={20} />, label: "Disputes",   badge: openDisputes },
     { key: "categories",  icon: <Tag          size={20} />, label: "Categories"  },
     { key: "marketplace", icon: <ShoppingBag  size={20} />, label: "Marketplace", badge: pendingOrders },
+    { key: "support",     icon: <LifeBuoy     size={20} />, label: "Support"     },
     { key: "settings",    icon: <Settings     size={20} />, label: "Settings"    },
   ];
 
@@ -84,7 +84,7 @@ export const AdminNav: FC<AdminNavProps> = ({
       <nav className={`nav-bot${mobileOpen ? " mobile-open" : ""}`}>
         {/* Brand */}
         <div className="nav-brand">
-          <div className="nav-brand-logo" style={{ background: "var(--acc)" }}>
+          <div className="nav-brand-logo" style={{ background: "linear-gradient(135deg, #6366F1, #4F46E5)" }}>
             <ShieldCheck size={14} color="#fff" />
           </div>
           <span className="nav-brand-name serif">Admin</span>
@@ -114,7 +114,7 @@ export const AdminNav: FC<AdminNavProps> = ({
                 {n.badge && n.badge > 0 ? (
                   <span style={{
                     position: "absolute", top: -5, right: -6,
-                    background: "var(--red)", color: "#fff",
+                    background: "#F59E0B", color: "#1E1B4B",
                     fontSize: 9, fontWeight: 800, lineHeight: 1,
                     padding: "2px 4px", borderRadius: 999, minWidth: 14, textAlign: "center",
                   }}>{n.badge}</span>
