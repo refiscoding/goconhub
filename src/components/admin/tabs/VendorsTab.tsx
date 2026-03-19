@@ -114,6 +114,54 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
                     <Row label="Bank"     value={v.bankName} />
                     <Row label="Acct No." value={v.accountNumber} mono />
                     <Divider borderColor="var(--border)" my={1} />
+
+                    {/* Identity document */}
+                    <Text fontSize="11px" fontWeight={700} color="var(--ink3)"
+                      textTransform="uppercase" letterSpacing=".06em" mb={1}>
+                      {docLabel}
+                    </Text>
+                    {(() => {
+                      const docUrl = isIndividual ? v.idDocumentUrl : v.cipaDocumentUrl;
+                      if (!docUrl) {
+                        return (
+                          <Flex align="center" gap={2} bg="var(--bg2)" borderRadius="8px" p={3}>
+                            <X size={14} color="var(--red)" />
+                            <Text fontSize="12px" color="var(--ink3)">No document uploaded yet</Text>
+                          </Flex>
+                        );
+                      }
+                      const isPdf = docUrl.startsWith("data:application/pdf") || docUrl.startsWith("data:application/octet");
+                      if (isPdf) {
+                        return (
+                          <Flex align="center" gap={2} bg="var(--bg2)" borderRadius="8px" p={3}>
+                            <CircleCheck size={14} color="var(--green)" />
+                            <Text fontSize="12px" color="var(--ink)" flex={1}>PDF document uploaded</Text>
+                            <a href={docUrl} download={`${v.name.replace(/\s+/g,"-")}-doc.pdf`}
+                              style={{ fontSize: 11, fontWeight: 700, color: "var(--acc)", textDecoration: "none" }}>
+                              Download
+                            </a>
+                          </Flex>
+                        );
+                      }
+                      return (
+                        <Box borderRadius="10px" overflow="hidden" border="1px solid var(--border)" position="relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={docUrl} alt={docLabel}
+                            style={{ width: "100%", maxHeight: 220, objectFit: "cover", display: "block" }} />
+                          <Flex position="absolute" bottom={0} left={0} right={0}
+                            bg="rgba(0,0,0,.55)" px={3} py={2} justify="space-between" align="center">
+                            <Text fontSize="11px" color="rgba(255,255,255,.8)" fontWeight={600}>{docLabel}</Text>
+                            <a href={docUrl} target="_blank" rel="noreferrer"
+                              style={{ fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none",
+                                background: "rgba(255,255,255,.2)", borderRadius: 6, padding: "3px 10px" }}>
+                              Full View
+                            </a>
+                          </Flex>
+                        </Box>
+                      );
+                    })()}
+
+                    <Divider borderColor="var(--border)" my={1} />
                     <Row label="User ID"  value={v.id} mono />
                   </Flex>
                 </Collapse>
