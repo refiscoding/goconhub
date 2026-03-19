@@ -9,7 +9,7 @@ import { getSession } from "@/lib/session";
  */
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session || session.role !== "customer") redirect("/auth");
+  if (!session || session.role !== "customer") redirect("/");
 
   return (
     <CustomerChakraProvider>

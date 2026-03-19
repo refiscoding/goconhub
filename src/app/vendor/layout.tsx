@@ -5,7 +5,7 @@ import { getSession } from "@/lib/session";
 
 export default async function VendorLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session || session.role !== "vendor") redirect("/auth");
+  if (!session || session.role !== "vendor") redirect("/");
 
   return (
     <VendorChakraProvider>

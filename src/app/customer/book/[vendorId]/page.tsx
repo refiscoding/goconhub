@@ -10,7 +10,7 @@ interface PageProps {
 
 export default async function BookVendorPage({ params }: PageProps) {
   const session = await getSession();
-  if (!session || session.role !== "customer") redirect("/auth?next=/customer/explore");
+  if (!session || session.role !== "customer") redirect("/");
 
   const { vendorId } = await params;
 
