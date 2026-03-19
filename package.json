@@ -7,7 +7,9 @@
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.10.9",
@@ -37,6 +39,7 @@
     "dotenv": "^17.3.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.0"
   }
 }
