@@ -442,23 +442,35 @@ export const VendorOnboard: FC = () => {
                 if (step === STEPS.length - 2) {
                   setBusy(true);
                   try {
-                    const toBase64 = (file: File): Promise<string> =>
-                      new Promise((res, rej) => {
-                        const r = new FileReader();
-                        r.onload = () => res(r.result as string);
-                        r.onerror = rej;
-                        r.readAsDataURL(file);
-                      });
-                    const idDocumentUrl   = idFile   ? await toBase64(idFile)   : "";
-                    const cipaDocumentUrl = cipaFile ? await toBase64(cipaFile) : "";
+                    // Send text fields only — fast payload
                     const res = await fetch("/api/onboarding", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, idDocumentUrl, cipaDocumentUrl, companyName: data.companyName, companyRegNumber: data.companyRegNumber, bankName: data.bankName, accountNumber: data.accountNumber } }),
+                      body: JSON.stringify({ firstName: data.fn, lastName: data.ln, phone: data.phone, city: data.city, area: data.area, vendorData: { bio: data.bio, category: data.cat, skills: data.skills, city: data.city, services, entityType: data.entityType, companyName: data.companyName, companyRegNumber: data.companyRegNumber, bankName: data.bankName, accountNumber: data.accountNumber } }),
                     });
                     if (!res.ok) { const d = await res.json(); setError(d.message ?? "Failed."); return; }
-                    await refresh();
                     setStep((s) => s + 1);
+                    refresh();
+                    // Upload identity documents in the background
+                    const uploadDocs = async () => {
+                      const toBase64 = (file: File): Promise<string> =>
+                        new Promise((resolve, reject) => {
+                          const r = new FileReader();
+                          r.onload = () => resolve(r.result as string);
+                          r.onerror = reject;
+                          r.readAsDataURL(file);
+                        });
+                      const idDocumentUrl   = idFile   ? await toBase64(idFile)   : undefined;
+                      const cipaDocumentUrl = cipaFile ? await toBase64(cipaFile) : undefined;
+                      if (idDocumentUrl || cipaDocumentUrl) {
+                        await fetch("/api/onboarding", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ vendorData: { idDocumentUrl, cipaDocumentUrl } }),
+                        });
+                      }
+                    };
+                    uploadDocs();
                   } catch { setError("Network error."); }
                   finally { setBusy(false); }
                 } else {
