@@ -246,7 +246,7 @@ function CustomerBookingsPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                 <div>
                   <p style={{ fontWeight: 700, fontSize: 15 }}>{b.serviceName}</p>
-                  <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 2 }}>{vendorName}</p>
+                  <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 2 }}>{vendorName}</p>
                   <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>{b.date} · {b.time}</p>
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: s.bg, color: s.color }}>{s.label}</span>

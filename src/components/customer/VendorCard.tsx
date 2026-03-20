@@ -20,8 +20,8 @@ export const VendorCard: FC<VendorCardProps> = ({ vendor: v }) => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5, overflow: "hidden" }}>
-                <p style={{ fontWeight: 700, fontSize: 14, color: "var(--acc)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.name}</p>
-                {v.verified && <BadgeCheck size={15} color="#16a34a" style={{ flexShrink: 0 }} />}
+                <p style={{ fontWeight: 700, fontSize: 14, color: "#1a1a1a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.name}</p>
+                {v.verified && <BadgeCheck size={15} color="#339AF0" fill="#339AF0" stroke="#fff" style={{ flexShrink: 0 }} />}
               </div>
               <p style={{ fontSize: 12, color: "var(--ink2)", marginTop: 1 }}>{v.cat}</p>
             </div>
