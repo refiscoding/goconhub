@@ -39,7 +39,7 @@ export async function uploadFile(
   const res = await fetch(url, {
     method: "POST",
     headers: { ...headers(contentType), "x-upsert": "true" },
-    body: buffer,
+    body: buffer as unknown as BodyInit,
   });
 
   if (!res.ok) {
