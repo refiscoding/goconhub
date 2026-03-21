@@ -40,7 +40,7 @@ interface ChatListProps {
 }
 
 export const ChatList: FC<ChatListProps> = ({ chats, activeChatId, onSelectChat }) => (
-  <Box pb="88px" bg="white" h="100%" overflowY="auto">
+  <Box pb="20px" bg="white" h="100%" overflowY="auto">
     <Box pt="52px" px="20px" pb="12px">
       <Heading size="lg" letterSpacing="-0.02em" color="portal.text">
         Chats
@@ -82,7 +82,7 @@ export const ChatList: FC<ChatListProps> = ({ chats, activeChatId, onSelectChat 
           py="12px"
           bg={isActive ? "portal.surface" : "white"}
           cursor="pointer"
-          borderBottom={i < chats.length - 1 ? "1px solid" : "none"}
+          borderBottom="1px solid"
           borderColor="gray.100"
           _hover={{ bg: isActive ? "portal.surface" : "gray.50" }}
           transition="background 0.15s"
