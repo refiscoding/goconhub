@@ -31,7 +31,7 @@ export const MessageBubble: FC<MessageBubbleProps> = ({ message, senderName = ""
       <Flex justify={isMe ? "flex-end" : "flex-start"} gap="6px" align="flex-end">
         {!isMe && <Avatar name={senderName} size={24} />}
         <Box
-          maxW="280px"
+          maxW={{ base: "280px", md: "480px" }}
           px="10px"
           pt="8px"
           pb="6px"

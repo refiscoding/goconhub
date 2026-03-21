@@ -151,7 +151,7 @@ export const ChatRoom: FC<ChatRoomProps> = ({
   let lastDateLabel = "";
 
   return (
-    <Flex direction="column" h="100vh" bg="gray.50">
+    <Flex direction="column" h="100vh" bg="gray.50" position="relative">
       {/* Header */}
       <Flex
         bg="portal.primary"
@@ -203,7 +203,7 @@ export const ChatRoom: FC<ChatRoomProps> = ({
         overflowY="auto"
         px="18px"
         pt="16px"
-        pb="110px"
+        pb="80px"
         display="flex"
         flexDirection="column"
         gap="6px"
@@ -246,12 +246,10 @@ export const ChatRoom: FC<ChatRoomProps> = ({
       {/* Quick replies */}
       {showQR && quickReplies.length > 0 && (
         <Box
-          position="fixed"
-          bottom="72px"
-          left="50%"
-          transform="translateX(-50%)"
-          w="100%"
-          maxW="430px"
+          position="absolute"
+          bottom="68px"
+          left="0"
+          right="0"
           bg="white"
           borderTop="1px solid"
           borderColor="gray.200"
@@ -292,12 +290,10 @@ export const ChatRoom: FC<ChatRoomProps> = ({
       {/* Contact info warning */}
       {pendingText && (
         <Box
-          position="fixed"
-          bottom="72px"
-          left="50%"
-          transform="translateX(-50%)"
-          w="calc(100% - 28px)"
-          maxW="402px"
+          position="absolute"
+          bottom="68px"
+          left="14px"
+          right="14px"
           bg="white"
           border="1px solid"
           borderColor="red.200"
@@ -332,21 +328,16 @@ export const ChatRoom: FC<ChatRoomProps> = ({
 
       {/* Input area */}
       <Flex
-        position="fixed"
-        bottom="0"
-        left="50%"
-        transform="translateX(-50%)"
-        w="100%"
-        maxW="430px"
         bg="white"
         px="10px"
         pt="8px"
-        pb="22px"
+        pb="12px"
         gap="8px"
         align="flex-end"
         zIndex={55}
         borderTop="1px solid"
         borderColor="gray.100"
+        flexShrink={0}
       >
         {quickReplies.length > 0 && (
           <IconButton
