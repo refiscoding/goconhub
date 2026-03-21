@@ -103,20 +103,29 @@ export async function POST(req: NextRequest) {
     const code = generateOtp();
     otpStore.set(contact, { code, expires: Date.now() + 10 * 60 * 1000, attempts: 0, sentAt: Date.now() });
 
-    // ── Development mode: skip sending, return code directly ─────────────────
-    if (IS_DEV && !process.env.TWILIO_SID && !process.env.META_WA_TOKEN && !process.env.RESEND_API_KEY) {
-      console.log(`\n🔑 [DEV OTP] ${contact} → ${code}\n`);
+    // Check if any credentials are configured
+    const hasWhatsApp = !!(process.env.TWILIO_SID || process.env.META_WA_TOKEN);
+    const hasEmail    = !!process.env.RESEND_API_KEY;
+    const hasCreds    = hasWhatsApp || hasEmail;
+
+    if (!hasCreds) {
+      // No credentials configured — always return code so user can proceed
+      logger.warn("OTP fallback: no messaging credentials configured", { contact });
       return NextResponse.json({
         success: true,
         message: `Code sent to ${contact}.`,
-        devCode: code, // only present in dev with no credentials
+        devCode: code,
       });
     }
 
-    if (method === "whatsapp") {
+    if (method === "whatsapp" && hasWhatsApp) {
       await sendWhatsApp(contact, code);
-    } else {
+    } else if (method === "email" && hasEmail) {
       await sendEmail(contact, code);
+    } else {
+      // Requested method not configured — use whichever is available
+      if (hasWhatsApp) await sendWhatsApp(contact, code);
+      else await sendEmail(contact, code);
     }
 
     return NextResponse.json({ success: true, message: `Code sent to ${contact}.` });

@@ -82,8 +82,8 @@ export const ForgotPassword: FC = () => {
       });
       if (!res.ok) throw new Error((await res.json()).message || "Failed to reset password.");
       setStep("done");
-      // Auto-redirect to profile after 2 seconds
-      setTimeout(() => router.push(profilePath), 2000);
+      // Auto-redirect to login after 2 seconds
+      setTimeout(() => router.push("/"), 2000);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
@@ -304,11 +304,11 @@ export const ForgotPassword: FC = () => {
                 <h2 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)", letterSpacing: "-.01em" }}>Password updated!</h2>
                 <p style={{ fontSize: 14, color: "var(--ink2)", marginTop: 8, lineHeight: 1.6 }}>
                   Your password has been changed successfully.<br />
-                  Taking you to your profile…
+                  Taking you to the login page…
                 </p>
               </div>
-              <button className="btn-pri" onClick={() => router.push(profilePath)}>
-                Go to profile →
+              <button className="btn-pri" onClick={() => router.push("/")}>
+                Go to login →
               </button>
             </div>
           )}
