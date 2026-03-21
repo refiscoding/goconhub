@@ -157,6 +157,7 @@ export default function VendorMessagesPage() {
               quickReplies={QUICK_REPLIES}
               avatarSrc={selectedChat.avatarUrl ?? null}
               profileHref={`/vendor/customers/${selectedChat.id}`}
+              embedded
             />
           ) : (
             <Flex h="100%" align="center" justify="center" direction="column" color="gray.400">

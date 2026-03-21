@@ -1,7 +1,7 @@
 "use client";
 import { FC, useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Flex, Text, Input, IconButton, useBreakpointValue } from "@chakra-ui/react";
+import { Box, Flex, Text, Input, IconButton } from "@chakra-ui/react";
 import { ArrowLeft, Send } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import { MessageBubble } from "./MessageBubble";
@@ -21,6 +21,7 @@ interface ChatRoomProps {
   backHref?: string;
   avatarSrc?: string | null;
   profileHref?: string;
+  embedded?: boolean; // true when used inside split-pane desktop layout
 }
 
 function markRead(key: string, count: number) {
@@ -40,7 +41,7 @@ function fmtDateLabel(iso: string): string {
 }
 
 export const ChatRoom: FC<ChatRoomProps> = ({
-  title, subtitle, chatUserId, bookingIds, bookingId, initialMessages = [], quickReplies = [], backHref, avatarSrc, profileHref,
+  title, subtitle, chatUserId, bookingIds, bookingId, initialMessages = [], quickReplies = [], backHref, avatarSrc, profileHref, embedded = false,
 }) => {
   const router = useRouter();
   const { user } = useUser();
@@ -52,7 +53,6 @@ export const ChatRoom: FC<ChatRoomProps> = ({
   const [pendingText, setPendingText] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useBreakpointValue({ base: true, md: false }, { fallback: "base" });
 
   useEffect(() => {
     const myId = user?.id;
@@ -151,29 +151,35 @@ export const ChatRoom: FC<ChatRoomProps> = ({
   let lastDateLabel = "";
 
   return (
-    <Flex direction="column" h="100vh" bg="gray.50" position="relative">
+    <Flex
+      direction="column"
+      h={embedded ? "100%" : "100vh"}
+      bg="gray.50"
+      position="relative"
+      overflow="hidden"
+    >
       {/* Header */}
       <Flex
         bg="portal.primary"
-        pt="50px"
-        px="14px"
-        pb="12px"
+        pt={embedded ? "16px" : "50px"}
+        px="16px"
+        pb="14px"
         align="center"
         gap="10px"
-        position="sticky"
-        top="0"
-        zIndex={50}
+        flexShrink={0}
         boxShadow="sm"
       >
-        <IconButton
-          aria-label="Back"
-          icon={<ArrowLeft size={22} />}
-          variant="ghost"
-          color="white"
-          _hover={{ bg: "whiteAlpha.200" }}
-          onClick={goBack}
-          size="sm"
-        />
+        {!embedded && (
+          <IconButton
+            aria-label="Back"
+            icon={<ArrowLeft size={22} />}
+            variant="ghost"
+            color="white"
+            _hover={{ bg: "whiteAlpha.200" }}
+            onClick={goBack}
+            size="sm"
+          />
+        )}
         <Flex
           align="center"
           gap="10px"
@@ -190,29 +196,39 @@ export const ChatRoom: FC<ChatRoomProps> = ({
       </Flex>
 
       {/* Safety banner */}
-      <Flex bg="yellow.50" borderBottom="1px solid" borderColor="yellow.300" px="18px" py="8px" gap="8px" align="flex-start">
+      <Flex
+        bg="yellow.50"
+        borderBottom="1px solid"
+        borderColor="yellow.300"
+        px="18px"
+        py="6px"
+        gap="8px"
+        align="center"
+        flexShrink={0}
+      >
         <Text fontSize="13px" flexShrink={0}>🛡️</Text>
-        <Text fontSize="12px" color="yellow.800" lineHeight="1.5">
-          For your safety, all payments must be made through HandyHub. Payments made outside the platform are not protected.
+        <Text fontSize="11px" color="yellow.800" lineHeight="1.4">
+          All payments must be made through HandyHub for your protection.
         </Text>
       </Flex>
 
       {/* Messages area */}
-      <Box
+      <Flex
         flex="1"
         overflowY="auto"
         px="18px"
         pt="16px"
-        pb="80px"
-        display="flex"
-        flexDirection="column"
+        pb="16px"
+        direction="column"
         gap="6px"
         bg="gray.50"
       >
         {messages.length === 0 && (
-          <Text textAlign="center" color="gray.400" fontSize="13px" mt="40px">
-            No messages yet. Say hello!
-          </Text>
+          <Flex flex="1" align="center" justify="center">
+            <Text textAlign="center" color="gray.400" fontSize="13px">
+              No messages yet. Say hello!
+            </Text>
+          </Flex>
         )}
         {messages.map((m) => {
           const dateLabel = m.createdAt ? fmtDateLabel(m.createdAt) : "";
@@ -240,28 +256,23 @@ export const ChatRoom: FC<ChatRoomProps> = ({
             </Box>
           );
         })}
-        <div ref={bottomRef} />
-      </Box>
+        <Box ref={bottomRef} />
+      </Flex>
 
       {/* Quick replies */}
       {showQR && quickReplies.length > 0 && (
         <Box
-          position="absolute"
-          bottom="68px"
-          left="0"
-          right="0"
           bg="white"
           borderTop="1px solid"
-          borderColor="gray.200"
-          p="12px 14px"
-          zIndex={60}
-          borderRadius="12px 12px 0 0"
-          boxShadow="lg"
+          borderColor="gray.100"
+          px="14px"
+          py="12px"
+          flexShrink={0}
         >
           <Text fontSize="10px" fontWeight="700" color="portal.primary" textTransform="uppercase" letterSpacing="0.06em" mb="8px">
             Quick Replies
           </Text>
-          <Flex direction="column" gap="6px" maxH="180px" overflowY="auto">
+          <Flex direction="column" gap="6px" maxH="160px" overflowY="auto">
             {quickReplies.map((r, i) => (
               <Box
                 as="button"
@@ -290,17 +301,12 @@ export const ChatRoom: FC<ChatRoomProps> = ({
       {/* Contact info warning */}
       {pendingText && (
         <Box
-          position="absolute"
-          bottom="68px"
-          left="14px"
-          right="14px"
           bg="white"
-          border="1px solid"
-          borderColor="red.200"
-          borderRadius="12px"
-          p="14px 16px"
-          zIndex={70}
-          boxShadow="xl"
+          borderTop="1px solid"
+          borderColor="red.100"
+          px="16px"
+          py="14px"
+          flexShrink={0}
         >
           <Text fontWeight="700" fontSize="14px" mb="4px" color="red.500">⚠️ Contact info detected</Text>
           <Text fontSize="13px" color="gray.600" lineHeight="1.5" mb="12px">
@@ -329,15 +335,13 @@ export const ChatRoom: FC<ChatRoomProps> = ({
       {/* Input area */}
       <Flex
         bg="white"
-        px="10px"
-        pt="8px"
-        pb="12px"
+        px={{ base: "10px", md: "16px" }}
+        py="10px"
         gap="8px"
-        align="flex-end"
-        zIndex={55}
+        align="center"
+        flexShrink={0}
         borderTop="1px solid"
         borderColor="gray.100"
-        flexShrink={0}
       >
         {quickReplies.length > 0 && (
           <IconButton
@@ -347,43 +351,47 @@ export const ChatRoom: FC<ChatRoomProps> = ({
             variant={showQR ? "solid" : "outline"}
             colorScheme={showQR ? "blue" : "gray"}
             borderRadius="full"
-            size="md"
+            size="sm"
             flexShrink={0}
           />
         )}
         <Flex
           flex="1"
-          align="flex-end"
+          align="center"
           bg="gray.50"
-          borderRadius="22px"
+          borderRadius="full"
           border="1px solid"
           borderColor="gray.200"
-          px="14px"
+          px="16px"
         >
           <Input
             ref={inputRef}
-            placeholder="Message"
+            placeholder="Type a message..."
             value={input}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
             onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && send()}
             variant="unstyled"
-            fontSize="15px"
-            py="10px"
+            fontSize="14px"
+            py="9px"
             color="gray.800"
+            _placeholder={{ color: "gray.400" }}
           />
         </Flex>
         <IconButton
           aria-label="Send"
-          icon={<Send size={18} />}
+          icon={<Send size={17} />}
           onClick={() => send()}
-          isDisabled={sending}
-          colorScheme="blue"
+          isDisabled={sending || !input.trim()}
           bg="portal.primary"
           color="white"
           borderRadius="full"
-          size="md"
+          size="sm"
+          w="36px"
+          h="36px"
+          minW="36px"
           boxShadow="sm"
           _hover={{ opacity: 0.9 }}
+          _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
           flexShrink={0}
         />
       </Flex>
