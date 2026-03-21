@@ -12,15 +12,8 @@ interface MessageBubbleProps {
   senderName?: string;
 }
 
-function readStatus(msg: Message): string | null {
-  if (msg.from !== "me") return null;
-  // For now treat all sent messages as "Sent" — upgrade when read receipts exist
-  return "Sent";
-}
-
 export const MessageBubble: FC<MessageBubbleProps> = ({ message, senderName = "" }) => {
   const isMe = message.from === "me";
-  const status = readStatus(message);
 
   return (
     <MotionBox
@@ -55,11 +48,6 @@ export const MessageBubble: FC<MessageBubbleProps> = ({ message, senderName = ""
             lineHeight="1"
           >
             <Text as="span">{message.time}</Text>
-            {status && (
-              <Text as="span" fontWeight="500" fontSize="10px">
-                {status}
-              </Text>
-            )}
           </Flex>
         </Box>
       </Flex>
