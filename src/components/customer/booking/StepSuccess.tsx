@@ -2,6 +2,7 @@
 import { FC } from "react";
 import { useRouter } from "next/navigation";
 import type { BookingSelection, Vendor } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface StepSuccessProps {
   vendor: Vendor;
@@ -30,7 +31,7 @@ export const StepSuccess: FC<StepSuccessProps> = ({ vendor, selection, bookingId
           ["Service",    selection.service?.name ?? ""],
           ["Date & Time",`${selection.date?.label} · ${selection.time}`],
           ["Location",   vendor.loc],
-          ["Total",      `P${selection.service?.price ?? 0}`],
+          ["Total",      `${fmtPrice(selection.service?.price ?? 0)}`],
           ["Status",     "Pending vendor confirmation"],
         ] as [string, string][]).map(([k, v]) => (
           <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)", fontSize: 14 }}>

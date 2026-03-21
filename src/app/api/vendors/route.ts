@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
   const vendors = await prisma.vendor.findMany({
     where: {
       user: { status: "active" },
+      verified: true,
       ...(cat ? { category: { equals: cat, mode: "insensitive" } } : {}),
       ...(q ? {
         OR: [

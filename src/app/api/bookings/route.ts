@@ -1,18 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { CreateBookingSchema } from "@/lib/schemas";
+import { createNotification } from "@/lib/notifications";
+import { logger } from "@/lib/logger";
+import { Prisma } from "@prisma/client";
 
 // GET /api/bookings — list bookings for the current user
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
 
-  const where =
+  const { searchParams } = new URL(req.url);
+  const vendorIdFilter = searchParams.get("vendorId");
+  const statusFilter   = searchParams.get("status");
+
+  const baseWhere =
     session.role === "customer"
       ? { customerId: session.userId }
       : session.role === "vendor"
       ? { vendor: { userId: session.userId } }
       : {};
+
+  const where: Prisma.BookingWhereInput = { ...baseWhere };
+  if (vendorIdFilter) where.vendorId = vendorIdFilter;
+  if (statusFilter)   where.status   = { in: statusFilter.split(",") as Prisma.EnumBookingStatusFilter["in"] };
 
   const bookings = await prisma.booking.findMany({
     where,
@@ -24,6 +36,7 @@ export async function GET() {
       vendor:   { select: { id: true, userId: true, user: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
       service:  { select: { name: true } },
       _count:   { select: { messages: true } },
+      messages: { select: { createdAt: true, text: true }, orderBy: { createdAt: "desc" }, take: 1 },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -38,18 +51,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
   }
 
+  let parsed: ReturnType<typeof CreateBookingSchema.safeParse>;
   try {
-    const { vendorId, serviceId, serviceName, date, time, location, note, amount } = await req.json();
+    parsed = CreateBookingSchema.safeParse(await req.json());
+  } catch {
+    return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+  }
 
-    if (!vendorId || !serviceName || !date || !time) {
-      return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
-    }
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: parsed.error.issues[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
 
-    // Validate serviceName length
-    if (typeof serviceName !== "string" || serviceName.length > 200) {
-      return NextResponse.json({ message: "Invalid service name." }, { status: 400 });
-    }
+  const { vendorId, serviceId, serviceName, date, time, location, note, amount } = parsed.data;
 
+  try {
     // Server-side amount: always use the price stored in DB when a serviceId is provided
     let finalAmount: number;
     if (serviceId) {
@@ -67,7 +85,6 @@ export async function POST(req: NextRequest) {
       }
       finalAmount = service.price;
     } else {
-      // No serviceId — validate client amount is a positive number
       finalAmount = Number(amount);
       if (!isFinite(finalAmount) || finalAmount <= 0) {
         return NextResponse.json({ message: "Invalid amount." }, { status: 400 });
@@ -82,16 +99,31 @@ export async function POST(req: NextRequest) {
         serviceName: serviceName.slice(0, 200),
         date,
         time,
-        location:    (location ?? "").slice(0, 300),
-        note:        (note ?? "").slice(0, 1000),
+        location:    location.slice(0, 300),
+        note:        note.slice(0, 1000),
         amount:      finalAmount,
         status:      "pending",
       },
     });
 
+    // Notify vendor of new booking request
+    const vendor = await prisma.vendor.findUnique({
+      where: { id: vendorId },
+      select: { userId: true },
+    });
+    if (vendor) {
+      await createNotification({
+        userId:  vendor.userId,
+        type:    "booking_request",
+        title:   "New booking request",
+        body:    `A customer requested ${serviceName}.`,
+        linkUrl: `/vendor/dashboard`,
+      });
+    }
+
     return NextResponse.json({ booking }, { status: 201 });
   } catch (e) {
-    console.error("[bookings POST]", e);
+    logger.error("Booking creation failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Failed to create booking." }, { status: 500 });
   }
 }

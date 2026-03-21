@@ -36,6 +36,18 @@ enum ServiceUnit {
   day
 }
 
+enum ListingStatus {
+  active
+  sold
+  removed
+}
+
+enum OrderStatus {
+  pending
+  approved
+  rejected
+}
+
 model User {
   id                String     @id @default(cuid())
   email             String     @unique
@@ -52,11 +64,13 @@ model User {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
-  vendor    Vendor?
-  bookings  Booking[]  @relation("CustomerBookings")
-  messages  Message[]
-  disputes  Dispute[]  @relation("CustomerDisputes")
-  reviews   Review[]   @relation("ReviewsGiven")
+  vendor        Vendor?
+  bookings      Booking[]      @relation("CustomerBookings")
+  messages      Message[]
+  disputes      Dispute[]      @relation("CustomerDisputes")
+  reviews       Review[]       @relation("ReviewsGiven")
+  listingOrders ListingOrder[] @relation("CustomerOrders")
+  notifications Notification[]
 }
 
 model Vendor {
@@ -70,13 +84,22 @@ model Vendor {
   location    String   @default("")
   rating      Float    @default(0)
   reviewCount Int      @default(0)
-  available   Boolean  @default(true)
-  verified    Boolean  @default(false)
+  available        Boolean  @default(true)
+  verified         Boolean  @default(false)
+
+  entityType       String   @default("individual")
+  idDocumentUrl    String   @default("")
+  cipaDocumentUrl  String   @default("")
+  companyName      String   @default("")
+  companyRegNumber String   @default("")
+  bankName         String   @default("")
+  accountNumber    String   @default("")
 
   services  Service[]
   bookings  Booking[]  @relation("VendorBookings")
   disputes  Dispute[]  @relation("VendorDisputes")
   reviews   Review[]
+  listings  Listing[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -171,4 +194,78 @@ model Dispute {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Listing {
+  id        String        @id @default(cuid())
+  vendorId  String
+  vendor    Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  title     String
+  desc      String        @default("")
+  price     Float
+  condition String        @default("used")
+  photos    String[]      @default([])
+  status    ListingStatus @default(active)
+
+  orders    ListingOrder[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ListingOrder {
+  id         String      @id @default(cuid())
+  listingId  String
+  listing    Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   User        @relation("CustomerOrders", fields: [customerId], references: [id])
+
+  status     OrderStatus @default(pending)
+  note       String      @default("")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model ServiceCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  resolved
+}
+
+model SupportTicket {
+  id        String       @id @default(cuid())
+  name      String
+  email     String
+  role      String       // customer | vendor | other
+  issueType String       // billing | booking | account | verification | other
+  message   String
+  status    TicketStatus @default(open)
+  adminNote String       @default("")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model AdminSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // booking_request | booking_accepted | job_complete | payment_confirmed | payout_sent | new_review
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
 }

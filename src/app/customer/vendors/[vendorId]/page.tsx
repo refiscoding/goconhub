@@ -1,10 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, Stars, Toast } from "@/components/ui";
-import { IconChevL, IconMapPin } from "@/components/icons";
+import { Avatar, Stars, Toast, PageSpinner } from "@/components/ui";
+import { IconChevL, IconMapPin, IconChat } from "@/components/icons";
+import { User, Wrench, Star } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
+import { fmtPrice } from "@/lib/fmt";
 
 interface PageProps { params: { vendorId: string } }
 
@@ -20,6 +22,13 @@ interface VendorDetail {
   reviews: Review[];
 }
 
+const TABS: { id: string; label: string; Icon: React.FC<{ size: number; color: string }> }[] = [
+  { id: "About",    label: "About",    Icon: ({ size, color }) => <User    size={size} color={color} /> },
+  { id: "Services", label: "Services", Icon: ({ size, color }) => <Wrench  size={size} color={color} /> },
+  { id: "Reviews",  label: "Reviews",  Icon: ({ size, color }) => <Star    size={size} color={color} /> },
+];
+type Tab = "About" | "Services" | "Reviews";
+
 export default function VendorProfilePage({ params }: PageProps) {
   const { vendorId } = params;
   const router = useRouter();
@@ -27,12 +36,14 @@ export default function VendorProfilePage({ params }: PageProps) {
   const [toast, showToast] = useToast();
   const [vendor, setVendor] = useState<VendorDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>("About");
 
   // Review state
   const [myRating,  setMyRating]  = useState(0);
   const [myComment, setMyComment] = useState("");
   const [hovering,  setHovering]  = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [canReview, setCanReview] = useState(false);
 
   useEffect(() => {
     fetch(`/api/vendors/${vendorId}`)
@@ -41,6 +52,14 @@ export default function VendorProfilePage({ params }: PageProps) {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [vendorId]);
+
+  useEffect(() => {
+    if (user?.role !== "customer") return;
+    fetch(`/api/bookings?vendorId=${vendorId}&status=completed`)
+      .then((r) => r.json())
+      .then((d) => setCanReview((d.bookings ?? []).length > 0))
+      .catch(() => {});
+  }, [user, vendorId]);
 
   const submitReview = async () => {
     if (!myRating) { showToast("Please select a star rating", "err"); return; }
@@ -62,7 +81,7 @@ export default function VendorProfilePage({ params }: PageProps) {
     finally { setSubmitting(false); }
   };
 
-  if (loading) return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Loading…</div>;
+  if (loading) return <PageSpinner paddingY="120px" />;
   if (!vendor)  return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Vendor not found.</div>;
 
   const fullName = `${vendor.user.firstName} ${vendor.user.lastName}`;
@@ -73,7 +92,7 @@ export default function VendorProfilePage({ params }: PageProps) {
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       {/* Hero */}
-      <div style={{ height: 160, background: "linear-gradient(135deg,var(--acc) 0%,#92400e 100%)", position: "relative", overflow: "hidden" }}>
+      <div style={{ height: 160, background: "linear-gradient(135deg,var(--acc) 0%,#0f766e 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
         <button onClick={() => router.back()} style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,.3)", border: "none", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <IconChevL style={{ width: 20, height: 20, color: "#fff" }} />
@@ -115,7 +134,7 @@ export default function VendorProfilePage({ params }: PageProps) {
           { label: "Reviews",   value: String(vendor.reviewCount), icon: "💬", color: "var(--acc)" },
           { label: "Completed", value: String(vendor.completedBookings), icon: "✅", color: "var(--green)" },
         ].map((s) => (
-          <div key={s.label} style={{ flex: 1, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
+          <div key={s.label} style={{ flex: 1, background: "var(--card)", borderRadius: 14, padding: "12px 8px", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,.06), 0 6px 20px rgba(0,0,0,.07)" }}>
             <span style={{ fontSize: 18 }}>{s.icon}</span>
             <p style={{ fontSize: 16, fontWeight: 800, color: s.color, marginTop: 4 }}>{s.value}</p>
             <p style={{ fontSize: 10, color: "var(--ink3)", fontWeight: 700, marginTop: 2, textTransform: "uppercase", letterSpacing: ".05em" }}>{s.label}</p>
@@ -123,53 +142,68 @@ export default function VendorProfilePage({ params }: PageProps) {
         ))}
       </div>
 
-      <div style={{ padding: "16px 20px 0", display: "flex", flexDirection: "column", gap: 14 }}>
+      {/* Tabs */}
+      <div style={{ margin: "20px 20px 0", background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,.06), 0 6px 20px rgba(0,0,0,.07)", overflow: "hidden" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid var(--border)" }}>
+          {TABS.map(({ id, label, Icon }) => {
+            const active = tab === id;
+            return (
+              <button key={id} onClick={() => setTab(id as Tab)}
+                style={{ flex: 1, padding: "12px 0", border: "none", background: "transparent", cursor: "pointer", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <Icon size={15} color={active ? "var(--acc)" : "var(--ink3)"} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: active ? "var(--acc)" : "var(--ink3)", transition: "color .15s" }}>{label}</span>
+                {active && <div style={{ position: "absolute", bottom: 0, left: "10%", width: "80%", height: 2.5, background: "var(--acc)", borderRadius: 999 }} />}
+              </button>
+            );
+          })}
+        </div>
 
-        {/* Bio */}
-        {vendor.bio && (
-          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, padding: "18px 20px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 10 }}>About</p>
-            <p style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.7 }}>{vendor.bio}</p>
-          </div>
-        )}
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
 
-        {/* Skills */}
-        {vendor.skills.length > 0 && (
-          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, padding: "18px 20px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>Skills</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {vendor.skills.map((s) => (
-                <span key={s} style={{ padding: "5px 12px", borderRadius: 999, background: "var(--acc-bg)", border: "1px solid var(--acc-bd)", fontSize: 12, fontWeight: 600, color: "var(--acc)" }}>{s}</span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Services */}
-        {vendor.services.length > 0 && (
-          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", padding: "18px 20px 10px" }}>Services & Pricing</p>
-            {vendor.services.map((svc, i) => (
-              <div key={svc.id} style={{ padding: "12px 20px", borderTop: i > 0 ? "1px solid var(--border)" : undefined, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <p style={{ fontWeight: 700, fontSize: 14 }}>{svc.name}</p>
-                  {svc.desc && <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>{svc.desc}</p>}
-                </div>
-                <p style={{ fontWeight: 800, fontSize: 15, color: "var(--acc)", whiteSpace: "nowrap" }}>P{svc.price}/{svc.unit}</p>
+        {/* ── About tab ── */}
+        {tab === "About" && <>
+          {vendor.bio && (
+            <>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>Bio</p>
+              <p style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.7, marginBottom: 14 }}>{vendor.bio}</p>
+            </>
+          )}
+          {vendor.skills.length > 0 && (
+            <>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>Skills</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {vendor.skills.map((s) => (
+                  <span key={s} style={{ padding: "5px 12px", borderRadius: 999, background: "var(--acc-bg)", border: "1px solid var(--acc-bd)", fontSize: 12, fontWeight: 600, color: "var(--acc)" }}>{s}</span>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
+          {!vendor.bio && vendor.skills.length === 0 && (
+            <p style={{ textAlign: "center", color: "var(--ink3)", fontSize: 13, padding: "24px 0" }}>No information added yet.</p>
+          )}
+        </>}
+
+        {/* ── Services tab ── */}
+        {tab === "Services" && (
+          vendor.services.length > 0
+            ? <>{vendor.services.map((svc, i) => (
+                <div key={svc.id} style={{ paddingTop: i > 0 ? 14 : 0, borderTop: i > 0 ? "1px solid var(--border)" : undefined, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ fontWeight: 700, fontSize: 14 }}>{svc.name}</p>
+                    {svc.desc && <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>{svc.desc}</p>}
+                  </div>
+                  <p style={{ fontWeight: 800, fontSize: 15, color: "var(--acc)", whiteSpace: "nowrap", marginLeft: 12 }}>{fmtPrice(svc.price)}/{svc.unit}</p>
+                </div>
+              ))}</>
+            : <p style={{ textAlign: "center", color: "var(--ink3)", fontSize: 13, padding: "24px 0" }}>No services listed yet.</p>
         )}
 
-        {/* Reviews list */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", padding: "18px 20px 12px" }}>
-            Reviews ({vendor.reviews.length})
-          </p>
+        {/* ── Reviews tab ── */}
+        {tab === "Reviews" && <>
           {vendor.reviews.length === 0
-            ? <p style={{ padding: "0 20px 18px", fontSize: 13, color: "var(--ink3)" }}>No reviews yet. Be the first!</p>
+            ? <p style={{ fontSize: 13, color: "var(--ink3)", padding: "8px 0 16px" }}>No reviews yet. Be the first!</p>
             : vendor.reviews.map((rv, i) => (
-              <div key={rv.id} style={{ padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border)" : undefined }}>
+              <div key={rv.id} style={{ paddingTop: i > 0 ? 14 : 0, borderTop: i > 0 ? "1px solid var(--border)" : undefined }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                   <Avatar name={`${rv.reviewer.firstName} ${rv.reviewer.lastName}`} size={36} src={rv.reviewer.avatarUrl} />
                   <div style={{ flex: 1 }}>
@@ -184,52 +218,45 @@ export default function VendorProfilePage({ params }: PageProps) {
               </div>
             ))
           }
-        </div>
-
-        {/* Leave a review (customer only) */}
-        {user?.role === "customer" && (
-          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, padding: "18px 20px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 14 }}>
-              {myReview ? "Update Your Review" : "Leave a Review"}
-            </p>
-            {/* Star picker */}
-            <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-              {[1,2,3,4,5].map((n) => (
-                <button
-                  key={n}
-                  onMouseEnter={() => setHovering(n)}
-                  onMouseLeave={() => setHovering(0)}
-                  onClick={() => setMyRating(n)}
-                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: 28, lineHeight: 1, color: n <= (hovering || myRating) ? "#f59e0b" : "var(--border2)", transition: "color .15s" }}
-                >★</button>
-              ))}
-              {myRating > 0 && <span style={{ alignSelf: "center", fontSize: 13, color: "var(--ink3)", marginLeft: 4 }}>{["", "Poor", "Fair", "Good", "Great", "Excellent"][myRating]}</span>}
+          {user?.role === "customer" && (
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16, marginTop: 4 }}>
+              <div style={{ opacity: canReview ? 1 : 0.45, pointerEvents: canReview ? "auto" : "none" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>
+                  {myReview ? "Update Your Review" : "Leave a Review"}
+                </p>
+                {!canReview && (
+                  <p style={{ fontSize: 12, color: "var(--ink3)", marginBottom: 10 }}>Book and confirm a service to leave a review.</p>
+                )}
+                <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+                  {[1,2,3,4,5].map((n) => (
+                    <button key={n} onMouseEnter={() => setHovering(n)} onMouseLeave={() => setHovering(0)} onClick={() => setMyRating(n)}
+                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 28, lineHeight: 1, color: n <= (hovering || myRating) ? "#f59e0b" : "var(--border2)", transition: "color .15s" }}>★</button>
+                  ))}
+                  {myRating > 0 && <span style={{ alignSelf: "center", fontSize: 13, color: "var(--ink3)", marginLeft: 4 }}>{["","Poor","Fair","Good","Great","Excellent"][myRating]}</span>}
+                </div>
+                <textarea className="field" rows={3} placeholder="Share your experience (optional)…" value={myComment} onChange={(e) => setMyComment(e.target.value)} style={{ resize: "vertical" }} />
+                <button onClick={submitReview} disabled={submitting || !myRating} className="btn-pri"
+                  style={{ width: "100%", marginTop: 12, padding: 14, fontSize: 14, opacity: (!myRating || submitting) ? 0.6 : 1 }}>
+                  {submitting ? "Submitting…" : "Submit Review"}
+                </button>
+              </div>
             </div>
-            <textarea
-              className="field"
-              rows={3}
-              placeholder="Share your experience (optional)…"
-              value={myComment}
-              onChange={(e) => setMyComment(e.target.value)}
-              style={{ resize: "vertical" }}
-            />
-            <button
-              onClick={submitReview}
-              disabled={submitting || !myRating}
-              className="btn-pri"
-              style={{ width: "100%", marginTop: 12, padding: 14, fontSize: 14, opacity: (!myRating || submitting) ? 0.6 : 1 }}
-            >
-              {submitting ? "Submitting…" : "Submit Review"}
-            </button>
-          </div>
-        )}
+          )}
+        </>}
+        </div>
       </div>
 
-      {/* Book Now sticky footer */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 20px 28px", background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
+      {/* CTA bar — sidebar-aware on desktop, compact on mobile */}
+      <div className="page-cta-bar">
         <button
-          className="btn-pri"
-          style={{ width: "100%", padding: 16, fontSize: 16, fontWeight: 700, borderRadius: 14 }}
+          className="btn-ghost page-cta-btn"
+          onClick={() => router.push("/customer/messages")}
+        >
+          <IconChat style={{ width: 17, height: 17 }} />
+          Message
+        </button>
+        <button
+          className="btn-pri page-cta-btn"
           onClick={() => router.push(`/customer/book/${vendorId}`)}
         >
           Book {fullName.split(" ")[0]}

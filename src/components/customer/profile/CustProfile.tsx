@@ -1,24 +1,51 @@
 "use client";
 import { FC, useState, ChangeEvent, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { IconEdit, IconCheck, IconMapPin, IconLogout, IconUser, IconBell, IconShield, IconWallet } from "@/components/icons";
-import { Toast, AvatarUpload } from "@/components/ui";
+import {
+  Box, Flex, VStack, HStack, Grid, GridItem,
+  Text, Heading, Button, Input, InputGroup, InputRightElement,
+  Badge, Divider,
+} from "@chakra-ui/react";
+import {
+  User, MapPin, Mail, Phone, Shield, Wallet,
+  Edit2, Check, Bell, Lock, Eye, EyeOff, X,
+  FileText, ShieldCheck, Cookie, ExternalLink, RotateCcw,
+} from "lucide-react";
+import { Toast, AvatarUpload, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { useUser } from "@/context/UserContext";
 import type { ProfileData } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 
 const EMPTY: ProfileData = { fn: "", ln: "", email: "", phone: "", city: "", area: "", bio: "" };
 
+type StrField = Extract<{ [K in keyof ProfileData]: ProfileData[K] extends string ? K : never }[keyof ProfileData], string>;
+
+interface FieldProps {
+  label: string; field: StrField; type?: string; full?: boolean;
+  editing: boolean; draft: ProfileData; profile: ProfileData;
+  onChange: (f: StrField, v: string) => void;
+}
+const Field: FC<FieldProps> = ({ label, field, type = "text", full, editing, draft, profile, onChange }) => (
+  <div style={full ? { gridColumn: "1/-1" } : {}}>
+    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>{label}</label>
+    {editing
+      ? <input type={type} className="field" value={draft[field] as string} onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value)} />
+      : <p style={{ fontSize: 15, fontWeight: 500, padding: "2px 0", color: "var(--ink)" }}>{(profile[field] as string) || <span style={{ color: "var(--ink3)" }}>Not set</span>}</p>}
+  </div>
+);
+
+type TabId = "profile" | "security" | "payments" | "privacy";
+
 export const CustProfile: FC = () => {
-  const router = useRouter();
-  const { user, loading: userLoading, logout, refresh } = useUser();
+  const { user, loading: userLoading, refresh } = useUser();
   const [toast, showToast] = useToast();
   const [editing, setEditing] = useState(false);
   const [busy,    setBusy]    = useState(false);
   const [profile, setProfile] = useState<ProfileData>(EMPTY);
   const [draft,   setDraft]   = useState<ProfileData>(EMPTY);
   const [avatar,  setAvatar]  = useState<string | null>(null);
+  const [tab,     setTab]     = useState<TabId>("profile");
 
   // Change password
   const [pwOpen,    setPwOpen]    = useState(false);
@@ -26,6 +53,9 @@ export const CustProfile: FC = () => {
   const [pwNew,     setPwNew]     = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
   const [pwBusy,    setPwBusy]    = useState(false);
+  const [showCur,   setShowCur]   = useState(false);
+  const [showNew,   setShowNew]   = useState(false);
+  const [showConf,  setShowConf]  = useState(false);
 
   // Payment history
   interface PayRecord { id: string; serviceName: string; amount: number; paidAt: string | null; paymentMethod: string | null; vendor: { user: { firstName: string; lastName: string } } }
@@ -66,18 +96,42 @@ export const CustProfile: FC = () => {
   };
 
   const handleAvatarUpload = async (dataUrl: string) => {
-    const res = await fetch("/api/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ avatarUrl: dataUrl }),
-    });
-    if (!res.ok) { showToast("Upload failed", "err"); return; }
-    setAvatar(dataUrl);
-    await refresh();
-    showToast("Photo updated ✓", "ok");
+    try {
+      const blob = await fetch(dataUrl).then((r) => r.blob());
+      const form = new FormData();
+      form.append("file", blob, `avatar.${blob.type.split("/")[1] || "jpg"}`);
+      form.append("bucket", "avatars");
+      form.append("type", "avatar");
+
+      const upRes = await fetch("/api/upload", { method: "POST", body: form });
+      if (!upRes.ok) {
+        // Fallback to legacy base64 if storage is not configured
+        const res = await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ avatarUrl: dataUrl }),
+        });
+        if (!res.ok) { showToast("Upload failed", "err"); return; }
+        setAvatar(dataUrl);
+        await refresh();
+        showToast("Photo updated ✓", "ok");
+        return;
+      }
+
+      const { url } = await upRes.json();
+      await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: url }),
+      });
+      setAvatar(url);
+      await refresh();
+      showToast("Photo updated ✓", "ok");
+    } catch {
+      showToast("Upload failed", "err");
+    }
   };
 
-  const handleLogout = async () => { await logout(); router.push("/"); };
 
   const changePassword = async () => {
     if (!pwCurrent || !pwNew || !pwConfirm) { showToast("Fill in all fields", "err"); return; }
@@ -98,210 +152,504 @@ export const CustProfile: FC = () => {
     finally { setPwBusy(false); }
   };
 
-  type StrField = { [K in keyof ProfileData]: ProfileData[K] extends string ? K : never }[keyof ProfileData] & string;
-
-  const Field: FC<{ label: string; field: StrField; type?: string; full?: boolean }> = ({ label, field, type = "text", full }) => (
-    <div style={full ? { gridColumn: "1/-1" } : {}}>
-      <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>{label}</label>
-      {editing
-        ? <input type={type} className="field" value={draft[field] as string} onChange={(e: ChangeEvent<HTMLInputElement>) => setDraft((d) => ({ ...d, [field]: e.target.value }))} />
-        : <p style={{ fontSize: 15, fontWeight: 500, padding: "2px 0", color: "var(--ink)" }}>{(profile[field] as string) || <span style={{ color: "var(--ink3)" }}>Not set</span>}</p>}
-    </div>
-  );
+  const onFieldChange = (f: StrField, v: string) => setDraft((d) => ({ ...d, [f]: v }));
 
   const fullName = `${profile.fn} ${profile.ln}`.trim();
 
   if (userLoading) {
-    return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Loading…</div>;
+    return <PageSpinner paddingY="120px" />;
   }
 
+  const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
+    { id: "profile",  label: "Profile",  icon: <User       size={14} /> },
+    { id: "security", label: "Security", icon: <Shield     size={14} /> },
+    { id: "payments", label: "Payments", icon: <Wallet     size={14} /> },
+    { id: "privacy",  label: "Privacy",  icon: <ShieldCheck size={14} /> },
+  ];
+
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", paddingBottom: 100 }}>
+    <Box minH="100vh" bg="var(--bg)" pb="100px">
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       {/* ── Hero banner ── */}
-      <div style={{ height: 160, background: "linear-gradient(135deg,var(--acc) 0%,#b45309 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,.08)" }} />
-        <div style={{ position: "absolute", bottom: -60, left: -20, width: 160, height: 160, borderRadius: "50%", background: "rgba(0,0,0,.1)" }} />
-        <div style={{ position: "absolute", top: 16, right: 16 }}>
-          <button
+      <Box
+        h="180px"
+        bgGradient="linear(135deg, #d97706 0%, #b45309 55%, #1e40af 100%)"
+        position="relative"
+        overflow="hidden"
+      >
+        {/* decorative circles */}
+        <Box position="absolute" top="-40px" right="-40px" w="200px" h="200px" borderRadius="full" bg="rgba(255,255,255,.08)" />
+        <Box position="absolute" bottom="-60px" left="-20px" w="160px" h="160px" borderRadius="full" bg="rgba(0,0,0,.1)" />
+        <Box position="absolute" top="-20px" left="40%" w="120px" h="120px" borderRadius="full" bg="rgba(255,255,255,.05)" />
+
+        {/* Edit / Save button */}
+        <Box position="absolute" top={4} right={4}>
+          <Button
             onClick={() => editing ? save() : setEditing(true)}
-            disabled={busy}
-            style={{ background: "rgba(255,255,255,.2)", backdropFilter: "blur(10px)", border: "1.5px solid rgba(255,255,255,.35)", borderRadius: 999, padding: "8px 18px", color: "#fff", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 7, cursor: "pointer", opacity: busy ? 0.7 : 1 }}
+            isLoading={busy}
+            size="sm"
+            leftIcon={editing ? <Check size={14} /> : <Edit2 size={14} />}
+            bg="rgba(255,255,255,.18)"
+            backdropFilter="blur(10px)"
+            border="1.5px solid rgba(255,255,255,.35)"
+            color="white"
+            borderRadius="full"
+            fontWeight={700}
+            fontSize={13}
+            px={5}
+            _hover={{ bg: "rgba(255,255,255,.28)" }}
+            _active={{ bg: "rgba(255,255,255,.32)" }}
           >
-            {editing
-              ? <><IconCheck style={{ width: 15, height: 15 }} />{busy ? "Saving…" : "Save"}</>
-              : <><IconEdit style={{ width: 15, height: 15 }} />Edit Profile</>}
-          </button>
-        </div>
-      </div>
+            {editing ? (busy ? "Saving…" : "Save") : "Edit Profile"}
+          </Button>
+          {editing && (
+            <Button
+              ml={2}
+              onClick={() => { setEditing(false); setDraft(profile); }}
+              size="sm"
+              leftIcon={<X size={14} />}
+              bg="rgba(0,0,0,.2)"
+              backdropFilter="blur(10px)"
+              border="1.5px solid rgba(255,255,255,.2)"
+              color="white"
+              borderRadius="full"
+              fontWeight={700}
+              fontSize={13}
+              px={4}
+              _hover={{ bg: "rgba(0,0,0,.32)" }}
+            >
+              Cancel
+            </Button>
+          )}
+        </Box>
+      </Box>
 
       {/* ── Avatar (overlaps hero) ── */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: -55, position: "relative", zIndex: 10 }}>
-        <div style={{ padding: 4, background: "var(--bg)", borderRadius: "50%", boxShadow: "0 4px 20px rgba(0,0,0,.15)" }}>
-          <AvatarUpload src={avatar} name={fullName || "?"} size={110} onUpload={handleAvatarUpload} />
-        </div>
-      </div>
+      <Flex justify="center" mt="-50px" position="relative" zIndex={10}>
+        <Box p="4px" bg="var(--bg)" borderRadius="full" boxShadow="0 4px 20px rgba(0,0,0,.18)">
+          <AvatarUpload src={avatar} name={fullName || "?"} size={100} onUpload={handleAvatarUpload} />
+        </Box>
+      </Flex>
 
-      {/* ── Name + location ── */}
-      <div style={{ textAlign: "center", padding: "14px 24px 0" }}>
-        <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.02em", color: "var(--ink)" }}>{fullName || "Your Name"}</h2>
-        <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 5, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-          <IconMapPin style={{ width: 13, height: 13 }} />
-          {profile.city || "Gaborone"}{profile.area ? `, ${profile.area}` : ""}
-        </p>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, padding: "4px 12px", borderRadius: 999, background: "var(--green-bg)", border: "1px solid rgba(12,166,120,.2)" }}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--green)" }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--green)" }}>Active</span>
-        </div>
-      </div>
-
-      {/* ── Quick stats ── */}
-      <div style={{ display: "flex", gap: 10, margin: "20px 20px 0" }}>
-        {[
-          { label: "Email", value: profile.email || "—", icon: "✉️" },
-          { label: "Phone", value: profile.phone || "—", icon: "📞" },
-        ].map((s) => (
-          <div key={s.label} style={{ flex: 1, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 10px", textAlign: "center" }}>
-            <span style={{ fontSize: 20 }}>{s.icon}</span>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", marginTop: 6, wordBreak: "break-all" }}>{s.value}</p>
-            <p style={{ fontSize: 10, color: "var(--ink3)", fontWeight: 600, marginTop: 2, textTransform: "uppercase", letterSpacing: ".05em" }}>{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", gap: 14 }}>
-
-        {/* ── Personal info card ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--acc-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <IconUser style={{ width: 16, height: 16, color: "var(--acc)" }} />
-            </div>
-            <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Personal Information</p>
-          </div>
-          <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            <Field label="First Name" field="fn" />
-            <Field label="Last Name"  field="ln" />
-            <Field label="Email"      field="email" type="email" full />
-            <Field label="Phone"      field="phone" type="tel" />
-            <Field label="City"       field="city" />
-            <Field label="Area"       field="area" />
-          </div>
-        </div>
-
-        {/* ── Preferences placeholder ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(99,102,241,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <IconBell style={{ width: 16, height: 16, color: "#6366f1" }} />
-            </div>
-            <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Preferences</p>
-          </div>
-          <div style={{ padding: "16px 20px" }}>
-            {(user?.preferredServices?.length ?? 0) > 0
-              ? <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {user!.preferredServices.map((s) => (
-                    <span key={s} style={{ padding: "5px 12px", borderRadius: 999, background: "var(--acc-bg)", border: "1px solid var(--acc-bd)", fontSize: 12, fontWeight: 600, color: "var(--acc)" }}>{s}</span>
-                  ))}
-                </div>
-              : <p style={{ fontSize: 13, color: "var(--ink3)" }}>No preferred services set yet.</p>
-            }
-          </div>
-        </div>
-
-        {/* ── Security ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--green-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <IconShield style={{ width: 16, height: 16, color: "var(--green)" }} />
-            </div>
-            <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Account Security</p>
-          </div>
-          <div style={{ padding: "16px 20px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <p style={{ fontWeight: 600, fontSize: 14, color: "var(--ink)" }}>Password</p>
-                <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>Change your account password</p>
-              </div>
-              <button
-                onClick={() => setPwOpen((o) => !o)}
-                style={{ fontSize: 12, fontWeight: 700, color: "var(--acc)", background: "var(--acc-bg)", padding: "6px 14px", borderRadius: 999, border: "1px solid var(--acc-bd)", cursor: "pointer" }}
-              >{pwOpen ? "Cancel" : "Change"}</button>
-            </div>
-            {pwOpen && (
-              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>Current Password</label>
-                  <input type="password" className="field" placeholder="••••••••" value={pwCurrent} onChange={(e) => setPwCurrent(e.target.value)} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>New Password</label>
-                  <input type="password" className="field" placeholder="Min 8 characters" value={pwNew} onChange={(e) => setPwNew(e.target.value)} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>Confirm New Password</label>
-                  <input type="password" className="field" placeholder="Repeat new password" value={pwConfirm} onChange={(e) => setPwConfirm(e.target.value)} />
-                </div>
-                <button
-                  onClick={changePassword}
-                  disabled={pwBusy}
-                  className="btn-pri"
-                  style={{ padding: 13, fontSize: 14, opacity: pwBusy ? 0.7 : 1 }}
-                >{pwBusy ? "Saving…" : "Update Password"}</button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── Payment History ── */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(99,102,241,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <IconWallet style={{ width: 16, height: 16, color: "#6366f1" }} />
-            </div>
-            <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Payment History</p>
-          </div>
-          {payments.length === 0
-            ? <p style={{ padding: "16px 20px", fontSize: 13, color: "var(--ink3)" }}>No payments yet.</p>
-            : payments.map((p, i) => (
-              <div key={p.id} style={{ padding: "14px 20px", borderTop: i > 0 ? "1px solid var(--border)" : undefined }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>{p.serviceName}</p>
-                    <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>
-                      {p.vendor.user.firstName} {p.vendor.user.lastName}
-                    </p>
-                    <div style={{ display: "flex", gap: 8, marginTop: 4, alignItems: "center" }}>
-                      {p.paymentMethod && (
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "rgba(99,102,241,.1)", color: "#6366f1" }}>
-                          {METHOD_NAMES[p.paymentMethod] ?? p.paymentMethod}
-                        </span>
-                      )}
-                      {p.paidAt && (
-                        <span style={{ fontSize: 11, color: "var(--ink3)" }}>
-                          {new Date(p.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                          {" · "}
-                          {new Date(p.paidAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <p style={{ fontWeight: 800, fontSize: 16, color: "var(--acc)" }}>P{p.amount}</p>
-                </div>
-              </div>
-            ))
-          }
-        </div>
-
-        {/* ── Sign out ── */}
-        <button
-          onClick={handleLogout}
-          style={{ width: "100%", padding: 16, borderRadius: 14, background: "var(--red-bg)", border: "1px solid rgba(224,49,49,.2)", color: "var(--red)", fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, cursor: "pointer" }}
+      {/* ── Name + location + badge ── */}
+      <VStack spacing={1} pt={3} px={6} textAlign="center">
+        <Heading fontSize="24px" fontWeight={800} letterSpacing="-0.02em" color="var(--ink)">
+          {fullName || "Your Name"}
+        </Heading>
+        <HStack spacing={1} color="var(--ink3)" fontSize="13px">
+          <MapPin size={13} />
+          <Text>
+            {profile.city || "Gaborone"}{profile.area ? `, ${profile.area}` : ""}
+          </Text>
+        </HStack>
+        <HStack
+          spacing={2}
+          mt={1}
+          px={3}
+          py="4px"
+          borderRadius="full"
+          bg="var(--green-bg)"
+          border="1px solid rgba(12,166,120,.2)"
+          display="inline-flex"
         >
-          <IconLogout style={{ width: 18, height: 18 }} /> Sign Out
-        </button>
-      </div>
-    </div>
+          <Box w="7px" h="7px" borderRadius="full" bg="var(--green)" />
+          <Text fontSize="11px" fontWeight={700} color="var(--green)">Active</Text>
+        </HStack>
+      </VStack>
+
+      {/* ── Contact quick-info ── */}
+      <Grid templateColumns="1fr 1fr" gap={2} mx={4} mt={5}>
+        <GridItem>
+          <Box bg="white" borderRadius="2xl" boxShadow="sm" p={4} textAlign="center">
+            <Flex justify="center" mb={2}>
+              <Box p="8px" borderRadius="xl" bg="rgba(217,119,6,.1)">
+                <Mail size={16} color="#d97706" />
+              </Box>
+            </Flex>
+            <Text fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".05em" mb={1}>Email</Text>
+            <Text fontSize="12px" fontWeight={600} color="var(--ink)" wordBreak="break-all" noOfLines={1}>{profile.email || "—"}</Text>
+          </Box>
+        </GridItem>
+        <GridItem>
+          <Box bg="white" borderRadius="2xl" boxShadow="sm" p={4} textAlign="center">
+            <Flex justify="center" mb={2}>
+              <Box p="8px" borderRadius="xl" bg="rgba(217,119,6,.1)">
+                <Phone size={16} color="#d97706" />
+              </Box>
+            </Flex>
+            <Text fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".05em" mb={1}>Phone</Text>
+            <Text fontSize="12px" fontWeight={600} color="var(--ink)">{profile.phone || "—"}</Text>
+          </Box>
+        </GridItem>
+      </Grid>
+
+      {/* ── Tab switcher ── */}
+      <Box mx={4} mt={6}>
+        <Box bg="white" borderRadius="2xl" boxShadow="sm" overflow="hidden">
+          <Flex borderBottom="1px solid var(--border)">
+            {TABS.map((t) => (
+              <Box
+                key={t.id}
+                as="button"
+                flex={1}
+                py={3}
+                onClick={() => setTab(t.id)}
+                position="relative"
+                _focus={{ outline: "none" }}
+                transition="color .15s"
+              >
+                <Flex direction="column" align="center" gap="4px">
+                  <Box color={tab === t.id ? "var(--acc)" : "var(--ink3)"} transition="color .15s">
+                    {t.icon}
+                  </Box>
+                  <Text
+                    fontSize="12px"
+                    fontWeight={700}
+                    color={tab === t.id ? "var(--acc)" : "var(--ink3)"}
+                    transition="color .15s"
+                  >
+                    {t.label}
+                  </Text>
+                </Flex>
+                {tab === t.id && (
+                  <Box
+                    position="absolute"
+                    bottom={0}
+                    left="10%"
+                    w="80%"
+                    h="2.5px"
+                    bg="var(--acc)"
+                    borderRadius="full"
+                  />
+                )}
+              </Box>
+            ))}
+          </Flex>
+
+          {/* ── Profile tab ── */}
+          {tab === "profile" && (
+            <Box>
+              {/* Personal info */}
+              <Box px={5} pt={5} pb={2}>
+                <HStack spacing={3} mb={4}>
+                  <Flex w="32px" h="32px" borderRadius="xl" bg="var(--acc-bg)" align="center" justify="center" flexShrink={0}>
+                    <User size={16} color="var(--acc)" />
+                  </Flex>
+                  <Text fontWeight={700} fontSize="14px" color="var(--ink)">Personal Information</Text>
+                </HStack>
+                <Grid templateColumns="1fr 1fr" gap={5}>
+                  <Field label="First Name" field="fn"    editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+                  <Field label="Last Name"  field="ln"    editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+                  <Field label="Email"      field="email" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} type="email" full />
+                  <Field label="Phone"      field="phone" editing={editing} draft={draft} profile={profile} onChange={onFieldChange} type="tel" />
+                  <Field label="City"       field="city"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+                  <Field label="Area"       field="area"  editing={editing} draft={draft} profile={profile} onChange={onFieldChange} />
+                </Grid>
+              </Box>
+
+              <Divider borderColor="var(--border)" my={4} />
+
+              {/* Preferences */}
+              <Box px={5} pb={5}>
+                <HStack spacing={3} mb={4}>
+                  <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(99,102,241,.1)" align="center" justify="center" flexShrink={0}>
+                    <Bell size={16} color="#6366f1" />
+                  </Flex>
+                  <Text fontWeight={700} fontSize="14px" color="var(--ink)">Preferences</Text>
+                </HStack>
+                {(user?.preferredServices?.length ?? 0) > 0 ? (
+                  <Flex flexWrap="wrap" gap={2}>
+                    {user!.preferredServices.map((s) => (
+                      <Badge
+                        key={s}
+                        px={3} py={1}
+                        borderRadius="full"
+                        bg="var(--acc-bg)"
+                        border="1px solid var(--acc-bd)"
+                        fontSize="12px"
+                        fontWeight={600}
+                        color="var(--acc)"
+                        textTransform="none"
+                      >
+                        {s}
+                      </Badge>
+                    ))}
+                  </Flex>
+                ) : (
+                  <Text fontSize="13px" color="var(--ink3)">No preferred services set yet.</Text>
+                )}
+              </Box>
+            </Box>
+          )}
+
+          {/* ── Security tab ── */}
+          {tab === "security" && (
+            <Box px={5} py={5}>
+              <HStack spacing={3} mb={5}>
+                <Flex w="32px" h="32px" borderRadius="xl" bg="var(--green-bg)" align="center" justify="center" flexShrink={0}>
+                  <Shield size={16} color="var(--green)" />
+                </Flex>
+                <Text fontWeight={700} fontSize="14px" color="var(--ink)">Account Security</Text>
+              </HStack>
+
+              <Box bg="var(--bg)" borderRadius="xl" p={4}>
+                <Flex justify="space-between" align="center">
+                  <HStack spacing={3}>
+                    <Flex w="36px" h="36px" borderRadius="xl" bg="rgba(217,119,6,.1)" align="center" justify="center" flexShrink={0}>
+                      <Lock size={16} color="#d97706" />
+                    </Flex>
+                    <Box>
+                      <Text fontWeight={600} fontSize="14px" color="var(--ink)">Password</Text>
+                      <Text fontSize="12px" color="var(--ink3)" mt="2px">Change your account password</Text>
+                    </Box>
+                  </HStack>
+                  <Button
+                    onClick={() => setPwOpen((o) => !o)}
+                    size="sm"
+                    variant="ghost"
+                    colorScheme={pwOpen ? "gray" : "orange"}
+                    borderRadius="full"
+                    fontWeight={700}
+                    fontSize="12px"
+                    leftIcon={pwOpen ? <X size={12} /> : <Edit2 size={12} />}
+                  >
+                    {pwOpen ? "Cancel" : "Change"}
+                  </Button>
+                </Flex>
+
+                {pwOpen && (
+                  <VStack spacing={4} mt={5} align="stretch">
+                    <Box>
+                      <Text as="label" fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".06em" display="block" mb={2}>
+                        Current Password
+                      </Text>
+                      <InputGroup>
+                        <Input
+                          type={showCur ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={pwCurrent}
+                          onChange={(e) => setPwCurrent(e.target.value)}
+                          borderRadius="xl"
+                          fontSize="14px"
+                          bg="white"
+                        />
+                        <InputRightElement>
+                          <Box as="button" type="button" onClick={() => setShowCur((v) => !v)} color="var(--ink3)" p={1}>
+                            {showCur ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </Box>
+                        </InputRightElement>
+                      </InputGroup>
+                    </Box>
+                    <Box>
+                      <Text as="label" fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".06em" display="block" mb={2}>
+                        New Password
+                      </Text>
+                      <InputGroup>
+                        <Input
+                          type={showNew ? "text" : "password"}
+                          placeholder="Min 8 characters"
+                          value={pwNew}
+                          onChange={(e) => setPwNew(e.target.value)}
+                          borderRadius="xl"
+                          fontSize="14px"
+                          bg="white"
+                        />
+                        <InputRightElement>
+                          <Box as="button" type="button" onClick={() => setShowNew((v) => !v)} color="var(--ink3)" p={1}>
+                            {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </Box>
+                        </InputRightElement>
+                      </InputGroup>
+                    </Box>
+                    <Box>
+                      <Text as="label" fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".06em" display="block" mb={2}>
+                        Confirm New Password
+                      </Text>
+                      <InputGroup>
+                        <Input
+                          type={showConf ? "text" : "password"}
+                          placeholder="Repeat new password"
+                          value={pwConfirm}
+                          onChange={(e) => setPwConfirm(e.target.value)}
+                          borderRadius="xl"
+                          fontSize="14px"
+                          bg="white"
+                        />
+                        <InputRightElement>
+                          <Box as="button" type="button" onClick={() => setShowConf((v) => !v)} color="var(--ink3)" p={1}>
+                            {showConf ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </Box>
+                        </InputRightElement>
+                      </InputGroup>
+                    </Box>
+                    <Button
+                      onClick={changePassword}
+                      isLoading={pwBusy}
+                      colorScheme="orange"
+                      borderRadius="xl"
+                      fontWeight={700}
+                      fontSize="14px"
+                      leftIcon={<Check size={15} />}
+                      py={6}
+                    >
+                      Update Password
+                    </Button>
+                  </VStack>
+                )}
+              </Box>
+            </Box>
+          )}
+
+          {/* ── Payments tab ── */}
+          {tab === "payments" && (
+            <Box>
+              <Flex px={5} pt={5} pb={3} align="center" gap={3}>
+                <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(99,102,241,.1)" align="center" justify="center" flexShrink={0}>
+                  <Wallet size={16} color="#6366f1" />
+                </Flex>
+                <Text fontWeight={700} fontSize="14px" color="var(--ink)">Payment History</Text>
+              </Flex>
+
+              {payments.length === 0 ? (
+                <Box px={5} pb={5}>
+                  <Flex direction="column" align="center" py={8} gap={3}>
+                    <Box p={4} borderRadius="full" bg="rgba(99,102,241,.08)">
+                      <Wallet size={28} color="#6366f1" />
+                    </Box>
+                    <Text fontSize="14px" color="var(--ink3)" fontWeight={500}>No payments yet.</Text>
+                  </Flex>
+                </Box>
+              ) : (
+                <VStack spacing={0} align="stretch" pb={2}>
+                  {payments.map((p, i) => (
+                    <Box key={p.id}>
+                      {i > 0 && <Divider borderColor="var(--border)" />}
+                      <Flex px={5} py={4} justify="space-between" align="flex-start">
+                        <Box flex={1} mr={4}>
+                          <Text fontWeight={700} fontSize="14px" color="var(--ink)">{p.serviceName}</Text>
+                          <Text fontSize="12px" color="var(--ink3)" mt="2px">
+                            {p.vendor.user.firstName} {p.vendor.user.lastName}
+                          </Text>
+                          <HStack spacing={2} mt={2} flexWrap="wrap">
+                            {p.paymentMethod && (
+                              <Badge
+                                px={2} py="2px"
+                                borderRadius="full"
+                                bg="rgba(99,102,241,.1)"
+                                color="#6366f1"
+                                fontSize="11px"
+                                fontWeight={700}
+                                textTransform="none"
+                              >
+                                {METHOD_NAMES[p.paymentMethod] ?? p.paymentMethod}
+                              </Badge>
+                            )}
+                            {p.paidAt && (
+                              <Text fontSize="11px" color="var(--ink3)">
+                                {new Date(p.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                                {" · "}
+                                {new Date(p.paidAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                              </Text>
+                            )}
+                          </HStack>
+                        </Box>
+                        <Text fontWeight={800} fontSize="16px" color="var(--acc)" flexShrink={0}>
+                          {fmtPrice(p.amount)}
+                        </Text>
+                      </Flex>
+                    </Box>
+                  ))}
+                </VStack>
+              )}
+            </Box>
+          )}
+          {/* ── Privacy Centre tab ── */}
+          {tab === "privacy" && (
+            <Box px={5} py={5}>
+              <HStack spacing={3} mb={5}>
+                <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(13,148,136,.1)" align="center" justify="center" flexShrink={0}>
+                  <ShieldCheck size={16} color="#0d9488" />
+                </Flex>
+                <Text fontWeight={700} fontSize="14px" color="var(--ink)">Privacy Centre</Text>
+              </HStack>
+
+              {/* Policy links */}
+              <VStack spacing={3} align="stretch" mb={6}>
+                {[
+                  { href: "/legal/privacy", icon: <ShieldCheck size={16} color="#0d9488" />, label: "Privacy Policy", desc: "How we collect and use your data", bg: "rgba(13,148,136,.08)", color: "#0d9488" },
+                  { href: "/legal/terms",   icon: <FileText    size={16} color="#d97706" />, label: "Terms & Conditions", desc: "Your rights and obligations as a customer", bg: "rgba(217,119,6,.08)", color: "#d97706" },
+                  { href: "/legal/cookies", icon: <Cookie      size={16} color="#6366f1" />, label: "Cookie Policy", desc: "How we use cookies and local storage", bg: "rgba(99,102,241,.08)", color: "#6366f1" },
+                ].map((item) => (
+                  <Box
+                    key={item.href}
+                    as="a"
+                    href={item.href}
+                    display="flex"
+                    alignItems="center"
+                    gap={3}
+                    p={4}
+                    borderRadius="xl"
+                    bg="var(--bg)"
+                    border="1px solid var(--border)"
+                    style={{ textDecoration: "none", cursor: "pointer" }}
+                    _hover={{ bg: "var(--bg2)" }}
+                    transition="background .15s"
+                  >
+                    <Flex w="36px" h="36px" borderRadius="xl" bg={item.bg} align="center" justify="center" flexShrink={0}>
+                      {item.icon}
+                    </Flex>
+                    <Box flex={1}>
+                      <Text fontWeight={700} fontSize="13px" color="var(--ink)">{item.label}</Text>
+                      <Text fontSize="11px" color="var(--ink3)" mt="1px">{item.desc}</Text>
+                    </Box>
+                    <ExternalLink size={14} color="var(--ink3)" />
+                  </Box>
+                ))}
+              </VStack>
+
+              {/* Cookie preferences */}
+              <Box bg="var(--bg)" borderRadius="xl" p={4} border="1px solid var(--border)">
+                <HStack spacing={3} mb={3}>
+                  <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(99,102,241,.08)" align="center" justify="center" flexShrink={0}>
+                    <Cookie size={15} color="#6366f1" />
+                  </Flex>
+                  <Box>
+                    <Text fontWeight={700} fontSize="13px" color="var(--ink)">Cookie Preferences</Text>
+                    <Text fontSize="11px" color="var(--ink3)">Manage your consent settings</Text>
+                  </Box>
+                </HStack>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  colorScheme="purple"
+                  borderRadius="full"
+                  fontWeight={700}
+                  fontSize="12px"
+                  leftIcon={<RotateCcw size={12} />}
+                  onClick={() => {
+                    localStorage.removeItem("hh_cookie_consent");
+                    window.location.reload();
+                  }}
+                >
+                  Reset Cookie Consent
+                </Button>
+              </Box>
+
+              {/* Data request */}
+              <Box mt={4} p={4} borderRadius="xl" bg="#fffbeb" border="1px solid #fde68a">
+                <Text fontWeight={700} fontSize="13px" color="#d97706" mb={1}>Your Data Rights</Text>
+                <Text fontSize="12px" color="#44403c" lineHeight={1.6}>
+                  You have the right to access, correct, or delete your personal data.
+                  To submit a data request, contact us at{" "}
+                  <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#d97706", fontWeight: 700 }}>privacy@handyhub.co.bw</a>
+                </Text>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+    </Box>
   );
 };

@@ -1,21 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, signToken, cookieOptions, COOKIE_NAME } from "@/lib/auth";
+import { RegisterSchema } from "@/lib/schemas";
+import { isRateLimited, recordFailure, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const rlKey = `register:${ip}`;
+  if (isRateLimited(rlKey, RATE_LIMITS.auth)) {
+    return NextResponse.json({ message: "Too many attempts. Please try again later." }, { status: 429 });
+  }
+
+  let parsed: ReturnType<typeof RegisterSchema.safeParse>;
   try {
-    const { email, password, firstName, lastName, role } = await req.json();
+    parsed = RegisterSchema.safeParse(await req.json());
+  } catch {
+    return NextResponse.json({ message: "Invalid request body." }, { status: 400 });
+  }
 
-    if (!email || !password || !firstName || !lastName || !role) {
-      return NextResponse.json({ message: "All fields are required." }, { status: 400 });
-    }
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: parsed.error.issues[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
 
-    if (!["customer", "vendor"].includes(role)) {
-      return NextResponse.json({ message: "Invalid role." }, { status: 400 });
-    }
+  const { email, password, firstName, lastName, role } = parsed.data;
 
+  try {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
+      recordFailure(rlKey, RATE_LIMITS.auth);
       return NextResponse.json({ message: "An account with this email already exists." }, { status: 409 });
     }
 
@@ -42,7 +58,7 @@ export async function POST(req: NextRequest) {
     res.cookies.set(COOKIE_NAME, token, cookieOptions());
     return res;
   } catch (e) {
-    console.error("[register]", e);
+    logger.error("Registration failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ message: "Registration failed." }, { status: 500 });
   }
 }

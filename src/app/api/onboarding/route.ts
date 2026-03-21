@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     data: {
       ...(data.firstName != null && { firstName: data.firstName }),
       ...(data.lastName  != null && { lastName:  data.lastName }),
-      ...(data.phone     != null && { phone:     data.phone }),
+      ...(data.phone     != null && { phone:     data.phone || null }),
       ...(data.city      != null && { city:      data.city }),
       ...(data.area      != null && { area:      data.area }),
       ...(data.preferredServices != null && { preferredServices: data.preferredServices }),
@@ -31,10 +31,17 @@ export async function POST(req: NextRequest) {
       await prisma.vendor.update({
         where: { id: vendor.id },
         data: {
-          ...(vd.bio      != null && { bio:      vd.bio }),
-          ...(vd.category != null && { category: vd.category }),
-          ...(vd.skills   != null && { skills:   vd.skills }),
-          ...(vd.city     != null && { location: vd.city }),
+          ...(vd.bio             != null && { bio:             vd.bio }),
+          ...(vd.category        != null && { category:        vd.category }),
+          ...(vd.skills          != null && { skills:          vd.skills }),
+          ...(vd.city            != null && { location:        vd.city }),
+          ...(vd.entityType      != null && { entityType:      vd.entityType }),
+          ...(vd.idDocumentUrl   != null && { idDocumentUrl:   vd.idDocumentUrl }),
+          ...(vd.cipaDocumentUrl != null && { cipaDocumentUrl: vd.cipaDocumentUrl }),
+          ...(vd.companyName     != null && { companyName:     vd.companyName }),
+          ...(vd.companyRegNumber != null && { companyRegNumber: vd.companyRegNumber }),
+          ...(vd.bankName        != null && { bankName:        vd.bankName }),
+          ...(vd.accountNumber   != null && { accountNumber:   vd.accountNumber }),
         },
       });
 

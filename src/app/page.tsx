@@ -1,9 +1,14 @@
 import { AuthPage } from "@/components/auth/AuthPage";
+import { AuthChakraProvider } from "@/components/providers/AuthChakraProvider";
 
 /**
  * Public landing page — renders the customer/vendor login.
- * Rendered as a Server Component; AuthPage is a Client Component.
+ * Rendered as a Server Component; AuthPage + AuthChakraProvider are Client Components.
  */
 export default function HomePage() {
-  return <AuthPage />;
+  return (
+    <AuthChakraProvider>
+      <AuthPage />
+    </AuthChakraProvider>
+  );
 }

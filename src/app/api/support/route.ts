@@ -1,0 +1,32 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { isRateLimited, recordFailure, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
+
+const ISSUE_TYPES = ["billing", "booking", "account", "verification", "other"];
+const ROLES       = ["customer", "vendor", "other"];
+
+export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const rlKey = `support:${ip}`;
+  if (isRateLimited(rlKey, RATE_LIMITS.support)) {
+    return NextResponse.json({ message: "Too many tickets submitted. Please try again later." }, { status: 429 });
+  }
+
+  const { name, email, role, issueType, message } = await req.json();
+
+  if (!name?.trim() || !email?.trim() || !message?.trim())
+    return NextResponse.json({ message: "Name, email and message are required." }, { status: 400 });
+
+  if (!ROLES.includes(role))
+    return NextResponse.json({ message: "Invalid role." }, { status: 400 });
+
+  if (!ISSUE_TYPES.includes(issueType))
+    return NextResponse.json({ message: "Invalid issue type." }, { status: 400 });
+
+  const ticket = await prisma.supportTicket.create({
+    data: { name: name.trim(), email: email.trim().toLowerCase(), role, issueType, message: message.trim() },
+  });
+
+  recordFailure(rlKey, RATE_LIMITS.support);
+  return NextResponse.json({ ticket }, { status: 201 });
+}

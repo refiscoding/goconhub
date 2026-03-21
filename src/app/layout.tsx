@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { UserProvider } from "@/context/UserContext";
+import { CookieConsent } from "@/components/ui/CookieConsent";
 
 export const metadata: Metadata = {
   title: "HandyHub — Botswana's Trusted Handyman Platform",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div style={{ minHeight: "100vh", position: "relative" }}>
             {children}
           </div>
+          <CookieConsent />
         </UserProvider>
       </body>
     </html>

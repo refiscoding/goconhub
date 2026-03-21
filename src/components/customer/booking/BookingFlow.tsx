@@ -16,7 +16,7 @@ const TOTAL_STEPS = 3;
 export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
   const router = useRouter();
   const [step,      setStep]      = useState(0);
-  const [sel,       setSel]       = useState<BookingSelection>({ service: null, date: null, time: null, note: "" });
+  const [sel,       setSel]       = useState<BookingSelection>({ service: null, date: null, time: null, note: "", issueDesc: "", photos: [] });
   const [busy,      setBusy]      = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [error,     setError]     = useState("");
@@ -24,7 +24,7 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
   const canContinue =
     (step === 0 && !!sel.service) ||
     (step === 1 && !!sel.date && !!sel.time) ||
-    step === 2;
+    (step === 2 && sel.issueDesc.length >= 50);
 
   const confirm = async () => {
     if (busy) return;
@@ -41,6 +41,7 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
           time:        sel.time!,
           location:    vendor.loc,
           note:        sel.note,
+          issueDesc:   sel.issueDesc,
           amount:      sel.service!.price,
         }),
       });
@@ -79,7 +80,7 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
       <div style={{ flex: 1, overflowY: "auto", padding: "20px 22px 120px" }}>
         {step === 0 && <StepService  vendor={vendor} selected={sel.service} onSelect={(s) => setSel((p) => ({ ...p, service: s }))} />}
         {step === 1 && <StepDateTime selectedDate={sel.date} selectedTime={sel.time} onSelectDate={(d) => setSel((p) => ({ ...p, date: d }))} onSelectTime={(t) => setSel((p) => ({ ...p, time: t }))} />}
-        {step === 2 && <StepConfirm  vendor={vendor} selection={sel} onNoteChange={(n) => setSel((p) => ({ ...p, note: n }))} />}
+        {step === 2 && <StepConfirm  vendor={vendor} selection={sel} onNoteChange={(n) => setSel((p) => ({ ...p, note: n }))} onIssueDescChange={(d) => setSel((p) => ({ ...p, issueDesc: d }))} onPhotosChange={(f) => setSel((p) => ({ ...p, photos: f }))} />}
       </div>
 
       {error && (

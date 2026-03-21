@@ -1,7 +1,7 @@
 "use client";
 import { FC, useState, useEffect } from "react";
 import { IconPlus } from "@/components/icons";
-import { Toast } from "@/components/ui";
+import { Toast, PageSpinner } from "@/components/ui";
 import { useToast } from "@/hooks/useToast";
 import { ServiceCard } from "./ServiceCard";
 import { ServiceForm } from "./ServiceForm";
@@ -111,11 +111,11 @@ export const VendorServices: FC = () => {
     <div style={{ paddingBottom: 88 }}>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <div style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "52px 22px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div className="page-top" style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "0 22px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em" }}>My Services</h1>
           <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 4 }}>
-            {loading ? "Loading…" : `${services.filter((s) => s.active).length}/${services.length} active`}
+            {loading ? <PageSpinner inline /> : `${services.filter((s) => s.active).length}/${services.length} active`}
           </p>
         </div>
         <button onClick={() => setAdding(true)}
@@ -126,7 +126,7 @@ export const VendorServices: FC = () => {
 
       <div style={{ padding: "16px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
         {adding && (
-          <div className="card pop-enter" style={{ padding: 18, borderColor: "var(--acc-bd)" }}>
+          <div className="card pop-enter" style={{ padding: 18 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: "var(--acc)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>New Service</p>
             <ServiceForm
               draft={newDraft}
@@ -139,7 +139,7 @@ export const VendorServices: FC = () => {
 
         {services.map((svc) =>
           editing === svc.id ? (
-            <div key={svc.id} className="card" style={{ padding: 16, borderTop: "2px solid var(--acc)" }}>
+            <div key={svc.id} className="card" style={{ padding: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--acc)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12 }}>Editing</p>
               <ServiceForm
                 draft={editDraft}

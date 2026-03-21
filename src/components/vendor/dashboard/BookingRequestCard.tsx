@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui";
 import { IconCheck, IconX, IconChat, IconMapPin } from "@/components/icons";
 import type { Booking, BookingStatus } from "@/lib/types";
+import { fmtPrice } from "@/lib/fmt";
 
 interface BookingRequestCardProps {
   booking: Booking;
@@ -28,7 +29,7 @@ export const BookingRequestCard: FC<BookingRequestCardProps> = ({ booking: b, on
               <IconMapPin style={{ width: 13, height: 13 }} />{b.loc}
             </p>
           </div>
-          <p style={{ fontWeight: 800, fontSize: 16, color: "var(--acc)" }}>P{b.amount}</p>
+          <p style={{ fontWeight: 800, fontSize: 16, color: "var(--acc)" }}>{fmtPrice(b.amount)}</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button className="btn-success" style={{ flex: 1 }} onClick={() => onUpdate(b.id, "confirmed")}>

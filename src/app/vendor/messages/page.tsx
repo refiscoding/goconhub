@@ -8,6 +8,7 @@ interface ApiBooking {
   status: string;
   customer: { firstName: string; lastName: string };
   _count: { messages: number };
+  messages: { createdAt: string; text: string }[];
 }
 
 function getUnread(bookingId: string, total: number): number {
@@ -29,7 +30,8 @@ export default function VendorMessagesPage() {
         setChats(bookings.map((b) => ({
           id:          b.id,
           name:        `${b.customer.firstName} ${b.customer.lastName}`,
-          lastMessage: `${b.serviceName} · ${b.status}`,
+          lastMessage: b.messages[0]?.text ?? `${b.serviceName} · ${b.status}`,
+          time:        b.messages[0]?.createdAt,
           unread:      getUnread(b.id, b._count.messages),
           href:        `/vendor/messages/${b.id}`,
         })));

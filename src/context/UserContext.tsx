@@ -11,6 +11,13 @@ export interface VendorProfile {
   reviewCount: number;
   available: boolean;
   verified: boolean;
+  entityType: string;
+  companyName: string;
+  companyRegNumber: string;
+  idDocumentUrl: string;
+  cipaDocumentUrl: string;
+  bankName: string;
+  accountNumber: string;
 }
 
 export interface AuthUser {
