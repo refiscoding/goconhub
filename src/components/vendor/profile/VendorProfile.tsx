@@ -75,37 +75,26 @@ export const VendorProfile: FC = () => {
     finally { setBusy(false); }
   };
 
-  const handleAvatarUpload = async (dataUrl: string) => {
+  const handleAvatarUpload = async (croppedDataUrl: string) => {
     try {
-      // Convert data URL to Blob for storage upload
-      const blob = await fetch(dataUrl).then((r) => r.blob());
+      const blob = await fetch(croppedDataUrl).then((r) => r.blob());
       const form = new FormData();
       form.append("file", blob, `avatar.${blob.type.split("/")[1] || "jpg"}`);
       form.append("bucket", "avatars");
       form.append("type", "avatar");
 
       const upRes = await fetch("/api/upload", { method: "POST", body: form });
-      if (!upRes.ok) {
-        // Fallback to legacy base64 if storage is not configured
-        const res = await fetch("/api/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ avatarUrl: dataUrl }),
-        });
-        if (!res.ok) { showToast("Upload failed", "err"); return; }
-        setAvatar(dataUrl);
-        await refresh();
-        showToast("Photo updated ✓", "ok");
-        return;
-      }
+      const avatarUrl = upRes.ok
+        ? (await upRes.json()).url
+        : croppedDataUrl; // fallback to base64 if storage not configured
 
-      const { url } = await upRes.json();
-      await fetch("/api/profile", {
+      const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: url }),
+        body: JSON.stringify({ avatarUrl }),
       });
-      setAvatar(url);
+      if (!res.ok) { showToast("Upload failed", "err"); return; }
+      setAvatar(avatarUrl);
       await refresh();
       showToast("Photo updated ✓", "ok");
     } catch {

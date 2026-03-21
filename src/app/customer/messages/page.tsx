@@ -30,15 +30,17 @@ interface ChatPreview {
 
 function getUnread(key: string, total: number): number {
   try {
-    const seen = Number(localStorage.getItem(`hh_seen_${key}`) ?? 0);
-    return Math.max(0, total - seen);
-  } catch { return 0; }
+    const raw = localStorage.getItem(`hh_seen_${key}`);
+    if (raw === null) return total; // never opened = all unread
+    return Math.max(0, total - Number(raw));
+  } catch { return total; }
 }
 
 export default function CustomerMessagesPage() {
   const router = useRouter();
   const [chats, setChats] = useState<ChatPreview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const isDesktop = useBreakpointValue({ base: false, md: true }, { fallback: "base" });
 
@@ -100,7 +102,7 @@ export default function CustomerMessagesPage() {
 
         setChats(chatList);
       })
-      .catch(() => {})
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -118,6 +120,16 @@ export default function CustomerMessagesPage() {
     return (
       <Box pt="80px" textAlign="center" color="gray.400">
         Loading conversations…
+      </Box>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <Box py="80px" px="28px" textAlign="center" color="gray.400">
+        <Text fontSize="32px" mb="8px">⚠️</Text>
+        <Text fontWeight="600">Failed to load conversations</Text>
+        <Text fontSize="13px" mt="4px">Please check your connection and try again</Text>
       </Box>
     );
   }

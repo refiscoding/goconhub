@@ -123,7 +123,7 @@ function CustomerBookingsPage() {
     fetch("/api/bookings")
       .then((r) => r.json())
       .then((d) => setBookings(d.bookings ?? []))
-      .catch(() => {})
+      .catch(() => showToast("Failed to load bookings", "err"))
       .finally(() => setLoading(false));
   }, []);
 

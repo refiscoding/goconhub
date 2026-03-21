@@ -38,7 +38,7 @@ export const VendorServices: FC = () => {
         setApiServices(api);
         setServices(api.map((s, i) => ({ id: i, name: s.name, price: s.price, unit: s.unit, desc: s.desc, active: s.active })));
       })
-      .catch(() => {})
+      .catch(() => showToast("Failed to load services", "err"))
       .finally(() => setLoading(false));
   };
 

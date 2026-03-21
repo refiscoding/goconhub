@@ -90,7 +90,7 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
       )}
 
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, padding: "14px 22px 28px", background: "rgba(250,247,242,.95)", backdropFilter: "blur(12px)", borderTop: "1px solid var(--border)" }}>
-        <button className="btn-pri" style={{ opacity: (canContinue && !busy) ? 1 : 0.5 }}
+        <button className="btn-pri" disabled={!canContinue || busy} style={{ opacity: (canContinue && !busy) ? 1 : 0.5 }}
           onClick={() => {
             if (!canContinue || busy) return;
             if (step === 2) confirm();

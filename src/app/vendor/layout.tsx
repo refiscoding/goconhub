@@ -10,7 +10,7 @@ export default async function VendorLayout({ children }: { children: React.React
   return (
     <VendorChakraProvider>
       <div data-theme="vendor" className="app-shell">
-        <VendorNav unreadCount={2} />
+        <VendorNav />
         <main className="app-content">
           {children}
         </main>

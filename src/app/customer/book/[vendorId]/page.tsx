@@ -23,6 +23,7 @@ export default async function BookVendorPage({ params }: PageProps) {
   });
 
   if (!v) notFound();
+  if (v.services.length === 0) redirect(`/customer/vendors/${vendorId}`);
 
   const first = v.services[0];
   const vendor: Vendor = {

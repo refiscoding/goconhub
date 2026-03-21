@@ -11,7 +11,7 @@ import { fmtPrice } from "@/lib/fmt";
 interface PageProps { params: { vendorId: string } }
 
 interface Service { id: string; name: string; price: number; unit: string; desc: string }
-interface ReviewUser { firstName: string; lastName: string; avatarUrl: string | null }
+interface ReviewUser { id: string; firstName: string; lastName: string; avatarUrl: string | null }
 interface Review { id: string; rating: number; comment: string; createdAt: string; reviewer: ReviewUser }
 interface VendorDetail {
   id: string; bio: string; category: string; skills: string[]; location: string;
@@ -47,9 +47,9 @@ export default function VendorProfilePage({ params }: PageProps) {
 
   useEffect(() => {
     fetch(`/api/vendors/${vendorId}`)
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then((d) => { setVendor(d.vendor ?? null); })
-      .catch(() => {})
+      .catch(() => showToast("Failed to load vendor", "err"))
       .finally(() => setLoading(false));
   }, [vendorId]);
 
@@ -58,7 +58,7 @@ export default function VendorProfilePage({ params }: PageProps) {
     fetch(`/api/bookings?vendorId=${vendorId}&status=completed`)
       .then((r) => r.json())
       .then((d) => setCanReview((d.bookings ?? []).length > 0))
-      .catch(() => {});
+      .catch(() => {/* non-critical */});
   }, [user, vendorId]);
 
   const submitReview = async () => {
@@ -85,7 +85,7 @@ export default function VendorProfilePage({ params }: PageProps) {
   if (!vendor)  return <div style={{ paddingTop: 120, textAlign: "center", color: "var(--ink3)" }}>Vendor not found.</div>;
 
   const fullName = `${vendor.user.firstName} ${vendor.user.lastName}`;
-  const myReview = vendor.reviews.find((r) => r.reviewer.firstName + r.reviewer.lastName === (user ? user.firstName + user.lastName : ""));
+  const myReview = user ? vendor.reviews.find((r) => r.reviewer.id === user.id) : undefined;
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", paddingBottom: 120 }}>

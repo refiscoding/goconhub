@@ -63,13 +63,13 @@ export const VendorDash: FC = () => {
         setApiBookings(api);
         setBookings(api.map(toBooking));
       })
-      .catch(() => {})
+      .catch(() => showToast("Failed to load bookings", "err"))
       .finally(() => setLoading(false));
 
     fetch("/api/vendor/earnings")
       .then((r) => r.json())
       .then((d) => { setEarnings(d.payments ?? []); setTotalPaid(d.total ?? 0); })
-      .catch(() => {});
+      .catch(() => showToast("Failed to load earnings", "err"));
   }, []);
 
   const pending   = bookings.filter((b) => b.status === "pending");
