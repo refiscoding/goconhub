@@ -320,9 +320,18 @@ select.field { color:var(--ink); }
   [data-nav-collapsed="true"] .page-cta-bar { left:60px; }
 }
 
-/* ── Chat bubbles ───────────────────────────────────────────────────── */
-.bubble-me   { background:var(--acc); color:#fff; border-radius:16px 16px 4px 16px; }
-.bubble-them { background:var(--bg3); border:1px solid var(--border); color:var(--ink); border-radius:16px 16px 16px 4px; }
+/* ── Chat bubbles (legacy, kept for non-Chakra pages) ──────────────── */
+.bubble-me   { background:var(--acc); color:#fff; border-radius:10px 10px 2px 10px; box-shadow:0 1px 1px rgba(0,0,0,.06); }
+.bubble-them { background:var(--card); border:none; color:var(--ink); border-radius:10px 10px 10px 2px; box-shadow:0 1px 1px rgba(0,0,0,.06); }
+
+/* ── Typing indicator dots ─────────────────────────────────────────── */
+@keyframes typingPulse {
+  0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+  30% { opacity: 1; transform: scale(1); }
+}
+.typing-dot {
+  animation: typingPulse 1.2s ease-in-out infinite;
+}
 
 /* ── Auth page layout ───────────────────────────────────────────────── */
 .auth-wrap  { min-height:100vh; display:flex; flex-direction:column; }

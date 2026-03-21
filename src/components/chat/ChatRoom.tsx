@@ -1,7 +1,8 @@
 "use client";
 import { FC, useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { IconChevL, IconSend } from "@/components/icons";
+import { Box, Flex, Text, Input, IconButton, useBreakpointValue } from "@chakra-ui/react";
+import { ArrowLeft, Send } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import { MessageBubble } from "./MessageBubble";
 import { useUser } from "@/context/UserContext";
@@ -12,7 +13,8 @@ const CONTACT_RE = /(\b\d[\d\s\-().+]{6,}\d\b|[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+
 interface ChatRoomProps {
   title: string;
   subtitle: string;
-  banner?: string;
+  chatUserId?: string;
+  bookingIds?: string[];
   bookingId?: string;
   initialMessages?: Message[];
   quickReplies?: string[];
@@ -21,84 +23,116 @@ interface ChatRoomProps {
   profileHref?: string;
 }
 
-function markRead(bookingId: string, count: number) {
-  try { localStorage.setItem(`hh_seen_${bookingId}`, String(count)); } catch { /* ignore */ }
+function markRead(key: string, count: number) {
+  try { localStorage.setItem(`hh_seen_${key}`, String(count)); } catch { /* ignore */ }
+}
+
+function fmtDateLabel(iso: string): string {
+  const now = new Date();
+  const date = new Date(iso);
+  if (now.toDateString() === date.toDateString()) return "Today";
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (yesterday.toDateString() === date.toDateString()) return "Yesterday";
+  const days = Math.floor((now.getTime() - date.getTime()) / 86400000);
+  if (days < 7) return date.toLocaleDateString([], { weekday: "long" });
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 }
 
 export const ChatRoom: FC<ChatRoomProps> = ({
-  title, subtitle, banner, bookingId, initialMessages = [], quickReplies = [], backHref, avatarSrc, profileHref,
+  title, subtitle, chatUserId, bookingIds, bookingId, initialMessages = [], quickReplies = [], backHref, avatarSrc, profileHref,
 }) => {
-  const router   = useRouter();
+  const router = useRouter();
   const { user } = useUser();
-  const [messages,     setMessages]     = useState<Message[]>(initialMessages);
-  const [input,        setInput]        = useState("");
-  const [showQR,       setShowQR]       = useState(false);
-  const [sending,      setSending]      = useState(false);
-  const [pendingText,  setPendingText]  = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [activeBookingId, setActiveBookingId] = useState<string | undefined>(bookingId);
+  const [input, setInput] = useState("");
+  const [showQR, setShowQR] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [pendingText, setPendingText] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef  = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useBreakpointValue({ base: true, md: false }, { fallback: "base" });
 
   useEffect(() => {
-    if (!bookingId) return;
-    fetch(`/api/messages?bookingId=${bookingId}`)
+    const myId = user?.id;
+    if (!myId) return;
+
+    let url: string;
+    if (chatUserId) {
+      url = `/api/messages?userId=${chatUserId}`;
+    } else if (bookingId) {
+      url = `/api/messages?bookingId=${bookingId}`;
+    } else {
+      return;
+    }
+
+    fetch(url)
       .then((r) => r.json())
       .then((data) => {
-        const myId = user?.id;
         const msgs: Message[] = (data.messages ?? []).map((m: {
           id: string; text: string; createdAt: string;
           sender: { id: string };
         }) => ({
-          id:   m.id,
+          id: m.id,
           from: m.sender.id === myId ? "me" : "them",
           text: m.text,
           time: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          createdAt: m.createdAt,
         }));
         setMessages(msgs);
-        markRead(bookingId, msgs.length);
+
+        if (data.bookingIds?.length) {
+          setActiveBookingId(data.bookingIds[0]);
+        }
+
+        const readKey = chatUserId ?? bookingId ?? "";
+        if (readKey) markRead(readKey, msgs.length);
       })
       .catch(() => {});
-  }, [bookingId, user?.id]);
+  }, [chatUserId, bookingId, user?.id]);
+
+  useEffect(() => {
+    if (bookingIds?.length && !activeBookingId) {
+      setActiveBookingId(bookingIds[0]);
+    }
+  }, [bookingIds, activeBookingId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const doSend = async (t: string) => {
-    if (!t || sending) return;
+    if (!t || sending || !activeBookingId) return;
     setShowQR(false);
-
-    if (bookingId) {
-      setSending(true);
-      try {
-        const res = await fetch("/api/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId, text: t }),
+    setSending(true);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: activeBookingId, text: t }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const m = data.message;
+        const now = m.createdAt ?? new Date().toISOString();
+        setMessages((prev) => {
+          const next = [
+            ...prev,
+            {
+              id: m.id,
+              from: "me" as const,
+              text: m.text,
+              time: new Date(now).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              createdAt: now,
+            },
+          ];
+          const readKey = chatUserId ?? activeBookingId;
+          markRead(readKey, next.length);
+          return next;
         });
-        if (res.ok) {
-          const data = await res.json();
-          const m = data.message;
-          setMessages((prev) => {
-            const next = [
-              ...prev,
-              {
-                id:   m.id,
-                from: "me" as const,
-                text: m.text,
-                time: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              },
-            ];
-            markRead(bookingId, next.length);
-            return next;
-          });
-        }
-      } catch { /* ignore */ } finally { setSending(false); }
-    } else {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now(), from: "me", text: t, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) },
-      ]);
-    }
+      }
+    } catch { /* ignore */ } finally { setSending(false); }
   };
 
   const send = (text?: string) => {
@@ -114,91 +148,254 @@ export const ChatRoom: FC<ChatRoomProps> = ({
 
   const goBack = () => backHref ? router.push(backHref) : router.back();
 
+  let lastDateLabel = "";
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "var(--bg)" }}>
-      <div style={{ background: "var(--card)", borderBottom: "1px solid var(--border)", padding: "50px 18px 14px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 50 }}>
-        <button className="back-btn" onClick={goBack}>
-          <IconChevL style={{ width: 22, height: 22 }} />
-        </button>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: profileHref ? "pointer" : "default" }}
+    <Flex direction="column" h="100vh" bg="gray.50">
+      {/* Header */}
+      <Flex
+        bg="portal.primary"
+        pt="50px"
+        px="14px"
+        pb="12px"
+        align="center"
+        gap="10px"
+        position="sticky"
+        top="0"
+        zIndex={50}
+        boxShadow="sm"
+      >
+        <IconButton
+          aria-label="Back"
+          icon={<ArrowLeft size={22} />}
+          variant="ghost"
+          color="white"
+          _hover={{ bg: "whiteAlpha.200" }}
+          onClick={goBack}
+          size="sm"
+        />
+        <Flex
+          align="center"
+          gap="10px"
+          flex="1"
+          cursor={profileHref ? "pointer" : "default"}
           onClick={() => profileHref && router.push(profileHref)}
         >
-          <Avatar name={title} size={36} src={avatarSrc} />
-          <div>
-            <p style={{ fontWeight: 700, fontSize: 15 }}>{title}</p>
-            <p style={{ fontSize: 11, color: "var(--green)", fontWeight: 600, marginTop: 1 }}>● {subtitle}</p>
-          </div>
-        </div>
-      </div>
+          <Avatar name={title} size={38} src={avatarSrc} />
+          <Box>
+            <Text fontWeight="700" fontSize="15px" color="white">{title}</Text>
+            <Text fontSize="11px" color="whiteAlpha.700" fontWeight="500" mt="1px">{subtitle}</Text>
+          </Box>
+        </Flex>
+      </Flex>
 
-      {banner && (
-        <div style={{ background: "var(--acc-bg)", borderBottom: "1px solid var(--acc-bd)", padding: "9px 18px" }}>
-          <p style={{ fontSize: 12, color: "var(--acc)", fontWeight: 500 }}>{banner}</p>
-        </div>
-      )}
-      <div style={{ background: "#fef3c7", borderBottom: "1px solid #fcd34d", padding: "8px 18px", display: "flex", gap: 8, alignItems: "flex-start" }}>
-        <span style={{ fontSize: 13, flexShrink: 0 }}>🛡️</span>
-        <p style={{ fontSize: 12, color: "#92400e", lineHeight: 1.5 }}>For your safety, all payments must be made through HandyHub. Payments made outside the platform are not protected.</p>
-      </div>
+      {/* Safety banner */}
+      <Flex bg="yellow.50" borderBottom="1px solid" borderColor="yellow.300" px="18px" py="8px" gap="8px" align="flex-start">
+        <Text fontSize="13px" flexShrink={0}>🛡️</Text>
+        <Text fontSize="12px" color="yellow.800" lineHeight="1.5">
+          For your safety, all payments must be made through HandyHub. Payments made outside the platform are not protected.
+        </Text>
+      </Flex>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px 110px", display: "flex", flexDirection: "column", gap: 10 }}>
-        <div style={{ textAlign: "center", marginBottom: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--ink3)", background: "var(--bg2)", padding: "3px 12px", borderRadius: 999 }}>Today</span>
-        </div>
+      {/* Messages area */}
+      <Box
+        flex="1"
+        overflowY="auto"
+        px="18px"
+        pt="16px"
+        pb="110px"
+        display="flex"
+        flexDirection="column"
+        gap="6px"
+        bg="gray.50"
+      >
         {messages.length === 0 && (
-          <p style={{ textAlign: "center", color: "var(--ink3)", fontSize: 13, marginTop: 40 }}>No messages yet. Say hello!</p>
+          <Text textAlign="center" color="gray.400" fontSize="13px" mt="40px">
+            No messages yet. Say hello!
+          </Text>
         )}
-        {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} senderName={title} />
-        ))}
+        {messages.map((m) => {
+          const dateLabel = m.createdAt ? fmtDateLabel(m.createdAt) : "";
+          const showLabel = dateLabel && dateLabel !== lastDateLabel;
+          if (showLabel) lastDateLabel = dateLabel;
+          return (
+            <Box key={m.id}>
+              {showLabel && (
+                <Flex justify="center" my="8px">
+                  <Text
+                    fontSize="12px"
+                    color="gray.500"
+                    bg="white"
+                    px="14px"
+                    py="4px"
+                    borderRadius="8px"
+                    boxShadow="0 1px 2px rgba(0,0,0,0.06)"
+                    fontWeight="500"
+                  >
+                    {dateLabel}
+                  </Text>
+                </Flex>
+              )}
+              <MessageBubble message={m} senderName={title} />
+            </Box>
+          );
+        })}
         <div ref={bottomRef} />
-      </div>
+      </Box>
 
+      {/* Quick replies */}
       {showQR && quickReplies.length > 0 && (
-        <div style={{ position: "fixed", bottom: 72, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--card)", borderTop: "1px solid var(--border)", padding: "12px 14px", zIndex: 60 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: "var(--acc)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>Quick Replies</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 180, overflowY: "auto" }}>
+        <Box
+          position="fixed"
+          bottom="72px"
+          left="50%"
+          transform="translateX(-50%)"
+          w="100%"
+          maxW="430px"
+          bg="white"
+          borderTop="1px solid"
+          borderColor="gray.200"
+          p="12px 14px"
+          zIndex={60}
+          borderRadius="12px 12px 0 0"
+          boxShadow="lg"
+        >
+          <Text fontSize="10px" fontWeight="700" color="portal.primary" textTransform="uppercase" letterSpacing="0.06em" mb="8px">
+            Quick Replies
+          </Text>
+          <Flex direction="column" gap="6px" maxH="180px" overflowY="auto">
             {quickReplies.map((r, i) => (
-              <button key={i} onClick={() => send(r)}
-                style={{ textAlign: "left", background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 10, padding: "9px 12px", fontSize: 13, color: "var(--ink)", cursor: "pointer" }}>
+              <Box
+                as="button"
+                key={i}
+                onClick={() => send(r)}
+                textAlign="left"
+                bg="gray.50"
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="10px"
+                px="12px"
+                py="9px"
+                fontSize="13px"
+                color="gray.700"
+                cursor="pointer"
+                _hover={{ bg: "gray.100" }}
+                transition="background 0.15s"
+              >
                 {r}
-              </button>
+              </Box>
             ))}
-          </div>
-        </div>
+          </Flex>
+        </Box>
       )}
 
+      {/* Contact info warning */}
       {pendingText && (
-        <div style={{ position: "fixed", bottom: 72, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 28px)", maxWidth: 402, background: "var(--card)", border: "1px solid rgba(239,68,68,.35)", borderRadius: 12, padding: "14px 16px", zIndex: 70, boxShadow: "0 4px 20px rgba(0,0,0,.18)" }}>
-          <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: "var(--red, #ef4444)" }}>⚠️ Contact info detected</p>
-          <p style={{ fontSize: 13, color: "var(--ink2)", lineHeight: 1.5, marginBottom: 12 }}>
+        <Box
+          position="fixed"
+          bottom="72px"
+          left="50%"
+          transform="translateX(-50%)"
+          w="calc(100% - 28px)"
+          maxW="402px"
+          bg="white"
+          border="1px solid"
+          borderColor="red.200"
+          borderRadius="12px"
+          p="14px 16px"
+          zIndex={70}
+          boxShadow="xl"
+        >
+          <Text fontWeight="700" fontSize="14px" mb="4px" color="red.500">⚠️ Contact info detected</Text>
+          <Text fontSize="13px" color="gray.600" lineHeight="1.5" mb="12px">
             Sharing phone numbers, email addresses, or messaging app links is not allowed before a booking is confirmed.
-          </p>
-          <button
+          </Text>
+          <Box
+            as="button"
             onClick={() => { setPendingText(null); setTimeout(() => inputRef.current?.focus(), 50); }}
-            style={{ width: "100%", padding: "9px 0", borderRadius: 8, background: "var(--bg3)", border: "1px solid var(--border)", fontWeight: 600, fontSize: 13, cursor: "pointer", color: "var(--ink)" }}>
+            w="100%"
+            py="9px"
+            borderRadius="8px"
+            bg="gray.50"
+            border="1px solid"
+            borderColor="gray.200"
+            fontWeight="600"
+            fontSize="13px"
+            cursor="pointer"
+            color="gray.700"
+            _hover={{ bg: "gray.100" }}
+          >
             OK, edit my message
-          </button>
-        </div>
+          </Box>
+        </Box>
       )}
 
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--card)", borderTop: "1px solid var(--border)", padding: "10px 14px 22px", display: "flex", gap: 8, alignItems: "flex-end", zIndex: 55 }}>
+      {/* Input area */}
+      <Flex
+        position="fixed"
+        bottom="0"
+        left="50%"
+        transform="translateX(-50%)"
+        w="100%"
+        maxW="430px"
+        bg="white"
+        px="10px"
+        pt="8px"
+        pb="22px"
+        gap="8px"
+        align="flex-end"
+        zIndex={55}
+        borderTop="1px solid"
+        borderColor="gray.100"
+      >
         {quickReplies.length > 0 && (
-          <button onClick={() => setShowQR((v) => !v)}
-            style={{ width: 40, height: 40, background: showQR ? "var(--acc-bg)" : "var(--bg3)", border: `1px solid ${showQR ? "var(--acc-bd)" : "var(--border)"}`, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
-            ⚡
-          </button>
+          <IconButton
+            aria-label="Quick replies"
+            icon={<Text fontSize="16px">⚡</Text>}
+            onClick={() => setShowQR((v) => !v)}
+            variant={showQR ? "solid" : "outline"}
+            colorScheme={showQR ? "blue" : "gray"}
+            borderRadius="full"
+            size="md"
+            flexShrink={0}
+          />
         )}
-        <input ref={inputRef} className="field" placeholder="Type a message…" value={input}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
-          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && send()}
-          style={{ flex: 1 }} />
-        <button onClick={() => send()} disabled={sending}
-          style={{ width: 42, height: 42, borderRadius: 10, background: "var(--acc)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--bg)", flexShrink: 0, opacity: sending ? 0.6 : 1 }}>
-          <IconSend style={{ width: 18, height: 18 }} />
-        </button>
-      </div>
-    </div>
+        <Flex
+          flex="1"
+          align="flex-end"
+          bg="gray.50"
+          borderRadius="22px"
+          border="1px solid"
+          borderColor="gray.200"
+          px="14px"
+        >
+          <Input
+            ref={inputRef}
+            placeholder="Message"
+            value={input}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
+            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && send()}
+            variant="unstyled"
+            fontSize="15px"
+            py="10px"
+            color="gray.800"
+          />
+        </Flex>
+        <IconButton
+          aria-label="Send"
+          icon={<Send size={18} />}
+          onClick={() => send()}
+          isDisabled={sending}
+          colorScheme="blue"
+          bg="portal.primary"
+          color="white"
+          borderRadius="full"
+          size="md"
+          boxShadow="sm"
+          _hover={{ opacity: 0.9 }}
+          flexShrink={0}
+        />
+      </Flex>
+    </Flex>
   );
 };
