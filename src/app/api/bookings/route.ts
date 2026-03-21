@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
       vendor:   { select: { id: true, userId: true, user: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
       service:  { select: { name: true } },
       _count:   { select: { messages: true } },
+      messages: { select: { createdAt: true, text: true }, orderBy: { createdAt: "desc" }, take: 1 },
     },
     orderBy: { createdAt: "desc" },
   });

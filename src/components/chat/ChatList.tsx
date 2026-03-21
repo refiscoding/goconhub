@@ -1,14 +1,29 @@
 import { FC } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui";
-import type { Message } from "@/lib/types";
 
 interface ChatPreview {
   id: string;
   name: string;
   lastMessage: string;
+  time?: string;
   unread: number;
   href: string;
+}
+
+function fmtRelative(iso?: string): string {
+  if (!iso) return "";
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) {
+    return new Date(iso).toLocaleDateString([], { weekday: "short" });
+  }
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 interface ChatListProps { chats: ChatPreview[]; }
@@ -30,7 +45,7 @@ export const ChatList: FC<ChatListProps> = ({ chats }) => (
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <p style={{ fontWeight: 700, fontSize: 15 }}>{c.name}</p>
-              <p style={{ fontSize: 11, color: c.unread ? "var(--acc)" : "var(--ink3)", fontWeight: c.unread ? 700 : 400 }}>Now</p>
+              <p style={{ fontSize: 11, color: c.unread ? "var(--acc)" : "var(--ink3)", fontWeight: c.unread ? 700 : 400 }}>{fmtRelative(c.time)}</p>
             </div>
             <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.lastMessage}</p>
           </div>
