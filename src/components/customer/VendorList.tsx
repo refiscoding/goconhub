@@ -40,16 +40,16 @@ function toVendor(v: ApiVendor): Vendor {
   };
 }
 
-/* ── Category SVG Icons ────────────────────────────────────────────── */
-const CatIcons: Record<string, { icon: FC<{ size?: number }>; color: string }> = {
-  All:         { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>, color: "#64748b" },
-  Plumber:     { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14v-3a1 1 0 0 1 1-1h4"/><path d="M14 10h4a1 1 0 0 1 1 1v3"/><path d="M9 10V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4"/><path d="M7 14a3 3 0 0 0-3 3v1h8v-1a3 3 0 0 0-3-3z"/><path d="M15 14a3 3 0 0 0-3 3v1h8v-1a3 3 0 0 0-3-3z"/></svg>, color: "#0ea5e9" },
-  Electrician: { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>, color: "#f59e0b" },
-  Carpenter:   { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, color: "#a16207" },
-  Painter:     { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 3H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M12 11v6"/><path d="M8 17h8a2 2 0 0 1 2 2H6a2 2 0 0 1 2-2z"/></svg>, color: "#e11d48" },
-  Cleaner:     { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 22 4-10 4 10"/></svg>, color: "#06b6d4" },
-  Tiler:       { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>, color: "#8b5cf6" },
-  Mason:       { icon: ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="4" rx="1"/><rect x="4" y="10" width="7" height="4"/><rect x="13" y="10" width="7" height="4"/><rect x="2" y="14" width="9" height="4"/><rect x="13" y="14" width="9" height="4"/><line x1="2" y1="18" x2="22" y2="18"/></svg>, color: "#78716c" },
+/* ── Category icons (Flaticon – color fill) ────────────────────────── */
+const CAT_ICONS: Record<string, string> = {
+  All:         "/icons/cat-all.png",
+  Plumber:     "/icons/cat-plumber.png",
+  Electrician: "/icons/cat-electrician.png",
+  Carpenter:   "/icons/cat-carpenter.png",
+  Painter:     "/icons/cat-painter.png",
+  Cleaner:     "/icons/cat-cleaner.png",
+  Tiler:       "/icons/cat-tiler.png",
+  Mason:       "/icons/cat-mason.png",
 };
 
 export const VendorList: FC = () => {
@@ -105,12 +105,11 @@ export const VendorList: FC = () => {
       {/* Category chips with icons */}
       <div style={{ display: "flex", gap: 8, padding: "14px 22px 8px", overflowX: "auto", scrollbarWidth: "none" }}>
         {FILTER_CATS.map((c) => {
-          const catDef = CatIcons[c] ?? CatIcons.All;
-          const Icon = catDef.icon;
+          const src = CAT_ICONS[c] ?? CAT_ICONS.All;
           const isOn = cat === c;
           return (
             <button key={c} className={`cat-chip${isOn ? " on" : ""}`} onClick={() => setCat(c)}>
-              <span style={{ color: isOn ? "#fff" : catDef.color, display: "flex" }}><Icon size={16} /></span>
+              <img src={src} alt="" width={18} height={18} style={{ objectFit: "contain", filter: isOn ? "brightness(0) invert(1)" : "none" }} />
               {c}
             </button>
           );
