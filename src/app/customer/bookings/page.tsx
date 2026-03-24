@@ -108,7 +108,7 @@ function CustomerBookingsPage() {
       const data = await res.json();
       if (!res.ok) { showToast(data.message ?? "Failed", "err"); return; }
       setReviewed((s) => new Set(s).add(reviewTarget.id));
-      showToast("Review submitted ✓", "ok");
+      showToast("Review submitted", "ok");
       closeReview();
     } catch { showToast("Network error", "err"); }
     finally { setReviewBusy(false); }
@@ -219,21 +219,22 @@ function CustomerBookingsPage() {
   const awaitingPayment = bookings.filter((b) => b.adminApprovedComplete && b.paymentStatus === "unpaid");
 
   return (
-    <div style={{ paddingBottom: 88, minHeight: "100vh", background: "var(--bg)" }}>
+    <div className="cust-page-wrap">
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <div className="page-top" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "0 22px 18px", position: "sticky", top: 0, zIndex: 50 }}>
-        <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em" }}>My Bookings</h1>
+      <div className="page-top cust-page-header">
+        <h1 className="cust-heading" style={{ fontSize: 26 }}>My Bookings</h1>
         <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 3 }}>{bookings.length} total</p>
       </div>
 
-      <div style={{ padding: "14px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="cust-page-body" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {loading ? (
           <PageSpinner paddingY="48px" />
         ) : bookings.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 0", color: "var(--ink3)" }}>
             <p style={{ fontSize: 32, marginBottom: 8 }}>📋</p>
-            <p style={{ fontWeight: 600 }}>No bookings yet</p>
+            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 16 }}>No bookings yet</p>
+            <p style={{ fontSize: 13, marginTop: 6, color: "var(--ink3)" }}>Your bookings will appear here</p>
           </div>
         ) : bookings.map((b) => {
           const s          = STATUS_LABELS[b.status] ?? STATUS_LABELS.pending;
@@ -242,27 +243,27 @@ function CustomerBookingsPage() {
           const submitted  = b.paymentStatus === "submitted";
           const paid       = b.paymentStatus === "confirmed";
           return (
-            <div key={b.id} className="card" style={{ padding: "16px" }}>
+            <div key={b.id} className="cust-card" style={{ padding: "16px 18px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                 <div>
-                  <p style={{ fontWeight: 700, fontSize: 15 }}>{b.serviceName}</p>
+                  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 15 }}>{b.serviceName}</p>
                   <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 2 }}>{vendorName}</p>
                   <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>{b.date} · {b.time}</p>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: s.bg, color: s.color }}>{s.label}</span>
+                <span className="cust-pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10, borderTop: "1px solid var(--border)" }}>
-                <p style={{ fontWeight: 800, fontSize: 16, color: "var(--acc)" }}>{fmtPrice(b.amount)}</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <p style={{ fontWeight: 800, fontSize: 16, color: "#1A7A5E" }}>{fmtPrice(b.amount)}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   {paid && (
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "var(--green-bg)", color: "var(--green)" }}>Paid</span>
+                      <span className="cust-pill" style={{ background: "var(--green-bg)", color: "var(--green)" }}>Paid</span>
                       {b.paidAt && <span style={{ fontSize: 11, color: "var(--ink3)" }}>{new Date(b.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>}
                     </div>
                   )}
-                  {submitted && <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "rgba(99,102,241,.12)", color: "#6366f1" }}>Payment Pending</span>}
+                  {submitted && <span className="cust-pill" style={{ background: "rgba(99,102,241,.12)", color: "#6366f1" }}>Payment Pending</span>}
                   {needsPay && (
-                    <button onClick={() => openPay(b)} className="btn-pri" style={{ padding: "8px 18px", fontSize: 13, fontWeight: 700 }}>Pay Now</button>
+                    <button onClick={() => openPay(b)} style={{ padding: "8px 18px", fontSize: 13, fontWeight: 700, background: "linear-gradient(135deg, #1A7A5E, #2ECC9A)", color: "#fff", border: "none", borderRadius: 999, cursor: "pointer", transition: "all .2s" }}>Pay Now</button>
                   )}
                   {b.status === "completed" && !reviewed.has(b.id) && (
                     <button onClick={() => openReview(b)}
@@ -271,7 +272,7 @@ function CustomerBookingsPage() {
                     </button>
                   )}
                   {b.status === "completed" && reviewed.has(b.id) && (
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "rgba(245,158,11,.1)", color: "#d97706" }}>✓ Reviewed</span>
+                    <span className="cust-pill" style={{ background: "rgba(245,158,11,.1)", color: "#d97706" }}>Reviewed</span>
                   )}
                   {(b.status === "confirmed" || b.status === "completed") && !disputed.has(b.id) && (
                     <button onClick={() => openDispute(b)}
@@ -280,7 +281,7 @@ function CustomerBookingsPage() {
                     </button>
                   )}
                   {disputed.has(b.id) && (
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "var(--red-bg)", color: "var(--red)" }}>Disputed</span>
+                    <span className="cust-pill" style={{ background: "var(--red-bg)", color: "var(--red)" }}>Disputed</span>
                   )}
                 </div>
               </div>
@@ -299,7 +300,7 @@ function CustomerBookingsPage() {
             {/* ── Step: Method selection ── */}
             {step === "method" && (
               <>
-                <h3 className="serif" style={{ fontSize: 20, marginBottom: 4 }}>Pay for Service</h3>
+                <h3 className="cust-heading" style={{ fontSize: 20, marginBottom: 4 }}>Pay for Service</h3>
                 <p style={{ fontSize: 13, color: "var(--ink3)", marginBottom: 20 }}>
                   {payTarget.serviceName} · <strong style={{ color: "var(--acc)" }}>{fmtPrice(payTarget.amount)}</strong>
                 </p>
@@ -339,7 +340,7 @@ function CustomerBookingsPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
                   <button onClick={() => setStep("method")} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--ink3)", lineHeight: 1 }}>‹</button>
                   <div>
-                    <h3 className="serif" style={{ fontSize: 20 }}>{METHOD_NAMES[payMethod] || ""}</h3>
+                    <h3 className="cust-heading" style={{ fontSize: 20 }}>{METHOD_NAMES[payMethod] || ""}</h3>
                     <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 1 }}>
                       {payTarget.serviceName} · <strong style={{ color: "var(--acc)" }}>{fmtPrice(payTarget.amount)}</strong>
                     </p>
@@ -390,8 +391,8 @@ function CustomerBookingsPage() {
             {/* ── Step: Success (from DPO callback redirect) ── */}
             {step === "success" && (
               <div style={{ textAlign: "center", padding: "12px 0 8px" }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--green-bg)", border: "2px solid rgba(12,166,120,.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px", fontSize: 32 }}>✓</div>
-                <h3 className="serif" style={{ fontSize: 22, color: "var(--green)" }}>Payment Successful!</h3>
+                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--green-bg)", border: "2px solid rgba(12,166,120,.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px", fontSize: 32 }}></div>
+                <h3 className="cust-heading" style={{ fontSize: 22, color: "var(--green)" }}>Payment Successful!</h3>
                 {successAmount && (
                   <p style={{ fontSize: 14, color: "var(--ink2)", marginTop: 8, lineHeight: 1.6 }}>
                     <strong>{fmtPrice(Number(successAmount))}</strong> paid via DPO Pay.
@@ -400,7 +401,7 @@ function CustomerBookingsPage() {
                 {successRef && (
                   <div style={{ margin: "16px 0", background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px" }}>
                     <p style={{ fontSize: 11, color: "var(--ink3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em" }}>Transaction Reference</p>
-                    <p style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 14, color: "var(--acc)", marginTop: 4 }}>{successRef}</p>
+                    <p style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: 14, color: "#1A7A5E", marginTop: 4 }}>{successRef}</p>
                   </div>
                 )}
                 <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 8 }}>Your booking is now complete.</p>
@@ -421,7 +422,7 @@ function CustomerBookingsPage() {
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.5)" }} onClick={closeReview} />
           <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "var(--bg)", borderRadius: "24px 24px 0 0", padding: "24px 22px 44px" }}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--border2)", margin: "0 auto 20px" }} />
-            <h3 className="serif" style={{ fontSize: 20, marginBottom: 4 }}>How was it?</h3>
+            <h3 className="cust-heading" style={{ fontSize: 20, marginBottom: 4 }}>How was it?</h3>
             <p style={{ fontSize: 13, color: "var(--ink3)", marginBottom: 20 }}>
               {reviewTarget.serviceName} · {reviewTarget.vendor.user.firstName} {reviewTarget.vendor.user.lastName}
             </p>
@@ -458,7 +459,7 @@ function CustomerBookingsPage() {
               <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--red-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <AlertTriangle size={18} color="var(--red)" />
               </div>
-              <h3 className="serif" style={{ fontSize: 20 }}>Raise a Dispute</h3>
+              <h3 className="cust-heading" style={{ fontSize: 20 }}>Raise a Dispute</h3>
             </div>
             <p style={{ fontSize: 13, color: "var(--ink3)", marginBottom: 20 }}>
               {disputeTarget.serviceName} · {disputeTarget.vendor?.user.firstName} {disputeTarget.vendor?.user.lastName}

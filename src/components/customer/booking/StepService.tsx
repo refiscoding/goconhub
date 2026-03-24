@@ -18,7 +18,7 @@ export const StepService: FC<StepServiceProps> = ({ vendor, selected, onSelect }
 
   return (
     <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14 }}>
+      <div className="cust-card" style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px" }}>
         <Avatar name={vendor.name} size={46} />
         <div>
           <p style={{ fontWeight: 700, fontSize: 15 }}>{vendor.name}</p>
@@ -28,18 +28,18 @@ export const StepService: FC<StepServiceProps> = ({ vendor, selected, onSelect }
         </div>
       </div>
 
-      <h2 className="serif" style={{ fontSize: 24, letterSpacing: "-.02em" }}>Choose a service</h2>
+      <h2 className="cust-heading" style={{ fontSize: 24 }}>Choose a service</h2>
 
       {items.map((item) => {
         const isSel = selected?.name === item.name;
         return (
           <div key={item.name} onClick={() => onSelect({ name: item.name, price: item.price })}
-            style={{ padding: 16, borderRadius: 14, border: `2px solid ${isSel ? "var(--acc)" : "var(--border)"}`, background: isSel ? "var(--acc-bg)" : "var(--card)", cursor: "pointer", transition: "all .2s" }}>
+            style={{ padding: 16, borderRadius: 16, border: `2px solid ${isSel ? "#1A7A5E" : "var(--border)"}`, background: isSel ? "rgba(26,122,94,.06)" : "var(--card)", cursor: "pointer", transition: "all .2s", boxShadow: isSel ? "0 0 0 3px rgba(26,122,94,.12)" : "none" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <p style={{ fontWeight: 700, fontSize: 15 }}>{item.name}</p>
+              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 15 }}>{item.name}</p>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <p style={{ fontWeight: 800, color: "var(--acc)", fontSize: 16 }}>{fmtPrice(item.price)}</p>
-                {isSel && <IconCheck style={{ width: 20, height: 20, color: "var(--acc)" }} />}
+                <p style={{ fontWeight: 800, color: "#1A7A5E", fontSize: 16 }}>{fmtPrice(item.price)}</p>
+                {isSel && <IconCheck style={{ width: 20, height: 20, color: "#1A7A5E" }} />}
               </div>
             </div>
             <p style={{ fontSize: 12, color: "var(--ink2)", marginTop: 4 }}>per {item.unit}</p>

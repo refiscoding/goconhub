@@ -20,18 +20,18 @@ interface StepDateTimeProps {
 
 export const StepDateTime: FC<StepDateTimeProps> = ({ selectedDate, selectedTime, onSelectDate, onSelectTime }) => (
   <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-    <h2 className="serif" style={{ fontSize: 24, letterSpacing: "-.02em" }}>Pick a date & time</h2>
+    <h2 className="cust-heading" style={{ fontSize: 24 }}>Pick a date & time</h2>
 
     <div>
-      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--ink2)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>Available dates</p>
+      <p className="cust-section-label" style={{ marginBottom: 10 }}>Available dates</p>
       <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none" }}>
         {MONTH_DAYS.map((d, i) => {
           const sel = selectedDate?.label === d.label;
           return (
             <div key={i} onClick={() => onSelectDate(d)}
-              style={{ flexShrink: 0, padding: "10px 14px", borderRadius: 12, border: `2px solid ${sel ? "var(--acc)" : "var(--border)"}`, background: sel ? "var(--acc-bg)" : "var(--card)", cursor: "pointer", textAlign: "center", minWidth: 64, transition: "all .2s" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: sel ? "var(--acc)" : "var(--ink3)", textTransform: "uppercase" }}>{d.label.split(" ")[0]}</p>
-              <p style={{ fontSize: 18, fontWeight: 800, marginTop: 2, color: sel ? "var(--acc)" : "var(--ink)" }}>{d.label.split(" ")[1]}</p>
+              style={{ flexShrink: 0, padding: "10px 14px", borderRadius: 14, border: `2px solid ${sel ? "#1A7A5E" : "var(--border)"}`, background: sel ? "rgba(26,122,94,.06)" : "var(--card)", cursor: "pointer", textAlign: "center", minWidth: 64, transition: "all .2s", boxShadow: sel ? "0 0 0 3px rgba(26,122,94,.12)" : "none" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: sel ? "#1A7A5E" : "var(--ink3)", textTransform: "uppercase" }}>{d.label.split(" ")[0]}</p>
+              <p style={{ fontSize: 18, fontWeight: 800, marginTop: 2, color: sel ? "#1A7A5E" : "var(--ink)" }}>{d.label.split(" ")[1]}</p>
             </div>
           );
         })}
@@ -39,14 +39,14 @@ export const StepDateTime: FC<StepDateTimeProps> = ({ selectedDate, selectedTime
     </div>
 
     <div>
-      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--ink2)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>Available times</p>
+      <p className="cust-section-label" style={{ marginBottom: 10 }}>Available times</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
         {TIME_SLOTS.map((t) => {
           const sel = selectedTime === t;
           return (
             <div key={t} onClick={() => onSelectTime(t)}
-              style={{ padding: "12px 8px", borderRadius: 10, border: `2px solid ${sel ? "var(--acc)" : "var(--border)"}`, background: sel ? "var(--acc-bg)" : "var(--card)", cursor: "pointer", textAlign: "center", transition: "all .2s" }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: sel ? "var(--acc)" : "var(--ink)" }}>{t}</p>
+              style={{ padding: "12px 8px", borderRadius: 12, border: `2px solid ${sel ? "#1A7A5E" : "var(--border)"}`, background: sel ? "rgba(26,122,94,.06)" : "var(--card)", cursor: "pointer", textAlign: "center", transition: "all .2s", boxShadow: sel ? "0 0 0 3px rgba(26,122,94,.12)" : "none" }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: sel ? "#1A7A5E" : "var(--ink)" }}>{t}</p>
             </div>
           );
         })}

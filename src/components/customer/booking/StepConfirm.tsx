@@ -26,9 +26,9 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
 
   return (
     <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <h2 className="serif" style={{ fontSize: 24, letterSpacing: "-.02em" }}>Confirm booking</h2>
+      <h2 className="cust-heading" style={{ fontSize: 24 }}>Confirm booking</h2>
 
-      <div className="card" style={{ padding: 18 }}>
+      <div className="cust-card" style={{ padding: 18 }}>
         {([
           ["Vendor",    vendor.name],
           ["Service",   selection.service?.name ?? ""],
@@ -43,16 +43,16 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
         ))}
         <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 4px", fontSize: 16 }}>
           <span style={{ fontWeight: 700 }}>Estimated Total</span>
-          <span style={{ fontWeight: 800, color: "var(--acc)" }}>{fmtPrice(selection.service?.price ?? 0)}</span>
+          <span style={{ fontWeight: 800, color: "#1A7A5E" }}>{fmtPrice(selection.service?.price ?? 0)}</span>
         </div>
         <p style={{ fontSize: 12, color: "var(--ink3)", marginBottom: 6 }}>Final price may vary depending on inspection and work required.</p>
-        <div style={{ background: "var(--acc-bg)", border: "1px solid var(--acc-bd)", borderRadius: 8, padding: "10px 12px", fontSize: 13, color: "var(--acc)" }}>
+        <div style={{ background: "rgba(26,122,94,.06)", border: "1px solid rgba(26,122,94,.15)", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1A7A5E" }}>
           🔒 Payment is securely held by HandyHub and released to the contractor only after the job is completed.
         </div>
       </div>
 
       {/* Structured job prep section */}
-      <div className="card" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div className="cust-card" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
           <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>
             Help the contractor prepare for your job <span style={{ color: "var(--red, #ef4444)", marginLeft: 2 }}>*</span>
@@ -76,7 +76,7 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
           />
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5, fontSize: 12 }}>
             <span style={{ color: belowMin && charCount > 0 ? "var(--red, #ef4444)" : "var(--ink3)" }}>
-              {belowMin && charCount > 0 ? `${MIN_CHARS - charCount} more characters needed` : belowMin ? `Minimum ${MIN_CHARS} characters required` : "✓ Good description"}
+              {belowMin && charCount > 0 ? `${MIN_CHARS - charCount} more characters needed` : belowMin ? `Minimum ${MIN_CHARS} characters required` : "Good description"}
             </span>
             <span style={{ color: charCount > MAX_CHARS * 0.9 ? "var(--red, #ef4444)" : "var(--ink3)" }}>
               {charCount}/{MAX_CHARS}
@@ -99,7 +99,7 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
             {selection.photos.length > 0 ? (
               <div>
                 <p style={{ fontSize: 20, marginBottom: 4 }}>📷</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--acc)" }}>{selection.photos.length} photo{selection.photos.length > 1 ? "s" : ""} selected</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#1A7A5E" }}>{selection.photos.length} photo{selection.photos.length > 1 ? "s" : ""} selected</p>
                 <p style={{ fontSize: 12, marginTop: 2 }}>Tap to change</p>
               </div>
             ) : (

@@ -69,8 +69,8 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
-      <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "52px 22px 16px", display: "flex", alignItems: "center", gap: 14, position: "sticky", top: 0, zIndex: 50 }}>
+    <div className="cust-page-wrap" style={{ display: "flex", flexDirection: "column" }}>
+      <div className="page-top" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "0 22px 16px", display: "flex", alignItems: "center", gap: 14, position: "sticky", top: 0, zIndex: 50 }}>
         <button className="back-btn" onClick={step === 0 ? () => router.back() : () => setStep((s) => s - 1)}>
           <IconChevL style={{ width: 22, height: 22 }} />
         </button>
@@ -89,14 +89,14 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
         </div>
       )}
 
-      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, padding: "14px 22px 28px", background: "rgba(250,247,242,.95)", backdropFilter: "blur(12px)", borderTop: "1px solid var(--border)" }}>
-        <button className="btn-pri" disabled={!canContinue || busy} style={{ opacity: (canContinue && !busy) ? 1 : 0.5 }}
+      <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, padding: "14px 22px 28px", background: "rgba(250,247,242,.92)", backdropFilter: "blur(16px)", borderTop: "1px solid var(--border)" }}>
+        <button disabled={!canContinue || busy} style={{ width: "100%", padding: "14px 0", fontSize: 15, fontWeight: 700, borderRadius: 14, border: "none", cursor: (canContinue && !busy) ? "pointer" : "not-allowed", color: "#fff", background: (canContinue && !busy) ? "linear-gradient(135deg, #1A7A5E, #2ECC9A)" : "var(--border2)", opacity: (canContinue && !busy) ? 1 : 0.5, transition: "all .2s", boxShadow: (canContinue && !busy) ? "0 4px 16px rgba(26,122,94,.25)" : "none" }}
           onClick={() => {
             if (!canContinue || busy) return;
             if (step === 2) confirm();
             else setStep((s) => s + 1);
           }}>
-          {step === 2 ? (busy ? "Booking…" : "Confirm Booking →") : "Continue →"}
+          {step === 2 ? (busy ? "Booking…" : "Confirm Booking") : "Continue"}
         </button>
       </div>
     </div>
