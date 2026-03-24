@@ -8,22 +8,28 @@ import { logger } from "@/lib/logger";
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();
   if (!session) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  if (session.role !== "customer") return NextResponse.json({ message: "Only customers can leave reviews" }, { status: 403 });
+  if (session.role !== "customer") {
+    logger.error("Review role check failed", { userId: session.userId, role: session.role });
+    return NextResponse.json({ message: "Only customers can leave reviews" }, { status: 403 });
+  }
 
   const { rating, comment } = await req.json();
   if (!rating || rating < 1 || rating > 5) return NextResponse.json({ message: "Rating must be 1–5" }, { status: 400 });
 
   try {
-    // Only allow reviews after a completed booking
+    // Allow reviews after a completed or confirmed+paid booking
     const eligibleBooking = await prisma.booking.findFirst({
       where: {
         customerId: session.userId,
         vendorId:   params.id,
-        status:     "completed",
+        OR: [
+          { status: "completed" },
+          { status: "confirmed", paymentStatus: "confirmed" },
+        ],
       },
     });
     if (!eligibleBooking) {
-      return NextResponse.json({ message: "You can only review vendors you have booked" }, { status: 403 });
+      return NextResponse.json({ message: "You can only review vendors after a completed booking" }, { status: 403 });
     }
     const review = await prisma.review.upsert({
       where: { vendorId_reviewerId: { vendorId: params.id, reviewerId: session.userId } },

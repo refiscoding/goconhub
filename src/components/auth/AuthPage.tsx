@@ -78,11 +78,11 @@ function useAuthLogic() {
       await refresh();
       if (mode === "login") {
         const userRole = data.user?.role ?? role;
-        if      (userRole === "vendor") router.push("/vendor/dashboard");
-        else if (userRole === "admin")  router.push("/admin/dashboard");
-        else                            router.push("/customer/explore");
+        if      (userRole === "vendor") window.location.href = "/vendor/dashboard";
+        else if (userRole === "admin")  window.location.href = "/admin/dashboard";
+        else                            window.location.href = "/customer/explore";
       } else {
-        router.push(role === "vendor" ? "/onboarding/vendor" : "/onboarding/customer");
+        window.location.href = role === "vendor" ? "/onboarding/vendor" : "/onboarding/customer";
       }
     } catch {
       toast({ title: "Network error. Please try again.", status: "error", duration: 3000, isClosable: true, position: "top" });
