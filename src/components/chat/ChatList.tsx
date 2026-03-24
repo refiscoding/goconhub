@@ -41,24 +41,28 @@ interface ChatListProps {
 
 export const ChatList: FC<ChatListProps> = ({ chats, activeChatId, onSelectChat }) => (
   <Box pb="20px" bg="white" h="100%" overflowY="auto">
-    <Box pt="52px" px="20px" pb="12px">
-      <Heading size="lg" letterSpacing="-0.02em" color="portal.text">
+    <Box pt="52px" px="20px" pb="16px">
+      <Heading size="lg" letterSpacing="-0.03em" color="portal.text" fontWeight="800">
         Chats
       </Heading>
     </Box>
 
-    <Box px="16px" pb="10px" borderBottom="1px solid" borderColor="gray.100">
-      <InputGroup size="sm">
-        <InputLeftElement pointerEvents="none">
-          <Search size={15} color="#A0AEC0" />
+    {/* Search bar — pill shape */}
+    <Box px="16px" pb="14px">
+      <InputGroup size="md">
+        <InputLeftElement pointerEvents="none" h="100%">
+          <Search size={16} color="#A0AEC0" />
         </InputLeftElement>
         <Input
-          placeholder="Search"
-          borderRadius="8px"
+          placeholder="Search conversations"
+          borderRadius="full"
           bg="gray.50"
-          border="none"
-          _placeholder={{ color: "gray.400" }}
-          _focus={{ bg: "gray.100", boxShadow: "none" }}
+          border="1px solid"
+          borderColor="gray.100"
+          _placeholder={{ color: "gray.400", fontSize: "14px" }}
+          _focus={{ bg: "gray.100", boxShadow: "none", borderColor: "gray.200" }}
+          fontSize="14px"
+          h="42px"
           readOnly
         />
       </InputGroup>
@@ -71,88 +75,105 @@ export const ChatList: FC<ChatListProps> = ({ chats, activeChatId, onSelectChat 
       </Box>
     )}
 
-    {chats.map((c, i) => {
-      const isActive = c.id === activeChatId;
-      const chatEl = (
-        <Flex
-          key={c.id}
-          align="center"
-          gap="13px"
-          px="18px"
-          py="12px"
-          bg={isActive ? "portal.surface" : "white"}
-          cursor="pointer"
-          borderBottom="1px solid"
-          borderColor="gray.100"
-          _hover={{ bg: isActive ? "portal.surface" : "gray.50" }}
-          transition="background 0.15s"
-          onClick={() => onSelectChat?.(c.id)}
-        >
-          <Avatar name={c.name} size={50} src={c.avatarUrl} />
-          <Box flex="1" minW="0">
-            <Flex justify="space-between" align="baseline" mb="2px">
-              <Text
-                fontWeight="600"
-                fontSize="16px"
-                color="gray.800"
-                overflow="hidden"
-                textOverflow="ellipsis"
-                whiteSpace="nowrap"
-                flex="1"
-                mr="8px"
-              >
-                {c.name}
-              </Text>
-              <Text
-                fontSize="12px"
-                color={c.unread ? "portal.primary" : "gray.400"}
-                fontWeight="400"
-                flexShrink={0}
-              >
-                {fmtRelative(c.time)}
-              </Text>
-            </Flex>
-            <Flex align="center" gap="6px">
-              <Text
-                flex="1"
-                fontSize="14px"
-                color={c.unread ? "gray.700" : "gray.400"}
-                overflow="hidden"
-                textOverflow="ellipsis"
-                whiteSpace="nowrap"
-                fontWeight={c.unread ? 600 : 400}
-              >
-                {c.lastMessage}
-              </Text>
+    <Flex direction="column" px="10px" gap="2px">
+      {chats.map((c) => {
+        const isActive = c.id === activeChatId;
+        const chatEl = (
+          <Flex
+            key={c.id}
+            align="center"
+            gap="14px"
+            px="14px"
+            py="14px"
+            bg={isActive ? "portal.surface" : "transparent"}
+            cursor="pointer"
+            borderRadius="16px"
+            _hover={{ bg: isActive ? "portal.surface" : "gray.50" }}
+            transition="all 0.15s ease"
+            onClick={() => onSelectChat?.(c.id)}
+          >
+            <Box position="relative" flexShrink={0}>
+              <Avatar name={c.name} size={52} src={c.avatarUrl} />
               {c.unread > 0 && (
-                <Badge
+                <Box
+                  position="absolute"
+                  top="-2px"
+                  right="-2px"
+                  w="12px"
+                  h="12px"
                   borderRadius="full"
-                  px="6px"
-                  py="1px"
-                  fontSize="11px"
-                  fontWeight="700"
                   bg="portal.primary"
-                  color="white"
-                  minW="20px"
-                  textAlign="center"
-                >
-                  {c.unread}
-                </Badge>
+                  border="2.5px solid white"
+                />
               )}
-            </Flex>
-          </Box>
-        </Flex>
-      );
+            </Box>
+            <Box flex="1" minW="0">
+              <Flex justify="space-between" align="baseline" mb="3px">
+                <Text
+                  fontWeight={c.unread ? "700" : "600"}
+                  fontSize="15px"
+                  color="gray.800"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
+                  flex="1"
+                  mr="8px"
+                  letterSpacing="-0.01em"
+                >
+                  {c.name}
+                </Text>
+                <Text
+                  fontSize="12px"
+                  color={c.unread ? "portal.primary" : "gray.400"}
+                  fontWeight={c.unread ? "600" : "400"}
+                  flexShrink={0}
+                >
+                  {fmtRelative(c.time)}
+                </Text>
+              </Flex>
+              <Flex align="center" gap="8px">
+                <Text
+                  flex="1"
+                  fontSize="13.5px"
+                  color={c.unread ? "gray.600" : "gray.400"}
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
+                  fontWeight={c.unread ? 500 : 400}
+                  lineHeight="1.4"
+                >
+                  {c.lastMessage}
+                </Text>
+                {c.unread > 0 && (
+                  <Badge
+                    borderRadius="full"
+                    px="7px"
+                    py="2px"
+                    fontSize="11px"
+                    fontWeight="700"
+                    bg="portal.primary"
+                    color="white"
+                    minW="22px"
+                    textAlign="center"
+                    boxShadow="0 2px 6px rgba(0,0,0,0.08)"
+                  >
+                    {c.unread}
+                  </Badge>
+                )}
+              </Flex>
+            </Box>
+          </Flex>
+        );
 
-      // On desktop with sidebar, clicking handles selection; on standalone pages, use Link
-      if (onSelectChat) {
-        return chatEl;
-      }
-      return (
-        <Link key={c.id} href={c.href} style={{ textDecoration: "none", color: "inherit" }}>
-          {chatEl}
-        </Link>
-      );
-    })}
+        if (onSelectChat) {
+          return chatEl;
+        }
+        return (
+          <Link key={c.id} href={c.href} style={{ textDecoration: "none", color: "inherit" }}>
+            {chatEl}
+          </Link>
+        );
+      })}
+    </Flex>
   </Box>
 );

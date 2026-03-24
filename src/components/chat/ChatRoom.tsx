@@ -2,7 +2,7 @@
 import { FC, useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Flex, Text, Input, IconButton } from "@chakra-ui/react";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, ShieldCheck } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import { MessageBubble } from "./MessageBubble";
 import { useUser } from "@/context/UserContext";
@@ -21,7 +21,7 @@ interface ChatRoomProps {
   backHref?: string;
   avatarSrc?: string | null;
   profileHref?: string;
-  embedded?: boolean; // true when used inside split-pane desktop layout
+  embedded?: boolean;
 }
 
 function markRead(key: string, count: number) {
@@ -154,79 +154,119 @@ export const ChatRoom: FC<ChatRoomProps> = ({
     <Flex
       direction="column"
       h={embedded ? "100%" : "100vh"}
-      bg="gray.50"
+      bg="#f8f9fb"
       position="relative"
       overflow="hidden"
     >
-      {/* Header */}
+      {/* Header — frosted glass */}
       <Flex
         bg="portal.primary"
         pt={embedded ? "16px" : "50px"}
-        px="16px"
-        pb="14px"
+        px="20px"
+        pb="16px"
         align="center"
-        gap="10px"
+        gap="12px"
         flexShrink={0}
-        boxShadow="sm"
+        position="relative"
+        zIndex={2}
+        boxShadow="0 4px 20px -4px rgba(0,0,0,0.15)"
       >
         {!embedded && (
           <IconButton
             aria-label="Back"
-            icon={<ArrowLeft size={22} />}
+            icon={<ArrowLeft size={20} />}
             variant="ghost"
             color="white"
             _hover={{ bg: "whiteAlpha.200" }}
             onClick={goBack}
             size="sm"
+            borderRadius="full"
           />
         )}
         <Flex
           align="center"
-          gap="10px"
+          gap="12px"
           flex="1"
           cursor={profileHref ? "pointer" : "default"}
           onClick={() => profileHref && router.push(profileHref)}
         >
-          <Avatar name={title} size={38} src={avatarSrc} />
+          <Box position="relative">
+            <Avatar name={title} size={42} src={avatarSrc} />
+            {/* Online dot */}
+            <Box
+              position="absolute"
+              bottom="0px"
+              right="0px"
+              w="11px"
+              h="11px"
+              borderRadius="full"
+              bg="#34d399"
+              border="2px solid"
+              borderColor="portal.primary"
+            />
+          </Box>
           <Box>
-            <Text fontWeight="700" fontSize="15px" color="white">{title}</Text>
-            <Text fontSize="11px" color="whiteAlpha.700" fontWeight="500" mt="1px">{subtitle}</Text>
+            <Text fontWeight="700" fontSize="16px" color="white" letterSpacing="-0.01em">{title}</Text>
+            <Text fontSize="12px" color="whiteAlpha.700" fontWeight="500" mt="1px">{subtitle}</Text>
           </Box>
         </Flex>
       </Flex>
 
-      {/* Safety banner */}
+      {/* Safety banner — subtle glass card */}
       <Flex
-        bg="yellow.50"
-        borderBottom="1px solid"
-        borderColor="yellow.300"
-        px="18px"
-        py="6px"
-        gap="8px"
+        mx="16px"
+        mt="12px"
+        px="14px"
+        py="10px"
+        gap="10px"
         align="center"
         flexShrink={0}
+        bg="white"
+        borderRadius="14px"
+        boxShadow="0 1px 4px rgba(0,0,0,0.04)"
+        border="1px solid"
+        borderColor="gray.100"
       >
-        <Text fontSize="13px" flexShrink={0}>🛡️</Text>
-        <Text fontSize="11px" color="yellow.800" lineHeight="1.4">
+        <Flex
+          w="28px" h="28px" borderRadius="10px"
+          bg="green.50" align="center" justify="center" flexShrink={0}
+        >
+          <ShieldCheck size={15} color="#22c55e" />
+        </Flex>
+        <Text fontSize="12px" color="gray.500" lineHeight="1.4">
           All payments must be made through HandyHub for your protection.
         </Text>
       </Flex>
 
-      {/* Messages area */}
+      {/* Messages area — subtle pattern bg */}
       <Flex
         flex="1"
         overflowY="auto"
-        px="18px"
-        pt="16px"
+        px="16px"
+        pt="12px"
         pb="16px"
         direction="column"
-        gap="6px"
-        bg="gray.50"
+        gap="8px"
+        bg="#f8f9fb"
+        css={{
+          "&::-webkit-scrollbar": { width: "4px" },
+          "&::-webkit-scrollbar-thumb": { background: "rgba(0,0,0,0.1)", borderRadius: "4px" },
+        }}
       >
         {messages.length === 0 && (
-          <Flex flex="1" align="center" justify="center">
-            <Text textAlign="center" color="gray.400" fontSize="13px">
-              No messages yet. Say hello!
+          <Flex flex="1" align="center" justify="center" direction="column" gap="8px">
+            <Flex
+              w="56px" h="56px" borderRadius="18px"
+              bg="white" boxShadow="0 2px 8px rgba(0,0,0,0.04)"
+              align="center" justify="center"
+            >
+              <Sparkles size={24} color="#d1d5db" />
+            </Flex>
+            <Text textAlign="center" color="gray.400" fontSize="14px" fontWeight="500">
+              No messages yet
+            </Text>
+            <Text textAlign="center" color="gray.300" fontSize="13px">
+              Say hello to start the conversation
             </Text>
           </Flex>
         )}
@@ -237,16 +277,18 @@ export const ChatRoom: FC<ChatRoomProps> = ({
           return (
             <Box key={m.id}>
               {showLabel && (
-                <Flex justify="center" my="8px">
+                <Flex justify="center" my="12px">
                   <Text
-                    fontSize="12px"
-                    color="gray.500"
+                    fontSize="11px"
+                    color="gray.400"
                     bg="white"
                     px="14px"
-                    py="4px"
-                    borderRadius="8px"
-                    boxShadow="0 1px 2px rgba(0,0,0,0.06)"
-                    fontWeight="500"
+                    py="5px"
+                    borderRadius="full"
+                    boxShadow="0 1px 4px rgba(0,0,0,0.04)"
+                    fontWeight="600"
+                    letterSpacing="0.02em"
+                    textTransform="uppercase"
                   >
                     {dateLabel}
                   </Text>
@@ -259,37 +301,38 @@ export const ChatRoom: FC<ChatRoomProps> = ({
         <Box ref={bottomRef} />
       </Flex>
 
-      {/* Quick replies */}
+      {/* Quick replies — modern chip style */}
       {showQR && quickReplies.length > 0 && (
         <Box
           bg="white"
           borderTop="1px solid"
           borderColor="gray.100"
-          px="14px"
-          py="12px"
+          px="16px"
+          py="14px"
           flexShrink={0}
         >
-          <Text fontSize="10px" fontWeight="700" color="portal.primary" textTransform="uppercase" letterSpacing="0.06em" mb="8px">
+          <Text fontSize="10px" fontWeight="700" color="gray.400" textTransform="uppercase" letterSpacing="0.08em" mb="10px">
             Quick Replies
           </Text>
-          <Flex direction="column" gap="6px" maxH="160px" overflowY="auto">
+          <Flex flexWrap="wrap" gap="8px">
             {quickReplies.map((r, i) => (
               <Box
                 as="button"
                 key={i}
                 onClick={() => send(r)}
-                textAlign="left"
                 bg="gray.50"
                 border="1px solid"
                 borderColor="gray.200"
-                borderRadius="10px"
-                px="12px"
-                py="9px"
+                borderRadius="full"
+                px="16px"
+                py="8px"
                 fontSize="13px"
-                color="gray.700"
+                color="gray.600"
                 cursor="pointer"
-                _hover={{ bg: "gray.100" }}
-                transition="background 0.15s"
+                fontWeight="500"
+                _hover={{ bg: "gray.100", borderColor: "gray.300" }}
+                transition="all 0.15s ease"
+                whiteSpace="nowrap"
               >
                 {r}
               </Box>
@@ -301,23 +344,26 @@ export const ChatRoom: FC<ChatRoomProps> = ({
       {/* Contact info warning */}
       {pendingText && (
         <Box
+          mx="16px"
+          mb="8px"
+          p="16px"
           bg="white"
-          borderTop="1px solid"
+          borderRadius="16px"
+          border="1px solid"
           borderColor="red.100"
-          px="16px"
-          py="14px"
+          boxShadow="0 4px 12px rgba(239,68,68,0.08)"
           flexShrink={0}
         >
-          <Text fontWeight="700" fontSize="14px" mb="4px" color="red.500">⚠️ Contact info detected</Text>
-          <Text fontSize="13px" color="gray.600" lineHeight="1.5" mb="12px">
+          <Text fontWeight="700" fontSize="14px" mb="6px" color="red.500">Contact info detected</Text>
+          <Text fontSize="13px" color="gray.500" lineHeight="1.5" mb="14px">
             Sharing phone numbers, email addresses, or messaging app links is not allowed before a booking is confirmed.
           </Text>
           <Box
             as="button"
             onClick={() => { setPendingText(null); setTimeout(() => inputRef.current?.focus(), 50); }}
             w="100%"
-            py="9px"
-            borderRadius="8px"
+            py="10px"
+            borderRadius="12px"
             bg="gray.50"
             border="1px solid"
             borderColor="gray.200"
@@ -326,44 +372,38 @@ export const ChatRoom: FC<ChatRoomProps> = ({
             cursor="pointer"
             color="gray.700"
             _hover={{ bg: "gray.100" }}
+            transition="all 0.15s ease"
           >
             OK, edit my message
           </Box>
         </Box>
       )}
 
-      {/* Input area */}
-      <Flex
-        bg="white"
-        px={{ base: "10px", md: "16px" }}
-        py="10px"
-        gap="8px"
-        align="center"
-        flexShrink={0}
-        borderTop="1px solid"
-        borderColor="gray.100"
-      >
-        {quickReplies.length > 0 && (
-          <IconButton
-            aria-label="Quick replies"
-            icon={<Text fontSize="16px">⚡</Text>}
-            onClick={() => setShowQR((v) => !v)}
-            variant={showQR ? "solid" : "outline"}
-            colorScheme={showQR ? "blue" : "gray"}
-            borderRadius="full"
-            size="sm"
-            flexShrink={0}
-          />
-        )}
+      {/* Input area — floating glass bar */}
+      <Box px="12px" pb={embedded ? "12px" : "16px"} pt="8px" flexShrink={0} bg="#f8f9fb">
         <Flex
-          flex="1"
+          bg="white"
+          px="6px"
+          py="6px"
+          gap="8px"
           align="center"
-          bg="gray.50"
           borderRadius="full"
-          border="1px solid"
-          borderColor="gray.200"
-          px="16px"
+          boxShadow="0 2px 12px -2px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)"
         >
+          {quickReplies.length > 0 && (
+            <IconButton
+              aria-label="Quick replies"
+              icon={<Sparkles size={16} />}
+              onClick={() => setShowQR((v) => !v)}
+              variant="ghost"
+              color={showQR ? "portal.primary" : "gray.400"}
+              borderRadius="full"
+              size="sm"
+              ml="4px"
+              _hover={{ bg: "gray.50", color: "portal.primary" }}
+              flexShrink={0}
+            />
+          )}
           <Input
             ref={inputRef}
             placeholder="Type a message..."
@@ -371,30 +411,32 @@ export const ChatRoom: FC<ChatRoomProps> = ({
             onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
             onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && send()}
             variant="unstyled"
-            fontSize="14px"
-            py="9px"
+            fontSize="14.5px"
+            py="10px"
+            px={quickReplies.length > 0 ? "4px" : "14px"}
             color="gray.800"
             _placeholder={{ color: "gray.400" }}
           />
+          <IconButton
+            aria-label="Send"
+            icon={<Send size={16} />}
+            onClick={() => send()}
+            isDisabled={sending || !input.trim()}
+            bg="portal.primary"
+            color="white"
+            borderRadius="full"
+            size="sm"
+            w="40px"
+            h="40px"
+            minW="40px"
+            boxShadow="0 2px 8px rgba(0,0,0,0.1)"
+            _hover={{ opacity: 0.9, transform: "scale(1.04)" }}
+            _disabled={{ opacity: 0.35, cursor: "not-allowed", transform: "none" }}
+            transition="all 0.2s ease"
+            flexShrink={0}
+          />
         </Flex>
-        <IconButton
-          aria-label="Send"
-          icon={<Send size={17} />}
-          onClick={() => send()}
-          isDisabled={sending || !input.trim()}
-          bg="portal.primary"
-          color="white"
-          borderRadius="full"
-          size="sm"
-          w="36px"
-          h="36px"
-          minW="36px"
-          boxShadow="sm"
-          _hover={{ opacity: 0.9 }}
-          _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-          flexShrink={0}
-        />
-      </Flex>
+      </Box>
     </Flex>
   );
 };
