@@ -172,14 +172,14 @@ export const VendorListings: FC = () => {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) { showToast(data.message ?? "Failed to update", "err"); return; }
-        showToast("Listing updated ✓", "ok");
+        showToast("Listing updated", "ok");
       } else {
         const res  = await fetch("/api/listings", {
           method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) { showToast(data.message ?? "Failed to create", "err"); return; }
-        showToast("Listing posted ✓", "ok");
+        showToast("Listing posted", "ok");
       }
       resetForm();
       reload();
@@ -205,7 +205,7 @@ export const VendorListings: FC = () => {
     await fetch(`/api/listings/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sold" }),
     });
-    showToast("Marked as sold ✓", "ok");
+    showToast("Marked as sold", "ok");
     reload();
   };
 

@@ -88,7 +88,7 @@ export const VendorDash: FC = () => {
       });
       setApiBookings((prev) => prev.map((b) => b.id === id ? { ...b, status } : b));
       setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status } : b));
-      showToast(status === "confirmed" ? "Booking accepted ✓" : "Booking declined", status === "confirmed" ? "ok" : "err");
+      showToast(status === "confirmed" ? "Booking accepted" : "Booking declined", status === "confirmed" ? "ok" : "err");
     } catch {
       showToast("Failed to update booking", "err");
     }

@@ -210,7 +210,7 @@ export const MarketplacePage: FC = () => {
   return (
     <div>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
-      {buyItem && <BuyModal listing={buyItem} onClose={() => setBuyItem(null)} onDone={() => showToast("Request sent ✓", "ok")} />}
+      {buyItem && <BuyModal listing={buyItem} onClose={() => setBuyItem(null)} onDone={() => showToast("Request sent", "ok")} />}
       {lightbox && <ImageLightbox photos={lightbox.photos} startIndex={lightbox.index} onClose={() => setLightbox(null)} />}
 
       {/* Header */}

@@ -130,7 +130,7 @@ const TicketRow: FC<{ ticket: SupportTicket; onUpdate: RowProps["onUpdate"] }> =
                 variant="outline"
                 fontSize="12px"
               >
-                {saved ? "Saved ✓" : "Save Changes"}
+                {saved ? "Saved" : "Save Changes"}
               </Button>
             </Flex>
           </Box>

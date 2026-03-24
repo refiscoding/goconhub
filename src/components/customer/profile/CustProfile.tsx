@@ -90,7 +90,7 @@ export const CustProfile: FC = () => {
       if (!res.ok) { showToast("Failed to save profile", "err"); return; }
       await refresh();
       setEditing(false);
-      showToast("Profile updated ✓", "ok");
+      showToast("Profile updated", "ok");
     } catch { showToast("Network error", "err"); }
     finally { setBusy(false); }
   };
@@ -117,7 +117,7 @@ export const CustProfile: FC = () => {
       if (!res.ok) { showToast("Upload failed", "err"); return; }
       setAvatar(avatarUrl);
       await refresh();
-      showToast("Photo updated ✓", "ok");
+      showToast("Photo updated", "ok");
     } catch {
       showToast("Upload failed", "err");
     }
@@ -137,7 +137,7 @@ export const CustProfile: FC = () => {
       });
       const data = await res.json();
       if (!res.ok) { showToast(data.message ?? "Failed", "err"); return; }
-      showToast("Password changed ✓", "ok");
+      showToast("Password changed", "ok");
       setPwOpen(false); setPwCurrent(""); setPwNew(""); setPwConfirm("");
     } catch { showToast("Network error", "err"); }
     finally { setPwBusy(false); }

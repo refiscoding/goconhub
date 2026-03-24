@@ -70,7 +70,7 @@ export const VendorProfile: FC = () => {
       if (!res.ok) { showToast("Failed to save profile", "err"); return; }
       await refresh();
       setEditing(false);
-      showToast("Profile saved ✓", "ok");
+      showToast("Profile saved", "ok");
     } catch { showToast("Network error", "err"); }
     finally { setBusy(false); }
   };
@@ -96,7 +96,7 @@ export const VendorProfile: FC = () => {
       if (!res.ok) { showToast("Upload failed", "err"); return; }
       setAvatar(avatarUrl);
       await refresh();
-      showToast("Photo updated ✓", "ok");
+      showToast("Photo updated", "ok");
     } catch {
       showToast("Upload failed", "err");
     }
@@ -127,7 +127,7 @@ export const VendorProfile: FC = () => {
       });
       const data = await res.json();
       if (!res.ok) { showToast(data.message ?? "Failed", "err"); return; }
-      showToast("Password changed ✓", "ok");
+      showToast("Password changed", "ok");
       setPwOpen(false); setPwCurrent(""); setPwNew(""); setPwConfirm("");
     } catch { showToast("Network error", "err"); }
     finally { setPwBusy(false); }
@@ -195,7 +195,7 @@ export const VendorProfile: FC = () => {
         {[
           { label: "Rating",   value: user?.vendor?.rating?.toFixed(1) ?? "—",     color: "#f59e0b", icon: "⭐" },
           { label: "Reviews",  value: String(user?.vendor?.reviewCount ?? 0),       color: "var(--acc)", icon: "💬" },
-          { label: "Verified", value: user?.vendor?.verified ? "Yes" : "No",        color: "var(--green)", icon: "✓" },
+          { label: "Verified", value: user?.vendor?.verified ? "Yes" : "No",        color: "var(--green)", icon: "" },
         ].map((s) => (
           <div key={s.label} style={{ flex: 1, background: "var(--card)", borderRadius: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: "14px 8px", textAlign: "center" }}>
             <span style={{ fontSize: 20 }}>{s.icon}</span>
