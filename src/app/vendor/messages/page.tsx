@@ -1,62 +1,175 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Box, Flex, Text, useBreakpointValue } from "@chakra-ui/react";
 import { ChatList } from "@/components/chat/ChatList";
+import { ChatRoom } from "@/components/chat/ChatRoom";
+import { QUICK_REPLIES } from "@/lib/constants";
 
 interface ApiBooking {
   id: string;
   serviceName: string;
   status: string;
-  customer: { firstName: string; lastName: string };
+  customer: { id: string; firstName: string; lastName: string; avatarUrl?: string | null };
   _count: { messages: number };
   messages: { createdAt: string; text: string }[];
 }
 
-function getUnread(bookingId: string, total: number): number {
+interface ChatPreview {
+  id: string;
+  name: string;
+  lastMessage: string;
+  time?: string;
+  unread: number;
+  href: string;
+  avatarUrl?: string | null;
+  bookingIds: string[];
+}
+
+function getUnread(key: string, total: number): number {
   try {
-    const seen = Number(localStorage.getItem(`hh_seen_${bookingId}`) ?? 0);
-    return Math.max(0, total - seen);
-  } catch { return 0; }
+    const raw = localStorage.getItem(`hh_seen_${key}`);
+    if (raw === null) return total; // never opened = all unread
+    return Math.max(0, total - Number(raw));
+  } catch { return total; }
 }
 
 export default function VendorMessagesPage() {
-  const [chats, setChats] = useState<{ id: string; name: string; lastMessage: string; unread: number; href: string }[]>([]);
+  const router = useRouter();
+  const [chats, setChats] = useState<ChatPreview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const isDesktop = useBreakpointValue({ base: false, md: true }, { fallback: "base" });
 
   useEffect(() => {
     fetch("/api/bookings")
       .then((r) => r.json())
       .then((data) => {
         const bookings: ApiBooking[] = data.bookings ?? [];
-        setChats(bookings.map((b) => ({
-          id:          b.id,
-          name:        `${b.customer.firstName} ${b.customer.lastName}`,
-          lastMessage: b.messages[0]?.text ?? `${b.serviceName} · ${b.status}`,
-          time:        b.messages[0]?.createdAt,
-          unread:      getUnread(b.id, b._count.messages),
-          href:        `/vendor/messages/${b.id}`,
-        })));
+        const byPerson = new Map<string, {
+          name: string; avatarUrl?: string | null; customerId: string;
+          totalMessages: number; totalUnread: number;
+          latestText: string; latestTime: string; bookingIds: string[];
+        }>();
+
+        for (const b of bookings) {
+          const uid = b.customer.id;
+          const existing = byPerson.get(uid);
+          const msgCount = b._count.messages;
+          const unread = getUnread(uid, msgCount);
+          const latestMsg = b.messages[0];
+
+          if (!existing) {
+            byPerson.set(uid, {
+              name: `${b.customer.firstName} ${b.customer.lastName}`,
+              avatarUrl: b.customer.avatarUrl,
+              customerId: uid,
+              totalMessages: msgCount,
+              totalUnread: unread,
+              latestText: latestMsg?.text ?? "",
+              latestTime: latestMsg?.createdAt ?? "",
+              bookingIds: [b.id],
+            });
+          } else {
+            existing.totalMessages += msgCount;
+            existing.totalUnread += unread;
+            existing.bookingIds.push(b.id);
+            if (latestMsg && latestMsg.createdAt > existing.latestTime) {
+              existing.latestText = latestMsg.text;
+              existing.latestTime = latestMsg.createdAt;
+            }
+          }
+        }
+
+        const chatList: ChatPreview[] = Array.from(byPerson.values())
+          .filter((p) => p.totalMessages > 0)
+          .sort((a, b) => (b.latestTime > a.latestTime ? 1 : -1))
+          .map((p) => ({
+            id: p.customerId,
+            name: p.name,
+            lastMessage: p.latestText,
+            time: p.latestTime || undefined,
+            unread: p.totalUnread,
+            href: `/vendor/messages/${p.customerId}`,
+            avatarUrl: p.avatarUrl,
+            bookingIds: p.bookingIds,
+          }));
+
+        setChats(chatList);
       })
-      .catch(() => {})
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
+  const selectedChat = chats.find((c) => c.id === selectedId);
+
+  const handleSelectChat = (chatId: string) => {
+    if (isDesktop) {
+      setSelectedId(chatId);
+    } else {
+      router.push(`/vendor/messages/${chatId}`);
+    }
+  };
+
   if (loading) {
     return (
-      <div style={{ paddingTop: 80, textAlign: "center", color: "var(--ink3)" }}>
+      <Box pt="80px" textAlign="center" color="gray.400">
         Loading conversations…
-      </div>
+      </Box>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <Box py="80px" px="28px" textAlign="center" color="gray.400">
+        <Text fontSize="32px" mb="8px">⚠️</Text>
+        <Text fontWeight="600">Failed to load conversations</Text>
+        <Text fontSize="13px" mt="4px">Please check your connection and try again</Text>
+      </Box>
     );
   }
 
   if (chats.length === 0) {
     return (
-      <div style={{ padding: "80px 28px", textAlign: "center", color: "var(--ink3)" }}>
-        <p style={{ fontSize: 32, marginBottom: 8 }}>💬</p>
-        <p style={{ fontWeight: 600 }}>No conversations yet</p>
-        <p style={{ fontSize: 13, marginTop: 4 }}>Conversations appear when customers book you</p>
-      </div>
+      <Box py="80px" px="28px" textAlign="center" color="gray.400">
+        <Text fontSize="32px" mb="8px">💬</Text>
+        <Text fontWeight="600">No conversations yet</Text>
+        <Text fontSize="13px" mt="4px">Conversations appear when customers message you</Text>
+      </Box>
     );
   }
 
-  return <ChatList chats={chats} />;
+  if (isDesktop) {
+    return (
+      <Flex h="calc(100vh - 60px)" overflow="hidden">
+        <Box w="360px" borderRight="1px solid" borderColor="gray.200" flexShrink={0}>
+          <ChatList chats={chats} activeChatId={selectedId ?? undefined} onSelectChat={handleSelectChat} />
+        </Box>
+        <Box flex="1" bg="gray.50">
+          {selectedChat ? (
+            <ChatRoom
+              key={selectedChat.id}
+              title={selectedChat.name}
+              subtitle="Customer"
+              chatUserId={selectedChat.id}
+              bookingIds={selectedChat.bookingIds}
+              quickReplies={QUICK_REPLIES}
+              avatarSrc={selectedChat.avatarUrl ?? null}
+              profileHref={`/vendor/customers/${selectedChat.id}`}
+              embedded
+            />
+          ) : (
+            <Flex h="100%" align="center" justify="center" direction="column" color="gray.400">
+              <Text fontSize="48px" mb="12px">💬</Text>
+              <Text fontWeight="600" fontSize="18px">Select a conversation</Text>
+              <Text fontSize="14px" mt="4px">Choose from your existing conversations</Text>
+            </Flex>
+          )}
+        </Box>
+      </Flex>
+    );
+  }
+
+  return <ChatList chats={chats} onSelectChat={handleSelectChat} />;
 }

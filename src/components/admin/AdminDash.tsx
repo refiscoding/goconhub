@@ -146,7 +146,7 @@ export const AdminDash: FC = () => {
       body: JSON.stringify({ status }),
     });
     setUsers((prev) => prev.map((u) => u.id === id ? { ...u, status } : u));
-    showToast(status === "active" ? "User reactivated ✓" : "User suspended", status === "active" ? "ok" : "err");
+    showToast(status === "active" ? "User reactivated" : "User suspended", status === "active" ? "ok" : "err");
   };
 
   const approveUser = (id: string) => updateUserStatus(id, "active");
@@ -160,7 +160,7 @@ export const AdminDash: FC = () => {
     });
     if (res.ok) {
       setUsers((prev) => prev.map((u) => u.id === id ? { ...u, verified: true } : u));
-      showToast("Vendor verified ✓", "ok");
+      showToast("Vendor verified", "ok");
     } else {
       showToast("Failed to verify vendor", "err");
     }
@@ -180,7 +180,7 @@ export const AdminDash: FC = () => {
   const resolveDisp = async (id: string) => {
     await fetch(`/api/admin/disputes/${id}`, { method: "PATCH" });
     setDisps((prev) => prev.map((d) => d.id === id ? { ...d, status: "resolved" } : d));
-    showToast("Dispute resolved ✓", "ok");
+    showToast("Dispute resolved", "ok");
   };
 
   const approveJobComplete = async (id: string) => {
@@ -191,7 +191,7 @@ export const AdminDash: FC = () => {
     });
     if (res.ok) {
       setRawBkgs((prev) => prev.map((b) => b.id === id ? { ...b, adminApprovedComplete: true } : b));
-      showToast("Job completion approved — customer notified to pay ✓", "ok");
+      showToast("Job completion approved — customer notified to pay", "ok");
     } else showToast("Failed to approve", "err");
   };
 
@@ -203,7 +203,7 @@ export const AdminDash: FC = () => {
     });
     if (res.ok) {
       setRawBkgs((prev) => prev.map((b) => b.id === id ? { ...b, paymentStatus: "confirmed", status: "completed" } : b));
-      showToast("Payment confirmed — vendor notified ✓", "ok");
+      showToast("Payment confirmed — vendor notified", "ok");
     } else showToast("Failed to confirm payment", "err");
   };
 
@@ -216,7 +216,7 @@ export const AdminDash: FC = () => {
         o.id === id ? { ...o, status: "approved" } :
         o.listingId === prev.find((x) => x.id === id)?.listingId ? { ...o, status: "rejected" } : o
       ));
-      showToast("Order approved ✓", "ok");
+      showToast("Order approved", "ok");
     } else showToast("Failed to approve", "err");
   };
 

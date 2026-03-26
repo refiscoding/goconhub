@@ -76,10 +76,11 @@ export interface Dispute {
 }
 
 export interface Message {
-  id: number;
+  id: number | string;
   from: MessageSender;
   text: string;
   time: string;
+  createdAt?: string;
 }
 
 export interface VendorService {

@@ -14,7 +14,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   return (
     <CustomerChakraProvider>
       <div data-theme="customer" className="app-shell">
-        <CustomerNav unreadCount={2} />
+        <CustomerNav />
         <main className="app-content">
           {children}
         </main>

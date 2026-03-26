@@ -18,13 +18,42 @@ async function getBookingIfAuthorized(bookingId: string, userId: string, role: s
   return (isCustomer || isVendor || isAdmin) ? booking : null;
 }
 
-// GET /api/messages?bookingId=xxx
+// GET /api/messages?bookingId=xxx  — messages for a single booking
+// GET /api/messages?userId=xxx     — all messages across bookings with a specific user
 export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
 
-  const bookingId = new URL(req.url).searchParams.get("bookingId");
-  if (!bookingId) return NextResponse.json({ message: "bookingId required." }, { status: 400 });
+  const { searchParams } = new URL(req.url);
+  const bookingId = searchParams.get("bookingId");
+  const userId    = searchParams.get("userId");
+
+  // ── Per-user: fetch all messages across shared bookings ──
+  if (userId) {
+    // Find all bookings between current user and target user
+    const bookings = await prisma.booking.findMany({
+      where: session.role === "customer"
+        ? { customerId: session.userId, vendor: { userId } }
+        : { customerId: userId, vendor: { userId: session.userId } },
+      select: { id: true },
+    });
+
+    const bookingIds = bookings.map((b) => b.id);
+    if (bookingIds.length === 0) {
+      return NextResponse.json({ messages: [], bookingIds: [] });
+    }
+
+    const messages = await prisma.message.findMany({
+      where: { bookingId: { in: bookingIds } },
+      include: { sender: { select: { id: true, firstName: true, lastName: true, role: true } } },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return NextResponse.json({ messages, bookingIds });
+  }
+
+  // ── Per-booking (legacy) ──
+  if (!bookingId) return NextResponse.json({ message: "bookingId or userId required." }, { status: 400 });
 
   const booking = await getBookingIfAuthorized(bookingId, session.userId, session.role);
   if (!booking) return NextResponse.json({ message: "Forbidden." }, { status: 403 });

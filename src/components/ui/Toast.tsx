@@ -10,6 +10,6 @@ export const Toast: FC<ToastState> = ({ msg, type = "ok" }) => (
         type === "err" ? "var(--red)"   : "var(--acc)",
     }}
   >
-    {type === "ok" ? "✓" : type === "err" ? "✕" : "!"} {msg}
+    {msg}
   </div>
 );

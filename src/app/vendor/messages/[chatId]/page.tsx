@@ -3,9 +3,7 @@ import { useEffect, useState } from "react";
 import { ChatRoom } from "@/components/chat/ChatRoom";
 import { QUICK_REPLIES } from "@/lib/constants";
 
-interface PageProps {
-  params: { chatId: string };
-}
+interface PageProps { params: { chatId: string } }
 
 interface BookingInfo {
   id: string;
@@ -14,34 +12,39 @@ interface BookingInfo {
 }
 
 export default function VendorChatPage({ params }: PageProps) {
-  const { chatId } = params;
-  const [booking, setBooking] = useState<BookingInfo | null>(null);
+  const userId = params.chatId; // the customer's user ID
+  const [info, setInfo] = useState<{ name: string; avatarUrl?: string | null; bookingIds: string[] } | null>(null);
 
   useEffect(() => {
     fetch("/api/bookings")
       .then((r) => r.json())
       .then((data) => {
-        const found = (data.bookings ?? []).find((b: BookingInfo) => b.id === chatId);
-        if (found) setBooking(found);
+        const bookings: BookingInfo[] = (data.bookings ?? []).filter(
+          (b: BookingInfo) => b.customer.id === userId,
+        );
+        if (bookings.length > 0) {
+          const c = bookings[0].customer;
+          setInfo({
+            name: `${c.firstName} ${c.lastName}`,
+            avatarUrl: c.avatarUrl,
+            bookingIds: bookings.map((b) => b.id),
+          });
+        }
       })
       .catch(() => {});
-  }, [chatId]);
-
-  const customerName = booking
-    ? `${booking.customer.firstName} ${booking.customer.lastName}`
-    : "Customer";
+  }, [userId]);
 
   return (
     <div data-theme="vendor" style={{ minHeight: "100vh" }}>
       <ChatRoom
-        title={customerName}
+        title={info?.name ?? "Customer"}
         subtitle="Customer"
-        banner={booking ? `📋 ${booking.serviceName} — tap ⚡ for quick replies` : undefined}
-        bookingId={chatId}
+        chatUserId={userId}
+        bookingIds={info?.bookingIds}
         quickReplies={QUICK_REPLIES}
         backHref="/vendor/messages"
-        avatarSrc={booking?.customer.avatarUrl ?? null}
-        profileHref={booking ? `/vendor/customers/${booking.customer.id}` : undefined}
+        avatarSrc={info?.avatarUrl ?? null}
+        profileHref={userId ? `/vendor/customers/${userId}` : undefined}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 import { FC, useRef, useState, useCallback, ChangeEvent } from "react";
+import Cropper, { Area } from "react-easy-crop";
 import { IconCamera, IconX } from "@/components/icons";
 
 interface AvatarUploadProps {
@@ -9,21 +10,29 @@ interface AvatarUploadProps {
   onUpload: (dataUrl: string) => Promise<void>;
 }
 
-function resizeImage(file: File, maxPx = 400): Promise<string> {
+/* ── Crop helper ─────────────────────────────── */
+function getCroppedImg(imageSrc: string, crop: Area, maxPx = 400): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const size = Math.min(maxPx, crop.width);
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, crop.x, crop.y, crop.width, crop.height, 0, 0, size, size);
+      resolve(canvas.toDataURL("image/jpeg", 0.88));
+    };
+    img.onerror = reject;
+    img.src = imageSrc;
+  });
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width  = Math.round(img.width  * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.88));
-      };
-      img.src = e.target!.result as string;
-    };
+    reader.onload = (e) => resolve(e.target!.result as string);
     reader.readAsDataURL(file);
   });
 }
@@ -33,11 +42,17 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
   const videoRef  = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const [sheet,     setSheet]     = useState(false); // bottom sheet
-  const [camera,    setCamera]    = useState(false); // camera modal
+  const [sheet,     setSheet]     = useState(false);
+  const [camera,    setCamera]    = useState(false);
   const [busy,      setBusy]      = useState(false);
   const [camError,  setCamError]  = useState("");
-  const [preview,   setPreview]   = useState<string | null>(null); // captured frame
+  const [preview,   setPreview]   = useState<string | null>(null);
+
+  // Crop state
+  const [cropSrc,   setCropSrc]   = useState<string | null>(null);
+  const [crop,      setCrop]      = useState({ x: 0, y: 0 });
+  const [zoom,      setZoom]      = useState(1);
+  const [croppedArea, setCroppedArea] = useState<Area | null>(null);
 
   const initials = name.trim().split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
   const hue = name ? (name.charCodeAt(0) * 37 + (name.charCodeAt(1) || 0) * 13) % 360 : 220;
@@ -81,7 +96,8 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
     const ctx = canvas.getContext("2d")!;
     ctx.scale(-1, 1);
     ctx.drawImage(video, -canvas.width, 0);
-    setPreview(canvas.toDataURL("image/jpeg", 0.88));
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+    setPreview(dataUrl);
     stopStream();
   };
 
@@ -98,24 +114,47 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
     } catch { setCamError("Camera access denied."); }
   };
 
-  const usePhoto = async () => {
+  const usePhoto = () => {
     if (!preview) return;
-    setBusy(true);
-    await onUpload(preview);
-    setBusy(false);
     closeCamera();
+    setCropSrc(preview);
   };
 
   /* ── file upload ─────────────────────────────── */
   const handleFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setBusy(true);
     setSheet(false);
-    const dataUrl = await resizeImage(file);
-    await onUpload(dataUrl);
-    setBusy(false);
+    const dataUrl = await readFileAsDataUrl(file);
+    setCropSrc(dataUrl);
     e.target.value = "";
+  };
+
+  /* ── crop confirm ────────────────────────────── */
+  const onCropComplete = useCallback((_: Area, croppedPx: Area) => {
+    setCroppedArea(croppedPx);
+  }, []);
+
+  const confirmCrop = async () => {
+    if (!cropSrc || !croppedArea) return;
+    setBusy(true);
+    try {
+      const cropped = await getCroppedImg(cropSrc, croppedArea);
+      await onUpload(cropped);
+    } catch {
+      // handled by parent
+    } finally {
+      setBusy(false);
+      setCropSrc(null);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    }
+  };
+
+  const cancelCrop = () => {
+    setCropSrc(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   };
 
   return (
@@ -135,7 +174,6 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
             )
           }
         </button>
-        {/* Camera badge */}
         <button
           onClick={() => setSheet(true)}
           style={{ position: "absolute", bottom: 2, right: 2, width: 32, height: 32, borderRadius: "50%", background: "var(--acc)", border: "2.5px solid var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,.3)" }}
@@ -168,19 +206,16 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
         </div>
       )}
 
-      {/* ── Camera modal (compact) ── */}
+      {/* ── Camera modal ── */}
       {camera && (
         <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,.7)" }} onClick={closeCamera}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(92vw, 360px)", background: "#111", borderRadius: 20, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,.6)", display: "flex", flexDirection: "column" }}>
-            {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px" }}>
               <p style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Take Selfie</p>
               <button onClick={closeCamera} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: "50%", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <IconX style={{ width: 15, height: 15, color: "#fff" }} />
               </button>
             </div>
-
-            {/* Viewfinder — square crop */}
             <div style={{ position: "relative", width: "100%", aspectRatio: "1", background: "#000", overflow: "hidden" }}>
               {camError ? (
                 <p style={{ color: "#fff", textAlign: "center", padding: 24, fontSize: 13, position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{camError}</p>
@@ -189,23 +224,20 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
               ) : (
                 <video ref={videoRef} playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
               )}
-              {/* Circle guide */}
               {!preview && !camError && (
                 <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                   <div style={{ width: "70%", aspectRatio: "1", borderRadius: "50%", border: "2px solid rgba(255,255,255,.55)", boxShadow: "0 0 0 1000px rgba(0,0,0,.3)" }} />
                 </div>
               )}
             </div>
-
-            {/* Controls */}
             <div style={{ padding: "14px 16px 18px", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
               {preview ? (
                 <>
                   <button onClick={retake} style={{ flex: 1, padding: "10px", borderRadius: 12, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                     Retake
                   </button>
-                  <button onClick={usePhoto} disabled={busy} style={{ flex: 1, padding: "10px", borderRadius: 12, background: "var(--acc)", border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy ? 0.7 : 1 }}>
-                    {busy ? "Saving…" : "Use Photo"}
+                  <button onClick={usePhoto} style={{ flex: 1, padding: "10px", borderRadius: 12, background: "var(--acc)", border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                    Use Photo
                   </button>
                 </>
               ) : (
@@ -213,6 +245,53 @@ export const AvatarUpload: FC<AvatarUploadProps> = ({ src, name, size = 110, onU
                   <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#fff", border: "3px solid #111" }} />
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Crop modal ── */}
+      {cropSrc && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,.8)" }}>
+          <div style={{ width: "min(92vw, 400px)", background: "#111", borderRadius: 20, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,.6)", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px" }}>
+              <p style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Crop Photo</p>
+              <button onClick={cancelCrop} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: "50%", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <IconX style={{ width: 15, height: 15, color: "#fff" }} />
+              </button>
+            </div>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "1", background: "#000" }}>
+              <Cropper
+                image={cropSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+            <div style={{ padding: "12px 16px 8px" }}>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.05}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                style={{ width: "100%", accentColor: "var(--acc)" }}
+              />
+              <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,.5)", marginTop: 2 }}>Pinch or slide to zoom</p>
+            </div>
+            <div style={{ padding: "8px 16px 18px", display: "flex", gap: 12 }}>
+              <button onClick={cancelCrop} style={{ flex: 1, padding: "10px", borderRadius: 12, background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button onClick={confirmCrop} disabled={busy} style={{ flex: 1, padding: "10px", borderRadius: 12, background: "var(--acc)", border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy ? 0.7 : 1 }}>
+                {busy ? "Saving…" : "Save"}
+              </button>
             </div>
           </div>
         </div>

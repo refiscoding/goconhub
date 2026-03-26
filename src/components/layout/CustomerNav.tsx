@@ -26,9 +26,11 @@ export const CustomerNav: FC<CustomerNavProps> = ({ unreadCount = 0 }) => {
   const [unreadNotifs, setUnreadNotifs] = useState(unreadCount);
 
   useEffect(() => {
-    const saved = localStorage.getItem("nav-collapsed") === "true";
-    setCollapsed(saved);
-    document.documentElement.dataset.navCollapsed = String(saved);
+    try {
+      const saved = localStorage.getItem("nav-collapsed") === "true";
+      setCollapsed(saved);
+      document.documentElement.dataset.navCollapsed = String(saved);
+    } catch { /* private browsing */ }
   }, []);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export const CustomerNav: FC<CustomerNavProps> = ({ unreadCount = 0 }) => {
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
-    localStorage.setItem("nav-collapsed", String(next));
+    try { localStorage.setItem("nav-collapsed", String(next)); } catch { /* ignore */ }
     document.documentElement.dataset.navCollapsed = String(next);
   };
 

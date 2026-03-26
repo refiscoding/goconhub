@@ -63,13 +63,13 @@ export const VendorDash: FC = () => {
         setApiBookings(api);
         setBookings(api.map(toBooking));
       })
-      .catch(() => {})
+      .catch(() => showToast("Failed to load bookings", "err"))
       .finally(() => setLoading(false));
 
     fetch("/api/vendor/earnings")
       .then((r) => r.json())
       .then((d) => { setEarnings(d.payments ?? []); setTotalPaid(d.total ?? 0); })
-      .catch(() => {});
+      .catch(() => showToast("Failed to load earnings", "err"));
   }, []);
 
   const pending   = bookings.filter((b) => b.status === "pending");
@@ -88,7 +88,7 @@ export const VendorDash: FC = () => {
       });
       setApiBookings((prev) => prev.map((b) => b.id === id ? { ...b, status } : b));
       setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status } : b));
-      showToast(status === "confirmed" ? "Booking accepted ✓" : "Booking declined", status === "confirmed" ? "ok" : "err");
+      showToast(status === "confirmed" ? "Booking accepted" : "Booking declined", status === "confirmed" ? "ok" : "err");
     } catch {
       showToast("Failed to update booking", "err");
     }

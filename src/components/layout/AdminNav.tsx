@@ -34,9 +34,11 @@ export const AdminNav: FC<AdminNavProps> = ({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("admin-nav-collapsed") === "true";
-    setCollapsed(saved);
-    document.documentElement.dataset.navCollapsed = String(saved);
+    try {
+      const saved = localStorage.getItem("admin-nav-collapsed") === "true";
+      setCollapsed(saved);
+      document.documentElement.dataset.navCollapsed = String(saved);
+    } catch { /* private browsing */ }
   }, []);
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -44,7 +46,7 @@ export const AdminNav: FC<AdminNavProps> = ({
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
-    localStorage.setItem("admin-nav-collapsed", String(next));
+    try { localStorage.setItem("admin-nav-collapsed", String(next)); } catch { /* ignore */ }
     document.documentElement.dataset.navCollapsed = String(next);
   };
 

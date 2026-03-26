@@ -101,7 +101,7 @@ export const SettingsTab: FC = () => {
               alignSelf="flex-start"
               px={6}
             >
-              {saved ? "Saved ✓" : "Save Settings"}
+              {saved ? "Saved" : "Save Settings"}
             </Button>
           </Flex>
         </Box>

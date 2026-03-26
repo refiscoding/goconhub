@@ -38,7 +38,7 @@ export const VendorServices: FC = () => {
         setApiServices(api);
         setServices(api.map((s, i) => ({ id: i, name: s.name, price: s.price, unit: s.unit, desc: s.desc, active: s.active })));
       })
-      .catch(() => {})
+      .catch(() => showToast("Failed to load services", "err"))
       .finally(() => setLoading(false));
   };
 
@@ -77,7 +77,7 @@ export const VendorServices: FC = () => {
       if (res.ok) {
         setAdding(false);
         setNewDraft(EMPTY_DRAFT);
-        showToast("Service added ✓", "ok");
+        showToast("Service added", "ok");
         loadServices();
       } else {
         showToast(data.message ?? "Failed to add service", "err");
@@ -103,7 +103,7 @@ export const VendorServices: FC = () => {
       body: JSON.stringify({ name: editDraft.name, price: Number(editDraft.price), unit: editDraft.unit, desc: editDraft.desc }),
     });
     setEditing(null);
-    showToast("Saved ✓", "ok");
+    showToast("Saved", "ok");
     loadServices();
   };
 
@@ -114,9 +114,9 @@ export const VendorServices: FC = () => {
       <div className="page-top" style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)", padding: "0 22px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em" }}>My Services</h1>
-          <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 4 }}>
+          <span style={{ fontSize: 13, color: "var(--ink2)", marginTop: 4, display: "block" }}>
             {loading ? <PageSpinner inline /> : `${services.filter((s) => s.active).length}/${services.length} active`}
-          </p>
+          </span>
         </div>
         <button onClick={() => setAdding(true)}
           style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--acc)", color: "var(--bg)", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 13, fontWeight: 700 }}>

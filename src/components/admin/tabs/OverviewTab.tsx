@@ -23,8 +23,10 @@ interface RevenueData {
   count: number;
 }
 
-const fmt = (n: number) =>
-  n >= 1000 ? `P${(n / 1000).toFixed(1)}k` : `P${n.toFixed(0)}`;
+const fmt = (n: number | undefined | null) => {
+  if (n == null) return "—";
+  return n >= 1000 ? `P${(n / 1000).toFixed(1)}k` : `P${n.toFixed(0)}`;
+};
 
 const SECTION_LABEL: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, color: "var(--ink3)",

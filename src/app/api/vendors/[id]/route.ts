@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
         include: {
           user:     { select: { firstName: true, lastName: true, avatarUrl: true, city: true, area: true } },
           services: { where: { active: true }, select: { id: true, name: true, price: true, unit: true, desc: true } },
-          reviews:  { orderBy: { createdAt: "desc" }, include: { reviewer: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
+          reviews:  { orderBy: { createdAt: "desc" }, include: { reviewer: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } } } },
           _count:   { select: { bookings: true } },
         },
       }),
