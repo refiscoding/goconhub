@@ -1,6 +1,6 @@
 "use client";
 import { FC, useState, ChangeEvent, useEffect, useCallback } from "react";
-import { Search, Bell } from "lucide-react";
+import { Search, Bell, LayoutGrid, Wrench, Zap, Hammer, Paintbrush, SprayCan, Grid2X2, BrickWall, type LucideIcon } from "lucide-react";
 import { PageSpinner } from "@/components/ui";
 import { VendorCard } from "./VendorCard";
 import { FILTER_CATS } from "@/lib/constants";
@@ -40,7 +40,8 @@ function toVendor(v: ApiVendor): Vendor {
   };
 }
 
-/* ── Category icons (Flaticon – color fill) ────────────────────────── */
+/* ── Category icons ─────────────────────────────────────────────────── */
+/* Unselected: Flaticon color-fill PNGs · Selected: Lucide outline icons */
 const CAT_ICONS: Record<string, string> = {
   All:         "/icons/cat-all.png",
   Plumber:     "/icons/cat-plumber.png",
@@ -50,6 +51,16 @@ const CAT_ICONS: Record<string, string> = {
   Cleaner:     "/icons/cat-cleaner.png",
   Tiler:       "/icons/cat-tiler.png",
   Mason:       "/icons/cat-mason.png",
+};
+const CAT_OUTLINE: Record<string, LucideIcon> = {
+  All:         LayoutGrid,
+  Plumber:     Wrench,
+  Electrician: Zap,
+  Carpenter:   Hammer,
+  Painter:     Paintbrush,
+  Cleaner:     SprayCan,
+  Tiler:       Grid2X2,
+  Mason:       BrickWall,
 };
 
 export const VendorList: FC = () => {
@@ -106,10 +117,13 @@ export const VendorList: FC = () => {
       <div style={{ display: "flex", gap: 8, padding: "14px 22px 8px", overflowX: "auto", scrollbarWidth: "none" }}>
         {FILTER_CATS.map((c) => {
           const src = CAT_ICONS[c] ?? CAT_ICONS.All;
+          const OutlineIcon = CAT_OUTLINE[c] ?? LayoutGrid;
           const isOn = cat === c;
           return (
             <button key={c} className={`cat-chip${isOn ? " on" : ""}`} onClick={() => setCat(c)}>
-              <img src={src} alt="" width={18} height={18} style={{ objectFit: "contain", filter: isOn ? "brightness(0) invert(1)" : "none" }} />
+              {isOn
+                ? <OutlineIcon size={18} color="#fff" strokeWidth={2.2} />
+                : <img src={src} alt="" width={18} height={18} style={{ objectFit: "contain" }} />}
               {c}
             </button>
           );
