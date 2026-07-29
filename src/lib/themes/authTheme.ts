@@ -1,19 +1,12 @@
 import { extendTheme } from "@chakra-ui/react";
 
-/** Auth / Landing — HandyHub amber-on-dark brand */
+/** GoCon monochrome brand */
 export const authTheme = extendTheme({
   colors: {
     brand: {
-      50:  "#fff8ee",
-      100: "#fdefd5",
-      200: "#fbda9e",
-      300: "#f8be5c",
-      400: "#f5a030",
-      500: "#e07b39",
-      600: "#c1440e",
-      700: "#8c2d07",
-      800: "#5c1d04",
-      900: "#2a0c00",
+      50: "#fafafa", 100: "#f4f4f5", 200: "#e4e4e7", 300: "#d4d4d8",
+      400: "#a1a1aa", 500: "#18181b", 600: "#09090b", 700: "#09090b",
+      800: "#09090b", 900: "#000000",
     },
   },
   fonts: {
@@ -29,7 +22,7 @@ export const authTheme = extendTheme({
             borderColor: "gray.200",
             bg: "white",
             _hover: { borderColor: "brand.400" },
-            _focus: { borderColor: "brand.500", boxShadow: "0 0 0 3px rgba(224,123,57,.15)" },
+            _focus: { borderColor: "brand.600", boxShadow: "0 0 0 3px rgba(0,0,0,.14)" },
             _placeholder: { color: "gray.400" },
           },
         },
@@ -39,7 +32,7 @@ export const authTheme = extendTheme({
     Button: {
       variants: {
         solid: {
-          _hover: { transform: "translateY(-1px)", boxShadow: "0 4px 16px rgba(193,68,14,.35)" },
+          _hover: { transform: "translateY(-1px)", boxShadow: "0 4px 16px rgba(0,0,0,.2)" },
           _active: { transform: "translateY(0)" },
           transition: "all .2s",
         },

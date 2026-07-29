@@ -55,7 +55,7 @@ export const AdminLogin: FC = () => {
             <IconShield style={{ width: 22, height: 22, color: "#fff" }} />
           </div>
           <h2 style={{ fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: "-.02em", lineHeight: 1.3, marginBottom: 12 }}>
-            HandyHub<br />Control Centre
+            GoCon<br />Control Centre
           </h2>
           <p style={{ fontSize: 14, color: "rgba(255,255,255,.55)", lineHeight: 1.7 }}>
             Manage vendors, bookings, disputes and platform settings from one place.
@@ -86,7 +86,7 @@ export const AdminLogin: FC = () => {
             <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em", color: "var(--ink)" }}>
               Admin <em style={{ color: "var(--acc)" }}>Portal</em>
             </h1>
-            <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 6 }}>Restricted access · HandyHub Control Centre</p>
+            <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 6 }}>Restricted access · GoCon Control Centre</p>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -97,7 +97,7 @@ export const AdminLogin: FC = () => {
             )}
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".05em", display: "block", marginBottom: 5 }}>Admin Email</label>
-              <input className="field" type="email" placeholder="admin@handyhub.co.bw"
+              <input className="field" type="email" placeholder="admin@gocon.co.bw"
                 value={email} onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && attempt()} />
             </div>

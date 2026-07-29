@@ -133,7 +133,7 @@ export const ForgotPassword: FC = () => {
             <div style={{ width: 40, height: 40, background: "#d97706", borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 4px 14px rgba(217,119,6,.4)" }}>
               <IconWrench style={{ width: 21, height: 21 }} />
             </div>
-            <span className="serif" style={{ color: "#fff", fontSize: 25, fontWeight: 800, letterSpacing: "-.01em" }}>HandyHub</span>
+            <span className="serif" style={{ color: "#fff", fontSize: 25, fontWeight: 800, letterSpacing: "-.01em" }}>GoCon</span>
           </div>
 
           <h1 className="serif" style={{ color: "#fff", fontSize: 34, fontWeight: 300, lineHeight: 1.15, letterSpacing: "-.02em" }}>
