@@ -633,7 +633,7 @@ export const CustProfile: FC = () => {
                 <Text fontSize="12px" color="#44403c" lineHeight={1.6}>
                   You have the right to access, correct, or delete your personal data.
                   To submit a data request, contact us at{" "}
-                  <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#d97706", fontWeight: 700 }}>privacy@handyhub.co.bw</a>
+                  <a href="mailto:privacy@gocon.co.bw" style={{ color: "#d97706", fontWeight: 700 }}>privacy@gocon.co.bw</a>
                 </Text>
               </Box>
             </Box>

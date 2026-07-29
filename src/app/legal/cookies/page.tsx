@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Cookie, ChevronRight } from "lucide-react";
 import { BackButton } from "@/components/legal/BackButton";
 
-export const metadata = { title: "Cookie Policy — HandyHub" };
+export const metadata = { title: "Cookie Policy — GoCon" };
 
 export default function CookiesPage() {
   return (
@@ -10,7 +10,7 @@ export default function CookiesPage() {
       <Section title="1. What Are Cookies">
         Cookies are small text files placed on your device when you visit a website. They help the
         site remember information about your visit, making it easier to use and more relevant.
-        HandyHub uses cookies and similar technologies such as local storage to operate the platform.
+        GoCon uses cookies and similar technologies such as local storage to operate the platform.
       </Section>
 
       <Section title="2. Cookies We Use">
@@ -31,7 +31,7 @@ export default function CookiesPage() {
       </Section>
 
       <Section title="5. Third-Party Cookies">
-        HandyHub may integrate with third-party services (such as DPO Pay for payments) that set
+        GoCon may integrate with third-party services (such as DPO Pay for payments) that set
         their own cookies. We do not control these. Please refer to the respective privacy policies
         of those services.
       </Section>
@@ -46,12 +46,12 @@ export default function CookiesPage() {
 
       <Section title="7. Changes to This Policy">
         We may update this Cookie Policy as our platform evolves. We will notify you of significant
-        changes. Continued use of HandyHub after changes constitutes acceptance.
+        changes. Continued use of GoCon after changes constitutes acceptance.
       </Section>
 
       <Section title="8. Contact">
         Cookie enquiries:{" "}
-        <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#d97706", fontWeight: 600 }}>privacy@handyhub.co.bw</a>
+        <a href="mailto:privacy@gocon.co.bw" style={{ color: "#d97706", fontWeight: 600 }}>privacy@gocon.co.bw</a>
       </Section>
     </LegalShell>
   );
@@ -102,7 +102,7 @@ function LegalShell({ title, subtitle, icon, current, children }: {
           ))}
           <div style={{ marginTop: 20, padding: "12px 14px", background: "white", borderRadius: 12, border: "1px solid #e7e5e4" }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 6 }}>Need help?</p>
-            <a href="mailto:privacy@handyhub.co.bw" style={{ fontSize: 12, color: "#d97706", fontWeight: 700, textDecoration: "none" }}>privacy@handyhub.co.bw</a>
+            <a href="mailto:privacy@gocon.co.bw" style={{ fontSize: 12, color: "#d97706", fontWeight: 700, textDecoration: "none" }}>privacy@gocon.co.bw</a>
           </div>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>

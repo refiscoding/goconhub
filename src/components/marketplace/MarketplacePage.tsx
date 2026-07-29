@@ -154,7 +154,7 @@ const BuyModal: FC<BuyModalProps> = ({ listing, onClose, onDone }) => {
             </div>
 
             <div style={{ background: "#fef3c7", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#92400e" }}>
-              🛡️ Payment will be arranged through HandyHub admin. Do not pay the vendor directly.
+              Payment is arranged securely through GoCon admin. Do not pay the vendor directly.
             </div>
 
             <div>

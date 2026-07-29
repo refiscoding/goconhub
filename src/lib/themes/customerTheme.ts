@@ -1,23 +1,16 @@
 import { extendTheme } from "@chakra-ui/react";
 
-/** Customer Portal — Okavango Delta */
+/** GoCon customer portal */
 export const customerTheme = extendTheme({
   colors: {
     brand: {
-      50:  "#F0F9FF",
-      100: "#E0F4FE",
-      200: "#90E0EF",
-      300: "#48CAE4",
-      400: "#00B4D8",
-      500: "#0077B6",
-      600: "#005F92",
-      700: "#023E58",
-      800: "#012A3A",
-      900: "#01181F",
+      50: "#FAFAFA", 100: "#F4F4F5", 200: "#E4E4E7", 300: "#D4D4D8",
+      400: "#A1A1AA", 500: "#18181B", 600: "#09090B", 700: "#09090B",
+      800: "#09090B", 900: "#000000",
     },
     accent: {
-      400: "#00B4D8",
-      500: "#0096C7",
+      400: "#52525B",
+      500: "#27272A",
     },
     success: { 500: "#2D9A4E" },
   },

@@ -19,7 +19,7 @@ export const AdminHeader: FC<AdminHeaderProps> = ({ tab, pendingVendors = 0, ope
         <IconShield style={{ width: 18, height: 18 }} />
       </div>
       <div>
-        <p style={{ fontWeight: 800, fontSize: 16 }}>HandyHub <span style={{ color: "var(--acc)" }}>Admin</span></p>
+        <p style={{ fontWeight: 800, fontSize: 16 }}>GoCon <span style={{ color: "var(--acc)" }}>Admin</span></p>
         <p style={{ fontSize: 11, color: "var(--ink3)" }}>Platform Control Centre</p>
       </div>
       {pendingVendors > 0 && (

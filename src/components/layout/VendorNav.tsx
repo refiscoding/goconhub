@@ -77,7 +77,7 @@ export const VendorNav: FC<VendorNavProps> = ({ unreadCount = 0 }) => {
           <div className="nav-brand-logo" style={{ background: "var(--acc)" }}>
             <IconWrench style={{ width: 14, height: 14 }} />
           </div>
-          <span className="nav-brand-name serif">HandyHub</span>
+          <span className="nav-brand-name serif">GoCon</span>
           {/* Desktop collapse toggle */}
           <button className="nav-toggle-btn" onClick={toggle} aria-label="Toggle sidebar">
             <IconChevL style={{ width: 13, height: 13, transform: collapsed ? "rotate(180deg)" : "none", transition: "transform .25s" }} />

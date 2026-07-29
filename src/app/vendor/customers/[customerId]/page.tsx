@@ -63,7 +63,7 @@ export default function CustomerProfilePage({ params }: PageProps) {
         <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, padding: "20px", textAlign: "center" }}>
           <span style={{ fontSize: 36 }}>👤</span>
           <p style={{ fontWeight: 700, fontSize: 15, marginTop: 10 }}>{fullName}</p>
-          <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 4 }}>Verified HandyHub Customer</p>
+          <p style={{ fontSize: 13, color: "var(--ink3)", marginTop: 4 }}>Verified GoCon Customer</p>
         </div>
       </div>
     </div>

@@ -1,24 +1,17 @@
 import { extendTheme } from "@chakra-ui/react";
 
-/** Admin Dashboard — Botswana Flag */
+/** GoCon admin dashboard */
 export const adminTheme = extendTheme({
   colors: {
     brand: {
-      50:  "#F4F6FB",
-      100: "#DCE4F2",
-      200: "#4A7CC7",
-      300: "#2F62B5",
-      400: "#1B4EA0",
-      500: "#1B3A6B",
-      600: "#142D54",
-      700: "#0D1B2A",
-      800: "#08101A",
-      900: "#04080D",
+      50: "#FAFAFA", 100: "#F4F4F5", 200: "#E4E4E7", 300: "#D4D4D8",
+      400: "#A1A1AA", 500: "#18181B", 600: "#09090B", 700: "#09090B",
+      800: "#09090B", 900: "#000000",
     },
     accent: {
-      300: "#D4B96A",
-      400: "#C9A84C",
-      500: "#B8943A",
+      300: "#A1A1AA",
+      400: "#52525B",
+      500: "#27272A",
     },
     danger: { 500: "#C0392B" },
   },

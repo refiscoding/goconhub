@@ -4,7 +4,7 @@ import { ShieldCheck, ChevronRight } from "lucide-react";
 import { BackButton } from "@/components/legal/BackButton";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Privacy Policy — HandyHub" };
+export const metadata = { title: "Privacy Policy — GoCon" };
 
 export default async function PrivacyPage() {
   const session = await getSession();
@@ -19,9 +19,9 @@ export default async function PrivacyPage() {
       current="privacy"
     >
       <Section title="1. Introduction">
-        HandyHub (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your personal
+        GoCon (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your personal
         information. This Privacy Policy explains what data we collect, how we use it, and your
-        rights. By using HandyHub, you agree to the collection and use of information as described here.
+        rights. By using GoCon, you agree to the collection and use of information as described here.
       </Section>
 
       <Section title="2. Information We Collect">
@@ -104,13 +104,13 @@ export default async function PrivacyPage() {
       </Section>
 
       <Section title="9. Children&apos;s Privacy">
-        HandyHub is not intended for users under the age of 18. We do not knowingly collect personal
+        GoCon is not intended for users under the age of 18. We do not knowingly collect personal
         information from children. Contact us immediately if you believe a minor has created an account.
       </Section>
 
       <Section title="10. Changes to This Policy">
         We may update this Privacy Policy from time to time and will notify you of significant
-        changes via email or a notice on the platform. Continued use of HandyHub after changes
+        changes via email or a notice on the platform. Continued use of GoCon after changes
         constitutes acceptance of the updated policy.
       </Section>
 

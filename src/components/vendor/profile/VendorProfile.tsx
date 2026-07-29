@@ -412,7 +412,7 @@ export const VendorProfile: FC = () => {
           <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
             {[
               { href: "/legal/privacy", icon: <ShieldCheck size={15} color="#0d9488" />, label: "Privacy Policy",      desc: "How we handle your data as a vendor",    bg: "rgba(13,148,136,.08)" },
-              { href: "/legal/terms",   icon: <FileText    size={15} color="#d97706" />, label: "Terms & Conditions", desc: "Your obligations and rights on HandyHub", bg: "rgba(217,119,6,.08)"  },
+              { href: "/legal/terms",   icon: <FileText    size={15} color="#d97706" />, label: "Terms & Conditions", desc: "Your obligations and rights on GoCon", bg: "rgba(217,119,6,.08)"  },
               { href: "/legal/cookies", icon: <Cookie      size={15} color="#6366f1" />, label: "Cookie Policy",      desc: "How we use cookies and local storage",    bg: "rgba(99,102,241,.08)" },
             ].map((item) => (
               <a key={item.href} href={item.href} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 12, background: "var(--bg)", border: "1px solid var(--border)", textDecoration: "none" }}>
@@ -443,7 +443,7 @@ export const VendorProfile: FC = () => {
               <p style={{ fontWeight: 700, fontSize: 12, color: "#0d9488", marginBottom: 4 }}>Your Data Rights</p>
               <p style={{ fontSize: 12, color: "#44403c", lineHeight: 1.6, margin: 0 }}>
                 To access, correct, or delete your personal data, contact{" "}
-                <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#0d9488", fontWeight: 700 }}>privacy@handyhub.co.bw</a>
+                <a href="mailto:privacy@gocon.co.bw" style={{ color: "#0d9488", fontWeight: 700 }}>privacy@gocon.co.bw</a>
               </p>
             </div>
           </div>

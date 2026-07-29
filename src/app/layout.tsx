@@ -4,7 +4,7 @@ import { UserProvider } from "@/context/UserContext";
 import { CookieConsent } from "@/components/ui/CookieConsent";
 
 export const metadata: Metadata = {
-  title: "HandyHub — Botswana's Trusted Handyman Platform",
+  title: "GoCon — Botswana's Trusted Contractor Platform",
   description: "Find and book trusted handymen across Gaborone and Botswana.",
 };
 

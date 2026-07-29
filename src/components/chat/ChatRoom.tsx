@@ -234,7 +234,7 @@ export const ChatRoom: FC<ChatRoomProps> = ({
           <ShieldCheck size={15} color="#22c55e" />
         </Flex>
         <Text fontSize="12px" color="gray.500" lineHeight="1.4">
-          All payments must be made through HandyHub for your protection.
+          All payments must be made through GoCon for your protection.
         </Text>
       </Flex>
 

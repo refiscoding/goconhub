@@ -47,7 +47,7 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
         </div>
         <p style={{ fontSize: 12, color: "var(--ink3)", marginBottom: 6 }}>Final price may vary depending on inspection and work required.</p>
         <div style={{ background: "rgba(26,122,94,.06)", border: "1px solid rgba(26,122,94,.15)", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1A7A5E" }}>
-          🔒 Payment is securely held by HandyHub and released to the contractor only after the job is completed.
+          Payment is securely held by GoCon and released to the contractor only after the job is completed.
         </div>
       </div>
 
@@ -133,7 +133,7 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
 
       <div style={{ background: "#fef3c7", border: "1px solid #fcd34d", borderRadius: 10, padding: "11px 14px", fontSize: 13, color: "#92400e", display: "flex", gap: 8, alignItems: "flex-start" }}>
         <span style={{ flexShrink: 0 }}>🛡️</span>
-        <span>For your safety, all payments must be made through HandyHub. Payments made outside the platform are not protected.</span>
+        <span>For your safety, all payments must be made through GoCon. Payments made outside the platform are not protected.</span>
       </div>
     </div>
   );
