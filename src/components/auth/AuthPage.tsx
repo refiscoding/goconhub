@@ -122,9 +122,9 @@ export function AuthPage() {
                   h="40px"
                   borderRadius="9px"
                   variant="ghost"
-                  bg={mode === item ? "black" : "transparent"}
+                  bg={mode === item ? "var(--navy)" : "transparent"}
                   color={mode === item ? "white" : "gray.600"}
-                  _hover={{ bg: mode === item ? "gray.800" : "gray.200" }}
+                  _hover={{ bg: mode === item ? "var(--navy-dark)" : "gray.200" }}
                   _focusVisible={{ boxShadow: "0 0 0 3px rgba(0,0,0,.2)" }}
                   onClick={() => { setMode(item); setError(""); }}
                 >
@@ -207,15 +207,15 @@ export function AuthPage() {
 
               <Button
                 h="50px"
-                bg="black"
+                bg="var(--navy)"
                 color="white"
                 borderRadius="10px"
                 leftIcon={<UserRound size={17} />}
                 isLoading={busy}
                 loadingText="Please wait"
                 onClick={submit}
-                _hover={{ bg: "gray.700" }}
-                _active={{ bg: "gray.800" }}
+                _hover={{ bg: "var(--navy-dark)" }}
+                _active={{ bg: "var(--navy-dark)" }}
                 _focusVisible={{ boxShadow: "0 0 0 4px rgba(0,0,0,.2)" }}
               >
                 {mode === "login" ? "Sign in to GoCon" : "Create GoCon account"}

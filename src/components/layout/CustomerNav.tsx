@@ -73,7 +73,7 @@ export const CustomerNav: FC<CustomerNavProps> = ({ unreadCount = 0 }) => {
       <nav className={`nav-bot${mobileOpen ? " mobile-open" : ""}`}>
         {/* Brand header */}
         <div className="nav-brand">
-          <div className="nav-brand-logo" style={{ background: "#0077B6" }}>
+          <div className="nav-brand-logo" style={{ background: "var(--navy)" }}>
             <IconWrench style={{ width: 14, height: 14 }} />
           </div>
           <span className="nav-brand-name serif">GoCon</span>

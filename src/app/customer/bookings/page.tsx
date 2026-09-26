@@ -25,7 +25,7 @@ interface ApiBooking {
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending:   { label: "Pending",   color: "#f59e0b",       bg: "rgba(245,158,11,.12)"  },
   confirmed: { label: "Confirmed", color: "var(--green)",  bg: "var(--green-bg)"       },
-  completed: { label: "Completed", color: "#6366f1",       bg: "rgba(99,102,241,.12)"  },
+  completed: { label: "Completed", color: "var(--navy)",   bg: "var(--navy-soft)"       },
   declined:  { label: "Declined",  color: "var(--red)",    bg: "var(--red-bg)"         },
 };
 
@@ -253,7 +253,7 @@ function CustomerBookingsPage() {
                 <span className="cust-pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10, borderTop: "1px solid var(--border)" }}>
-                <p style={{ fontWeight: 800, fontSize: 16, color: "#1A7A5E" }}>{fmtPrice(b.amount)}</p>
+                <p style={{ fontWeight: 800, fontSize: 16, color: "var(--navy)" }}>{fmtPrice(b.amount)}</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   {paid && (
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -261,18 +261,18 @@ function CustomerBookingsPage() {
                       {b.paidAt && <span style={{ fontSize: 11, color: "var(--ink3)" }}>{new Date(b.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>}
                     </div>
                   )}
-                  {submitted && <span className="cust-pill" style={{ background: "rgba(99,102,241,.12)", color: "#6366f1" }}>Payment Pending</span>}
+                  {submitted && <span className="cust-pill" style={{ background: "var(--navy-soft)", color: "var(--navy)" }}>Payment Pending</span>}
                   {needsPay && (
-                    <button onClick={() => openPay(b)} style={{ padding: "8px 18px", fontSize: 13, fontWeight: 700, background: "linear-gradient(135deg, #1A7A5E, #2ECC9A)", color: "#fff", border: "none", borderRadius: 999, cursor: "pointer", transition: "all .2s" }}>Pay Now</button>
+                    <button onClick={() => openPay(b)} style={{ padding: "8px 18px", fontSize: 13, fontWeight: 700, background: "linear-gradient(135deg, var(--navy-dark), var(--navy))", color: "#fff", border: "none", borderRadius: 999, cursor: "pointer", transition: "all .2s" }}>Pay Now</button>
                   )}
                   {b.status === "completed" && !reviewed.has(b.id) && (
                     <button onClick={() => openReview(b)}
-                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 999, border: "1.5px solid #f59e0b", background: "rgba(245,158,11,.08)", color: "#d97706", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
-                      <Star size={13} fill="#f59e0b" color="#f59e0b" /> Review
+                      style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 999, border: "1.5px solid var(--navy-border)", background: "var(--navy-soft)", color: "var(--navy)", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+                      <Star size={13} fill="var(--navy)" color="var(--navy)" /> Review
                     </button>
                   )}
                   {b.status === "completed" && reviewed.has(b.id) && (
-                    <span className="cust-pill" style={{ background: "rgba(245,158,11,.1)", color: "#d97706" }}>Reviewed</span>
+                    <span className="cust-pill" style={{ background: "var(--navy-soft)", color: "var(--navy)" }}>Reviewed</span>
                   )}
                   {(b.status === "confirmed" || b.status === "completed") && !disputed.has(b.id) && (
                     <button onClick={() => openDispute(b)}
@@ -401,7 +401,7 @@ function CustomerBookingsPage() {
                 {successRef && (
                   <div style={{ margin: "16px 0", background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px" }}>
                     <p style={{ fontSize: 11, color: "var(--ink3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em" }}>Transaction Reference</p>
-                    <p style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: 14, color: "#1A7A5E", marginTop: 4 }}>{successRef}</p>
+                    <p style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: 14, color: "var(--navy)", marginTop: 4 }}>{successRef}</p>
                   </div>
                 )}
                 <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 8 }}>Your booking is now complete.</p>
@@ -431,11 +431,11 @@ function CustomerBookingsPage() {
                 <button key={n}
                   onMouseEnter={() => setReviewHover(n)} onMouseLeave={() => setReviewHover(0)}
                   onClick={() => setReviewRating(n)}
-                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: 38, lineHeight: 1, color: n <= (reviewHover || reviewRating) ? "#f59e0b" : "var(--border2)", transition: "color .1s" }}>★</button>
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: 38, lineHeight: 1, color: n <= (reviewHover || reviewRating) ? "var(--navy)" : "var(--border2)", transition: "color .1s" }}>★</button>
               ))}
             </div>
             {reviewRating > 0 && (
-              <p style={{ textAlign: "center", fontSize: 14, fontWeight: 700, color: "#d97706", marginBottom: 16 }}>
+              <p style={{ textAlign: "center", fontSize: 14, fontWeight: 700, color: "var(--navy)", marginBottom: 16 }}>
                 {["","Poor","Fair","Good","Great","Excellent"][reviewRating]}
               </p>
             )}

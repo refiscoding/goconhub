@@ -5,7 +5,7 @@ interface StarsProps { n?: number; size?: number; }
 export const Stars: FC<StarsProps> = ({ n = 5, size = 12 }) => (
   <span>
     {Array.from({ length: 5 }, (_, i) => (
-      <span key={i} style={{ color: i < n ? "#f5c518" : "#555", fontSize: size }}>★</span>
+      <span key={i} style={{ color: i < n ? "var(--navy)" : "var(--border2)", fontSize: size }}>★</span>
     ))}
   </span>
 );

@@ -13,9 +13,10 @@ import { useUser } from "@/context/UserContext";
 import type { VendorOnboardData, ServiceDraft } from "@/lib/types";
 
 /* ── brand colours ───────────────────────────────────── */
-const A  = "#d97706";  // amber-600
-const AL = "#fffbeb";  // amber-50
-const AM = "#fde68a";  // amber-200
+const A  = "#27272a";
+const AL = "#ffffff";
+const AM = "#e5e5e5";
+const NAVY = "#27435f";
 
 /* ── steps ───────────────────────────────────────────── */
 const STEPS = ["Welcome", "Info", "Skills", "Services", "Verify", "Go Live!"];
@@ -32,8 +33,8 @@ const catIcons: Record<string, LucideIcon> = {
 
 /* ── illustration ────────────────────────────────────── */
 const Illus: FC<{ Icon: LucideIcon }> = ({ Icon }) => (
-  <div style={{ width: 96, height: 96, borderRadius: "50%", background: AM, border: `2px solid ${A}50`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 24px ${A}38` }}>
-    <Icon size={44} color={A} strokeWidth={1.5} />
+  <div style={{ width: 96, height: 96, borderRadius: "50%", background: AM, border: `2px solid ${NAVY}50`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 6px 24px ${NAVY}24` }}>
+    <Icon size={44} color={NAVY} strokeWidth={1.5} />
   </div>
 );
 
@@ -150,8 +151,8 @@ export const VendorOnboard: FC = () => {
       {/* illustration area */}
       <div style={{ flexShrink: 0, height: "30dvh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
         {step > 0 && step < STEPS.length - 1 && (
-          <button onClick={() => { setError(""); setStep((s) => s - 1); }} style={{ position: "absolute", top: 48, left: 20, width: 36, height: 36, borderRadius: 12, background: "white", border: `1.5px solid ${AM}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${A}25` }}>
-            <ChevronLeft size={18} color={A} strokeWidth={2.5} />
+          <button onClick={() => { setError(""); setStep((s) => s - 1); }} style={{ position: "absolute", top: 48, left: 20, width: 36, height: 36, borderRadius: 12, background: "white", border: `1.5px solid ${AM}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${NAVY}25` }}>
+            <ChevronLeft size={18} color={NAVY} strokeWidth={2.5} />
           </button>
         )}
         <Illus Icon={StepIcon} />
@@ -314,7 +315,7 @@ export const VendorOnboard: FC = () => {
                       <div key={type} onClick={() => { set("entityType", type); setError(""); }}
                         style={{ padding: "14px 12px", borderRadius: 14, textAlign: "center", border: `2px solid ${on ? "white" : "rgba(255,255,255,.2)"}`, background: on ? "rgba(255,255,255,.22)" : "rgba(255,255,255,.08)", cursor: "pointer", transition: "all .15s" }}>
                         <div style={{ width: 36, height: 36, borderRadius: 10, background: on ? "white" : "rgba(255,255,255,.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
-                          <User size={18} color={on ? A : "rgba(255,255,255,.6)"} />
+                          <User size={18} color={on ? NAVY : "rgba(255,255,255,.6)"} />
                         </div>
                         <p style={{ fontWeight: 700, fontSize: 13, color: "white" }}>{type === "individual" ? "Individual" : "Company"}</p>
                         <p style={{ fontSize: 11, color: "rgba(255,255,255,.6)", marginTop: 2 }}>{type === "individual" ? "Omang / ID" : "CIPA Registered"}</p>
@@ -429,7 +430,7 @@ export const VendorOnboard: FC = () => {
 
         {/* CTA */}
         <div style={{ flexShrink: 0, padding: "12px 26px 34px", borderTop: "1px solid rgba(255,255,255,.1)" }}>
-          {error && <p style={{ fontSize: 12, color: "#fef3c7", marginBottom: 8, textAlign: "center" }}>{error}</p>}
+          {error && <p style={{ fontSize: 12, color: "white", marginBottom: 8, textAlign: "center" }}>{error}</p>}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Dots cur={step} tot={STEPS.length} />
             <button
@@ -490,7 +491,7 @@ export const VendorOnboard: FC = () => {
               }}
               disabled={busy}
               style={{ width: 56, height: 56, borderRadius: "50%", background: "white", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.2)", flexShrink: 0, opacity: busy ? 0.7 : 1 }}>
-              {isLast ? <CheckCircle2 size={24} color={A} strokeWidth={2.5} /> : <ArrowRight size={24} color={A} strokeWidth={2.5} />}
+              {isLast ? <CheckCircle2 size={24} color={NAVY} strokeWidth={2.5} /> : <ArrowRight size={24} color={NAVY} strokeWidth={2.5} />}
             </button>
           </div>
         </div>

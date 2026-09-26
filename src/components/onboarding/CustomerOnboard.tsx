@@ -12,9 +12,10 @@ import { CUSTOMER_SERVICES } from "@/lib/constants";
 import type { CustOnboardData } from "@/lib/types";
 
 /* ── brand colours ───────────────────────────────────── */
-const C  = "#0d9488";  // teal-600
-const CL = "#f0fdfa";  // teal-50
-const CM = "#ccfbf1";  // teal-100
+const C  = "#27272a";
+const CL = "#ffffff";
+const CM = "#e5e5e5";
+const NAVY = "#27435f";
 
 /* ── step config ─────────────────────────────────────── */
 type Kind = "splash" | "form";
@@ -145,8 +146,8 @@ export const CustomerOnboard: FC = () => {
       {/* illustration area */}
       <div style={{ flexShrink: 0, height: "30dvh", display: "flex", alignItems: "stretch", justifyContent: "center", position: "relative", overflow: "hidden" }}>
         {step > 0 && (
-          <button onClick={() => { setError(""); setStep((s) => s - 1); }} style={{ position: "absolute", top: 48, left: 20, width: 36, height: 36, borderRadius: 12, background: "white", border: `1.5px solid ${CM}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${C}20`, zIndex: 1 }}>
-            <ChevronLeft size={18} color={C} strokeWidth={2.5} />
+          <button onClick={() => { setError(""); setStep((s) => s - 1); }} style={{ position: "absolute", top: 48, left: 20, width: 36, height: 36, borderRadius: 12, background: "white", border: `1.5px solid ${CM}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${NAVY}20`, zIndex: 1 }}>
+            <ChevronLeft size={18} color={NAVY} strokeWidth={2.5} />
           </button>
         )}
         <Illus key={step} img={meta.img} />
@@ -292,13 +293,13 @@ export const CustomerOnboard: FC = () => {
 
         {/* CTA */}
         <div style={{ flexShrink: 0, padding: "12px 26px 34px", borderTop: "1px solid rgba(255,255,255,.1)" }}>
-          {error && <p style={{ fontSize: 12, color: "#ff6b6b", marginBottom: 8, textAlign: "center", fontWeight: 700 }}>{error}</p>}
+          {error && <p style={{ fontSize: 12, color: "white", marginBottom: 8, textAlign: "center", fontWeight: 700 }}>{error}</p>}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Dots cur={step} tot={STEPS.length} />
             <button onClick={handleNext}
               disabled={busy}
               style={{ width: 56, height: 56, borderRadius: "50%", background: "white", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,.2)", flexShrink: 0, opacity: busy ? 0.7 : 1 }}>
-              {isLast ? <CheckCircle2 size={24} color={C} strokeWidth={2.5} /> : <ArrowRight size={24} color={C} strokeWidth={2.5} />}
+              {isLast ? <CheckCircle2 size={24} color={NAVY} strokeWidth={2.5} /> : <ArrowRight size={24} color={NAVY} strokeWidth={2.5} />}
             </button>
           </div>
           {isLast && (

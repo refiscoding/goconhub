@@ -31,17 +31,35 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
     setBusy(true);
     setError("");
     try {
+      const uploadedPhotoUrls: string[] = [];
+      for (const file of sel.photos) {
+        const form = new FormData();
+        form.append("file", file);
+        form.append("bucket", "documents");
+        form.append("type", "booking-photo");
+
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: form });
+        if (!uploadRes.ok) {
+          const uploadData = await uploadRes.json().catch(() => ({}));
+          throw new Error(uploadData.message ?? "Failed to upload one or more photos.");
+        }
+        const uploadData = await uploadRes.json();
+        uploadedPhotoUrls.push(uploadData.url);
+      }
+
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           vendorId:    vendor.id,
+          serviceId:   sel.service?.id ?? undefined,
           serviceName: sel.service!.name,
           date:        sel.date!.label,
           time:        sel.time!,
           location:    vendor.loc,
           note:        sel.note,
           issueDesc:   sel.issueDesc,
+          photos:      uploadedPhotoUrls,
           amount:      sel.service!.price,
         }),
       });
@@ -90,7 +108,7 @@ export const BookingFlow: FC<BookingFlowProps> = ({ vendor }) => {
       )}
 
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, padding: "14px 22px 28px", background: "rgba(250,247,242,.92)", backdropFilter: "blur(16px)", borderTop: "1px solid var(--border)" }}>
-        <button disabled={!canContinue || busy} style={{ width: "100%", padding: "14px 0", fontSize: 15, fontWeight: 700, borderRadius: 14, border: "none", cursor: (canContinue && !busy) ? "pointer" : "not-allowed", color: "#fff", background: (canContinue && !busy) ? "linear-gradient(135deg, #1A7A5E, #2ECC9A)" : "var(--border2)", opacity: (canContinue && !busy) ? 1 : 0.5, transition: "all .2s", boxShadow: (canContinue && !busy) ? "0 4px 16px rgba(26,122,94,.25)" : "none" }}
+        <button disabled={!canContinue || busy} style={{ width: "100%", padding: "14px 0", fontSize: 15, fontWeight: 700, borderRadius: 14, border: "none", cursor: (canContinue && !busy) ? "pointer" : "not-allowed", color: "#fff", background: (canContinue && !busy) ? "linear-gradient(135deg, var(--navy-dark), var(--navy))" : "var(--border2)", opacity: (canContinue && !busy) ? 1 : 0.5, transition: "all .2s", boxShadow: (canContinue && !busy) ? "0 4px 16px rgba(39,67,95,.22)" : "none" }}
           onClick={() => {
             if (!canContinue || busy) return;
             if (step === 2) confirm();

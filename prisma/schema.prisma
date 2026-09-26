@@ -134,6 +134,8 @@ model Booking {
   time        String
   location    String        @default("")
   note        String        @default("")
+  issueDesc   String        @default("")
+  photos      String[]      @default([])
   amount      Float
   status      BookingStatus @default(pending)
 

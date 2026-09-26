@@ -57,10 +57,10 @@ export const OverviewTab: FC<OverviewTabProps> = ({
     : "—";
 
   const FINANCE = [
-    { label: "Gross Transacted", value: rev ? fmt(rev.totalTransacted) : "—", sub: `${rev?.count ?? 0} confirmed payments`, icon: <CreditCard  size={18} />, accent: "#0077B6" },
-    { label: "Platform Revenue",  value: rev ? fmt(rev.totalRevenue)    : "—", sub: "5% fee on transactions",                icon: <TrendingUp  size={18} />, accent: "#2D9A4E" },
-    { label: "Vendor Payouts",    value: rev ? fmt(rev.totalVendorPaid) : "—", sub: "95% disbursed to vendors",               icon: <Banknote    size={18} />, accent: "#C9A84C" },
-    { label: "Net Profit",        value: rev ? fmt(rev.totalRevenue)    : "—", sub: "After all payouts",                      icon: <PiggyBank   size={18} />, accent: "#2D9A4E" },
+    { label: "Gross Transacted", value: rev ? fmt(rev.totalTransacted) : "—", sub: `${rev?.count ?? 0} confirmed payments`, icon: <CreditCard  size={18} />, accent: "var(--navy)" },
+    { label: "Platform Revenue",  value: rev ? fmt(rev.totalRevenue)    : "—", sub: "5% fee on transactions",                icon: <TrendingUp  size={18} />, accent: "var(--navy)" },
+    { label: "Vendor Payouts",    value: rev ? fmt(rev.totalVendorPaid) : "—", sub: "95% disbursed to vendors",               icon: <Banknote    size={18} />, accent: "var(--ink2)" },
+    { label: "Net Profit",        value: rev ? fmt(rev.totalRevenue)    : "—", sub: "After all payouts",                      icon: <PiggyBank   size={18} />, accent: "var(--navy)" },
   ];
 
   const PLATFORM = [

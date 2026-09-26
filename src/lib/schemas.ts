@@ -27,6 +27,8 @@ export const CreateBookingSchema = z.object({
   time:        z.string().min(1, "time is required."),
   location:    z.string().max(300).optional().default(""),
   note:        z.string().max(1000).optional().default(""),
+  issueDesc:   z.string().max(2000).optional().default(""),
+  photos:      z.array(z.string().min(1)).max(10).optional().default([]),
   amount:      z.number().positive().optional(),
 });
 

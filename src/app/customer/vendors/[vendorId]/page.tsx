@@ -92,7 +92,7 @@ export default function VendorProfilePage({ params }: PageProps) {
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       {/* Hero */}
-      <div style={{ height: 160, background: "linear-gradient(135deg, #1A7A5E 0%, #0f766e 50%, #2ECC9A 100%)", position: "relative", overflow: "hidden" }}>
+      <div style={{ height: 160, background: "linear-gradient(135deg, #27272a 0%, #27435f 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
         <button onClick={() => router.back()} style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,.3)", border: "none", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <IconChevL style={{ width: 20, height: 20, color: "#fff" }} />
@@ -130,7 +130,7 @@ export default function VendorProfilePage({ params }: PageProps) {
       {/* Stats */}
       <div style={{ display: "flex", gap: 10, margin: "16px 20px 0" }}>
         {[
-          { label: "Rating",    value: vendor.rating > 0 ? vendor.rating.toFixed(1) : "New", icon: "⭐", color: "#f59e0b" },
+          { label: "Rating",    value: vendor.rating > 0 ? vendor.rating.toFixed(1) : "New", icon: "⭐", color: "var(--navy)" },
           { label: "Reviews",   value: String(vendor.reviewCount), icon: "💬", color: "var(--acc)" },
           { label: "Completed", value: String(vendor.completedBookings), icon: "✅", color: "var(--green)" },
         ].map((s) => (
@@ -150,9 +150,9 @@ export default function VendorProfilePage({ params }: PageProps) {
             return (
               <button key={id} onClick={() => setTab(id as Tab)}
                 style={{ flex: 1, padding: "12px 0", border: "none", background: "transparent", cursor: "pointer", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                <Icon size={15} color={active ? "#1A7A5E" : "var(--ink3)"} />
-                <span style={{ fontSize: 12, fontWeight: 700, color: active ? "#1A7A5E" : "var(--ink3)", transition: "color .15s" }}>{label}</span>
-                {active && <div style={{ position: "absolute", bottom: 0, left: "10%", width: "80%", height: 2.5, background: "#1A7A5E", borderRadius: 999 }} />}
+                <Icon size={15} color={active ? "var(--navy)" : "var(--ink3)"} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: active ? "var(--navy)" : "var(--ink3)", transition: "color .15s" }}>{label}</span>
+                {active && <div style={{ position: "absolute", bottom: 0, left: "10%", width: "80%", height: 2.5, background: "var(--navy)", borderRadius: 999 }} />}
               </button>
             );
           })}
@@ -173,7 +173,7 @@ export default function VendorProfilePage({ params }: PageProps) {
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>Skills</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {vendor.skills.map((s) => (
-                  <span key={s} style={{ padding: "5px 12px", borderRadius: 999, background: "rgba(26,122,94,.08)", border: "1px solid rgba(26,122,94,.15)", fontSize: 12, fontWeight: 600, color: "#1A7A5E" }}>{s}</span>
+                  <span key={s} style={{ padding: "5px 12px", borderRadius: 999, background: "var(--navy-soft)", border: "1px solid var(--navy-border)", fontSize: 12, fontWeight: 600, color: "var(--navy)" }}>{s}</span>
                 ))}
               </div>
             </>
@@ -192,7 +192,7 @@ export default function VendorProfilePage({ params }: PageProps) {
                     <p style={{ fontWeight: 700, fontSize: 14 }}>{svc.name}</p>
                     {svc.desc && <p style={{ fontSize: 12, color: "var(--ink3)", marginTop: 2 }}>{svc.desc}</p>}
                   </div>
-                  <p style={{ fontWeight: 800, fontSize: 15, color: "#1A7A5E", whiteSpace: "nowrap", marginLeft: 12 }}>{fmtPrice(svc.price)}/{svc.unit}</p>
+                  <p style={{ fontWeight: 800, fontSize: 15, color: "var(--navy)", whiteSpace: "nowrap", marginLeft: 12 }}>{fmtPrice(svc.price)}/{svc.unit}</p>
                 </div>
               ))}</>
             : <p style={{ textAlign: "center", color: "var(--ink3)", fontSize: 13, padding: "24px 0" }}>No services listed yet.</p>
@@ -230,13 +230,13 @@ export default function VendorProfilePage({ params }: PageProps) {
                 <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
                   {[1,2,3,4,5].map((n) => (
                     <button key={n} onMouseEnter={() => setHovering(n)} onMouseLeave={() => setHovering(0)} onClick={() => setMyRating(n)}
-                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 28, lineHeight: 1, color: n <= (hovering || myRating) ? "#f59e0b" : "var(--border2)", transition: "color .15s" }}>★</button>
+                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 28, lineHeight: 1, color: n <= (hovering || myRating) ? "var(--navy)" : "var(--border2)", transition: "color .15s" }}>★</button>
                   ))}
                   {myRating > 0 && <span style={{ alignSelf: "center", fontSize: 13, color: "var(--ink3)", marginLeft: 4 }}>{["","Poor","Fair","Good","Great","Excellent"][myRating]}</span>}
                 </div>
                 <textarea className="field" rows={3} placeholder="Share your experience (optional)…" value={myComment} onChange={(e) => setMyComment(e.target.value)} style={{ resize: "vertical" }} />
                 <button onClick={submitReview} disabled={submitting || !myRating}
-                  style={{ width: "100%", marginTop: 12, padding: 14, fontSize: 14, fontWeight: 700, borderRadius: 14, border: "none", cursor: (!myRating || submitting) ? "not-allowed" : "pointer", color: "#fff", background: (!myRating || submitting) ? "var(--border2)" : "linear-gradient(135deg, #1A7A5E, #2ECC9A)", opacity: (!myRating || submitting) ? 0.6 : 1, transition: "all .2s", boxShadow: (!myRating || submitting) ? "none" : "0 4px 16px rgba(26,122,94,.25)" }}>
+                  style={{ width: "100%", marginTop: 12, padding: 14, fontSize: 14, fontWeight: 700, borderRadius: 14, border: "none", cursor: (!myRating || submitting) ? "not-allowed" : "pointer", color: "#fff", background: (!myRating || submitting) ? "var(--border2)" : "linear-gradient(135deg, var(--navy-dark), var(--navy))", opacity: (!myRating || submitting) ? 0.6 : 1, transition: "all .2s", boxShadow: (!myRating || submitting) ? "none" : "0 4px 16px rgba(39,67,95,.22)" }}>
                   {submitting ? "Submitting…" : "Submit Review"}
                 </button>
               </div>

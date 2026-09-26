@@ -14,9 +14,9 @@ interface Notif {
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
-  booking_request: <CalendarCheck size={18} color="#d97706" />,
-  payout_sent:     <Banknote      size={18} color="#d97706" />,
-  new_review:      <Star          size={18} color="#d97706" />,
+  booking_request: <CalendarCheck size={18} color="var(--navy)" />,
+  payout_sent:     <Banknote      size={18} color="var(--navy)" />,
+  new_review:      <Star          size={18} color="var(--navy)" />,
 };
 
 function timeAgo(iso: string) {

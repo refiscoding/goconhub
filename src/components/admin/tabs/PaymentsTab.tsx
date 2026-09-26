@@ -57,7 +57,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
         {[
           { label: "Total Transacted", value: fmtPrice(totalTransacted), icon: <HandCoins size={18} />,       color: "var(--acc)" },
-          { label: "Platform (5%)",    value: fmtPrice(totalPlatformFee), icon: <PiggyBank size={18} />,       color: "#6366f1"    },
+          { label: "Platform (5%)",    value: fmtPrice(totalPlatformFee), icon: <PiggyBank size={18} />,       color: "var(--navy)" },
           { label: "Vendor Payouts",   value: fmtPrice(totalVendorPaid),  icon: <BanknoteArrowUp size={18} />, color: "var(--green)" },
         ].map((s) => (
           <div key={s.label} style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
@@ -102,10 +102,10 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
       {/* Payments submitted by customers */}
       <div style={{ background: "var(--card)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", borderRadius: 18, overflow: "hidden", marginBottom: 16 }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(99,102,241,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💳</div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--navy-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💳</div>
           <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Payments Submitted by Customers</p>
           {awaitingConfirm.length > 0 && (
-            <span style={{ marginLeft: "auto", background: "#6366f1", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 999 }}>{awaitingConfirm.length}</span>
+            <span style={{ marginLeft: "auto", background: "var(--navy)", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 999 }}>{awaitingConfirm.length}</span>
           )}
         </div>
         {awaitingConfirm.length === 0
@@ -132,7 +132,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
                     <div style={{ borderTop: "1px solid var(--border)", paddingTop: 6, marginTop: 2, display: "flex", flexDirection: "column", gap: 3 }}>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 11, color: "var(--ink3)" }}>Platform fee (5%)</span>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#6366f1" }}>{fmtPrice(b.amount * 0.05)}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--navy)" }}>{fmtPrice(b.amount * 0.05)}</span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 11, color: "var(--ink3)" }}>Vendor receives (95%)</span>
@@ -173,7 +173,7 @@ export const PaymentsTab: FC<Props> = ({ bookings, onApproveComplete, onConfirmP
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <p style={{ fontWeight: 800, color: "var(--ink)", fontSize: 15 }}>{fmtPrice(b.amount)}</p>
-                    <p style={{ fontSize: 11, color: "#6366f1", marginTop: 2 }}>Fee: {fmtPrice(fee)}</p>
+                    <p style={{ fontSize: 11, color: "var(--navy)", marginTop: 2 }}>Fee: {fmtPrice(fee)}</p>
                     <p style={{ fontSize: 11, color: "var(--green)" }}>Vendor: {fmtPrice(vendor)}</p>
                   </div>
                 </div>

@@ -119,7 +119,7 @@ export const CategoriesTab: FC = () => {
       )}
 
       {loading ? (
-        <Flex justify="center" py={10}><Spinner size={{ base: "sm", md: "md" }} color="#4A7CC7" thickness="3px" speed="0.65s" /></Flex>
+        <Flex justify="center" py={10}><Spinner size={{ base: "sm", md: "md" }} color="var(--navy)" thickness="3px" speed="0.65s" /></Flex>
       ) : categories.length === 0 ? (
         <Text textAlign="center" color="var(--ink3)" py={10}>No categories yet</Text>
       ) : (
@@ -149,8 +149,8 @@ export const CategoriesTab: FC = () => {
                     <Flex align="center" gap={2}>
                       <Flex align="center" justify="center"
                         w="26px" h="26px" borderRadius="7px"
-                        bg="var(--acc-bg, rgba(99,102,241,0.1))" flexShrink={0}>
-                        <Tag size={13} color="var(--acc, #6366f1)" />
+                        bg="var(--acc-bg, var(--navy-soft))" flexShrink={0}>
+                        <Tag size={13} color="var(--acc, var(--navy))" />
                       </Flex>
                       <Text fontSize="13px" fontWeight={600} color="var(--ink)">{cat.name}</Text>
                     </Flex>

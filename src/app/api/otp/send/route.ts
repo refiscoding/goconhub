@@ -109,19 +109,12 @@ export async function POST(req: NextRequest) {
     const hasCreds    = hasWhatsApp || hasEmail;
 
     if (!hasCreds) {
-      // No credentials configured — always return code so user can proceed
-      logger.warn("OTP fallback: no messaging credentials configured", { contact });
-      return NextResponse.json({
-        success: true,
-        message: `Code sent to ${contact}.`,
-        devCode: code,
-      });
-    }
-
-    if (method === "whatsapp" && hasWhatsApp) {
-      await sendWhatsApp(contact, code);
-    } else if (method === "email" && hasEmail) {
-      await sendEmail(contact, code);
+    logger.warn("OTP fallback: no messaging credentials configured", { contact });
+    return NextResponse.json({
+      success: true,
+      message: "No OTP delivery provider is configured. Add an email/WhatsApp sender in production.",
+      devCode: code,
+    }, { status: 503 });
     } else {
       // Requested method not configured — use whichever is available
       if (hasWhatsApp) await sendWhatsApp(contact, code);

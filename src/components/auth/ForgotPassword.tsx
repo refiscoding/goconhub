@@ -125,12 +125,12 @@ export const ForgotPassword: FC = () => {
 
       {/* Left panel */}
       <div className="auth-hero">
-        <div style={{ position: "absolute", top: -60, right: -40, width: 220, height: 220, background: "rgba(217,119,6,.15)", borderRadius: "50%", filter: "blur(60px)" }} />
-        <div style={{ position: "absolute", bottom: -80, left: -60, width: 300, height: 300, background: "rgba(217,119,6,.07)", borderRadius: "50%", filter: "blur(70px)" }} />
+        <div style={{ position: "absolute", top: -60, right: -40, width: 220, height: 220, background: "rgba(39,67,95,.15)", borderRadius: "50%", filter: "blur(60px)" }} />
+        <div style={{ position: "absolute", bottom: -80, left: -60, width: 300, height: 300, background: "rgba(39,67,95,.07)", borderRadius: "50%", filter: "blur(70px)" }} />
 
         <div style={{ position: "relative" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-            <div style={{ width: 40, height: 40, background: "#d97706", borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 4px 14px rgba(217,119,6,.4)" }}>
+            <div style={{ width: 40, height: 40, background: "var(--navy)", borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 4px 14px rgba(39,67,95,.24)" }}>
               <IconWrench style={{ width: 21, height: 21 }} />
             </div>
             <span className="serif" style={{ color: "#fff", fontSize: 25, fontWeight: 800, letterSpacing: "-.01em" }}>GoCon</span>
@@ -138,7 +138,7 @@ export const ForgotPassword: FC = () => {
 
           <h1 className="serif" style={{ color: "#fff", fontSize: 34, fontWeight: 300, lineHeight: 1.15, letterSpacing: "-.02em" }}>
             Reset your<br />
-            <em style={{ fontStyle: "italic", color: "#d97706" }}>password.</em>
+            <em style={{ fontStyle: "italic", color: "#a1b4c6" }}>password.</em>
           </h1>
           <p style={{ color: "#78716c", fontSize: 14, marginTop: 12, lineHeight: 1.6 }}>
             We&apos;ll send a one-time code to verify it&apos;s you before letting you set a new password.
@@ -148,7 +148,7 @@ export const ForgotPassword: FC = () => {
           <div className="auth-feats" style={{ marginTop: 44 }}>
             {[["1", "Enter your contact"], ["2", "Verify with OTP"], ["3", "Set new password"]].map(([n, label], i) => (
               <div key={n} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0, background: i <= stepIdx ? "#d97706" : "rgba(255,255,255,.1)", color: i <= stepIdx ? "#fff" : "rgba(255,255,255,.4)", transition: "all .3s" }}>
+                <div style={{ width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0, background: i <= stepIdx ? "var(--navy)" : "rgba(255,255,255,.1)", color: i <= stepIdx ? "#fff" : "rgba(255,255,255,.4)", transition: "all .3s" }}>
                   {i < stepIdx ? <IconCheck style={{ width: 13, height: 13 }} /> : n}
                 </div>
                 <span style={{ fontSize: 13, color: i <= stepIdx ? "rgba(255,255,255,.85)" : "rgba(255,255,255,.35)", transition: "color .3s" }}>{label}</span>

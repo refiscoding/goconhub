@@ -1,8 +1,11 @@
 import { extendTheme } from "@chakra-ui/react";
+import { navy } from "./brandColors";
 
 /** GoCon monochrome brand */
 export const authTheme = extendTheme({
   colors: {
+    navy,
+    blue: navy,
     brand: {
       50: "#fafafa", 100: "#f4f4f5", 200: "#e4e4e7", 300: "#d4d4d8",
       400: "#a1a1aa", 500: "#18181b", 600: "#09090b", 700: "#09090b",

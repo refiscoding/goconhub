@@ -48,12 +48,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate type
-    if (!["avatar", "id-document", "cipa-document"].includes(type)) {
+    if (!["avatar", "id-document", "cipa-document", "booking-photo"].includes(type)) {
       return NextResponse.json({ message: "Invalid upload type." }, { status: 400 });
     }
 
-    // Documents require vendor role
-    if (bucket === "documents" && session.role !== "vendor") {
+    // Documents require vendor role unless this is a customer booking photo
+    if (bucket === "documents" && session.role !== "vendor" && type !== "booking-photo") {
       return NextResponse.json({ message: "Only vendors can upload documents." }, { status: 403 });
     }
 

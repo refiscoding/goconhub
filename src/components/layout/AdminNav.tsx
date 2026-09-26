@@ -86,7 +86,7 @@ export const AdminNav: FC<AdminNavProps> = ({
       <nav className={`nav-bot${mobileOpen ? " mobile-open" : ""}`}>
         {/* Brand */}
         <div className="nav-brand">
-          <div className="nav-brand-logo" style={{ background: "linear-gradient(135deg, #6366F1, #4F46E5)" }}>
+          <div className="nav-brand-logo" style={{ background: "var(--navy)" }}>
             <ShieldCheck size={14} color="#fff" />
           </div>
           <span className="nav-brand-name serif">Admin</span>
@@ -116,7 +116,7 @@ export const AdminNav: FC<AdminNavProps> = ({
                 {n.badge && n.badge > 0 ? (
                   <span style={{
                     position: "absolute", top: -5, right: -6,
-                    background: "#F59E0B", color: "#1E1B4B",
+                    background: "var(--navy)", color: "#ffffff",
                     fontSize: 9, fontWeight: 800, lineHeight: 1,
                     padding: "2px 4px", borderRadius: 999, minWidth: 14, textAlign: "center",
                   }}>{n.badge}</span>

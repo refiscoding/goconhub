@@ -14,9 +14,9 @@ interface Notif {
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
-  booking_accepted:  <Calendar    size={18} color="#1A7A5E" />,
-  job_complete:      <Wrench      size={18} color="#1A7A5E" />,
-  payment_confirmed: <CreditCard  size={18} color="#1A7A5E" />,
+  booking_accepted:  <Calendar    size={18} color="var(--navy)" />,
+  job_complete:      <Wrench      size={18} color="var(--navy)" />,
+  payment_confirmed: <CreditCard  size={18} color="var(--navy)" />,
 };
 
 function timeAgo(iso: string) {
@@ -64,14 +64,14 @@ export default function CustomerNotificationsPage() {
     <div className="cust-page-wrap" style={{ maxWidth: 640, margin: "0 auto" }}>
       <div className="page-top cust-page-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Bell size={22} color="#1A7A5E" />
+          <Bell size={22} color="var(--navy)" />
           <h1 className="cust-heading" style={{ fontSize: 22, margin: 0 }}>Notifications</h1>
           {unread > 0 && (
-            <span style={{ background: "#1A7A5E", color: "white", borderRadius: 99, fontSize: 11, fontWeight: 700, padding: "2px 8px" }}>{unread}</span>
+            <span style={{ background: "var(--navy)", color: "white", borderRadius: 99, fontSize: 11, fontWeight: 700, padding: "2px 8px" }}>{unread}</span>
           )}
         </div>
         {unread > 0 && (
-          <button onClick={markAllRead} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#1A7A5E", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+          <button onClick={markAllRead} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--navy)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
             <CheckCheck size={15} />
             Mark all read
           </button>
@@ -97,8 +97,8 @@ export default function CustomerNotificationsPage() {
               key={n.id}
               onClick={() => handleClick(n)}
               style={{
-                background: n.read ? "var(--card)" : "rgba(26,122,94,.04)",
-                border: `1.5px solid ${n.read ? "var(--border)" : "rgba(26,122,94,.15)"}`,
+                background: n.read ? "var(--card)" : "var(--navy-soft)",
+                border: `1.5px solid ${n.read ? "var(--border)" : "var(--navy-border)"}`,
                 borderRadius: 16,
                 padding: "14px 16px",
                 cursor: n.linkUrl ? "pointer" : "default",
@@ -108,7 +108,7 @@ export default function CustomerNotificationsPage() {
                 transition: "all .2s",
               }}
             >
-              <div style={{ width: 38, height: 38, borderRadius: 12, background: n.read ? "var(--bg3)" : "rgba(26,122,94,.08)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 12, background: n.read ? "var(--bg3)" : "var(--navy-soft)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 {TYPE_ICON[n.type] ?? <Bell size={18} color="var(--ink2)" />}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -119,7 +119,7 @@ export default function CustomerNotificationsPage() {
                 <p style={{ fontSize: 13, color: "var(--ink2)", margin: "3px 0 0", lineHeight: 1.45 }}>{n.body}</p>
               </div>
               {!n.read && (
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1A7A5E", flexShrink: 0, marginTop: 5 }} />
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--navy)", flexShrink: 0, marginTop: 5 }} />
               )}
             </div>
           ))}

@@ -29,9 +29,9 @@ export const StepDateTime: FC<StepDateTimeProps> = ({ selectedDate, selectedTime
           const sel = selectedDate?.label === d.label;
           return (
             <div key={i} onClick={() => onSelectDate(d)}
-              style={{ flexShrink: 0, padding: "10px 14px", borderRadius: 14, border: `2px solid ${sel ? "#1A7A5E" : "var(--border)"}`, background: sel ? "rgba(26,122,94,.06)" : "var(--card)", cursor: "pointer", textAlign: "center", minWidth: 64, transition: "all .2s", boxShadow: sel ? "0 0 0 3px rgba(26,122,94,.12)" : "none" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: sel ? "#1A7A5E" : "var(--ink3)", textTransform: "uppercase" }}>{d.label.split(" ")[0]}</p>
-              <p style={{ fontSize: 18, fontWeight: 800, marginTop: 2, color: sel ? "#1A7A5E" : "var(--ink)" }}>{d.label.split(" ")[1]}</p>
+              style={{ flexShrink: 0, padding: "10px 14px", borderRadius: 14, border: `2px solid ${sel ? "var(--navy)" : "var(--border)"}`, background: sel ? "var(--navy-soft)" : "var(--card)", cursor: "pointer", textAlign: "center", minWidth: 64, transition: "all .2s", boxShadow: sel ? "0 0 0 3px rgba(39,67,95,.12)" : "none" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: sel ? "var(--navy)" : "var(--ink3)", textTransform: "uppercase" }}>{d.label.split(" ")[0]}</p>
+              <p style={{ fontSize: 18, fontWeight: 800, marginTop: 2, color: sel ? "var(--navy)" : "var(--ink)" }}>{d.label.split(" ")[1]}</p>
             </div>
           );
         })}
@@ -45,8 +45,8 @@ export const StepDateTime: FC<StepDateTimeProps> = ({ selectedDate, selectedTime
           const sel = selectedTime === t;
           return (
             <div key={t} onClick={() => onSelectTime(t)}
-              style={{ padding: "12px 8px", borderRadius: 12, border: `2px solid ${sel ? "#1A7A5E" : "var(--border)"}`, background: sel ? "rgba(26,122,94,.06)" : "var(--card)", cursor: "pointer", textAlign: "center", transition: "all .2s", boxShadow: sel ? "0 0 0 3px rgba(26,122,94,.12)" : "none" }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: sel ? "#1A7A5E" : "var(--ink)" }}>{t}</p>
+              style={{ padding: "12px 8px", borderRadius: 12, border: `2px solid ${sel ? "var(--navy)" : "var(--border)"}`, background: sel ? "var(--navy-soft)" : "var(--card)", cursor: "pointer", textAlign: "center", transition: "all .2s", boxShadow: sel ? "0 0 0 3px rgba(39,67,95,.12)" : "none" }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: sel ? "var(--navy)" : "var(--ink)" }}>{t}</p>
             </div>
           );
         })}

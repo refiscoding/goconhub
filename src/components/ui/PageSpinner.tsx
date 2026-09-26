@@ -11,7 +11,7 @@ export function PageSpinner({ paddingY = "80px", inline = false }: PageSpinnerPr
     return (
       <Spinner
         size={{ base: "sm", md: "md" }}
-        color="#4A7CC7"
+        color="var(--navy)"
         thickness="3px"
         speed="0.65s"
       />
@@ -21,7 +21,7 @@ export function PageSpinner({ paddingY = "80px", inline = false }: PageSpinnerPr
     <Flex justify="center" align="center" style={{ padding: `${paddingY} 0` }}>
       <Spinner
         size={{ base: "sm", md: "md" }}
-        color="#4A7CC7"
+        color="var(--navy)"
         thickness="3px"
         speed="0.65s"
       />

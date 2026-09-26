@@ -165,7 +165,7 @@ export const CustProfile: FC = () => {
       {/* ── Hero banner ── */}
       <Box
         h="180px"
-        bgGradient="linear(135deg, #d97706 0%, #b45309 55%, #1e40af 100%)"
+        bgGradient="linear(135deg, #18181b 0%, #27435f 100%)"
         position="relative"
         overflow="hidden"
       >
@@ -254,8 +254,8 @@ export const CustProfile: FC = () => {
         <GridItem>
           <Box bg="white" borderRadius="2xl" boxShadow="sm" p={4} textAlign="center">
             <Flex justify="center" mb={2}>
-              <Box p="8px" borderRadius="xl" bg="rgba(217,119,6,.1)">
-                <Mail size={16} color="#d97706" />
+              <Box p="8px" borderRadius="xl" bg="var(--navy-soft)">
+                <Mail size={16} color="var(--navy)" />
               </Box>
             </Flex>
             <Text fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".05em" mb={1}>Email</Text>
@@ -265,8 +265,8 @@ export const CustProfile: FC = () => {
         <GridItem>
           <Box bg="white" borderRadius="2xl" boxShadow="sm" p={4} textAlign="center">
             <Flex justify="center" mb={2}>
-              <Box p="8px" borderRadius="xl" bg="rgba(217,119,6,.1)">
-                <Phone size={16} color="#d97706" />
+              <Box p="8px" borderRadius="xl" bg="var(--navy-soft)">
+                <Phone size={16} color="var(--navy)" />
               </Box>
             </Flex>
             <Text fontSize="11px" fontWeight={700} color="var(--ink3)" textTransform="uppercase" letterSpacing=".05em" mb={1}>Phone</Text>
@@ -344,8 +344,8 @@ export const CustProfile: FC = () => {
               {/* Preferences */}
               <Box px={5} pb={5}>
                 <HStack spacing={3} mb={4}>
-                  <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(99,102,241,.1)" align="center" justify="center" flexShrink={0}>
-                    <Bell size={16} color="#6366f1" />
+                  <Flex w="32px" h="32px" borderRadius="xl" bg="var(--navy-soft)" align="center" justify="center" flexShrink={0}>
+                    <Bell size={16} color="var(--navy)" />
                   </Flex>
                   <Text fontWeight={700} fontSize="14px" color="var(--ink)">Preferences</Text>
                 </HStack>
@@ -387,8 +387,8 @@ export const CustProfile: FC = () => {
               <Box bg="var(--bg)" borderRadius="xl" p={4}>
                 <Flex justify="space-between" align="center">
                   <HStack spacing={3}>
-                    <Flex w="36px" h="36px" borderRadius="xl" bg="rgba(217,119,6,.1)" align="center" justify="center" flexShrink={0}>
-                      <Lock size={16} color="#d97706" />
+                    <Flex w="36px" h="36px" borderRadius="xl" bg="var(--navy-soft)" align="center" justify="center" flexShrink={0}>
+                      <Lock size={16} color="var(--navy)" />
                     </Flex>
                     <Box>
                       <Text fontWeight={600} fontSize="14px" color="var(--ink)">Password</Text>
@@ -399,7 +399,7 @@ export const CustProfile: FC = () => {
                     onClick={() => setPwOpen((o) => !o)}
                     size="sm"
                     variant="ghost"
-                    colorScheme={pwOpen ? "gray" : "orange"}
+                    colorScheme={pwOpen ? "gray" : "navy"}
                     borderRadius="full"
                     fontWeight={700}
                     fontSize="12px"
@@ -477,7 +477,7 @@ export const CustProfile: FC = () => {
                     <Button
                       onClick={changePassword}
                       isLoading={pwBusy}
-                      colorScheme="orange"
+                      colorScheme="navy"
                       borderRadius="xl"
                       fontWeight={700}
                       fontSize="14px"
@@ -496,8 +496,8 @@ export const CustProfile: FC = () => {
           {tab === "payments" && (
             <Box>
               <Flex px={5} pt={5} pb={3} align="center" gap={3}>
-                <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(99,102,241,.1)" align="center" justify="center" flexShrink={0}>
-                  <Wallet size={16} color="#6366f1" />
+                <Flex w="32px" h="32px" borderRadius="xl" bg="var(--navy-soft)" align="center" justify="center" flexShrink={0}>
+                  <Wallet size={16} color="var(--navy)" />
                 </Flex>
                 <Text fontWeight={700} fontSize="14px" color="var(--ink)">Payment History</Text>
               </Flex>
@@ -505,8 +505,8 @@ export const CustProfile: FC = () => {
               {payments.length === 0 ? (
                 <Box px={5} pb={5}>
                   <Flex direction="column" align="center" py={8} gap={3}>
-                    <Box p={4} borderRadius="full" bg="rgba(99,102,241,.08)">
-                      <Wallet size={28} color="#6366f1" />
+                    <Box p={4} borderRadius="full" bg="var(--navy-soft)">
+                      <Wallet size={28} color="var(--navy)" />
                     </Box>
                     <Text fontSize="14px" color="var(--ink3)" fontWeight={500}>No payments yet.</Text>
                   </Flex>
@@ -527,8 +527,8 @@ export const CustProfile: FC = () => {
                               <Badge
                                 px={2} py="2px"
                                 borderRadius="full"
-                                bg="rgba(99,102,241,.1)"
-                                color="#6366f1"
+                                bg="var(--navy-soft)"
+                                color="var(--navy)"
                                 fontSize="11px"
                                 fontWeight={700}
                                 textTransform="none"
@@ -559,8 +559,8 @@ export const CustProfile: FC = () => {
           {tab === "privacy" && (
             <Box px={5} py={5}>
               <HStack spacing={3} mb={5}>
-                <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(13,148,136,.1)" align="center" justify="center" flexShrink={0}>
-                  <ShieldCheck size={16} color="#0d9488" />
+                <Flex w="32px" h="32px" borderRadius="xl" bg="var(--navy-soft)" align="center" justify="center" flexShrink={0}>
+                  <ShieldCheck size={16} color="var(--navy)" />
                 </Flex>
                 <Text fontWeight={700} fontSize="14px" color="var(--ink)">Privacy Centre</Text>
               </HStack>
@@ -568,9 +568,9 @@ export const CustProfile: FC = () => {
               {/* Policy links */}
               <VStack spacing={3} align="stretch" mb={6}>
                 {[
-                  { href: "/legal/privacy", icon: <ShieldCheck size={16} color="#0d9488" />, label: "Privacy Policy", desc: "How we collect and use your data", bg: "rgba(13,148,136,.08)", color: "#0d9488" },
-                  { href: "/legal/terms",   icon: <FileText    size={16} color="#d97706" />, label: "Terms & Conditions", desc: "Your rights and obligations as a customer", bg: "rgba(217,119,6,.08)", color: "#d97706" },
-                  { href: "/legal/cookies", icon: <Cookie      size={16} color="#6366f1" />, label: "Cookie Policy", desc: "How we use cookies and local storage", bg: "rgba(99,102,241,.08)", color: "#6366f1" },
+                  { href: "/legal/privacy", icon: <ShieldCheck size={16} color="var(--navy)" />, label: "Privacy Policy", desc: "How we collect and use your data", bg: "var(--navy-soft)", color: "var(--navy)" },
+                  { href: "/legal/terms",   icon: <FileText    size={16} color="var(--ink2)" />, label: "Terms & Conditions", desc: "Your rights and obligations as a customer", bg: "var(--bg2)", color: "var(--ink2)" },
+                  { href: "/legal/cookies", icon: <Cookie      size={16} color="var(--ink2)" />, label: "Cookie Policy", desc: "How we use cookies and local storage", bg: "var(--bg2)", color: "var(--ink2)" },
                 ].map((item) => (
                   <Box
                     key={item.href}
@@ -602,8 +602,8 @@ export const CustProfile: FC = () => {
               {/* Cookie preferences */}
               <Box bg="var(--bg)" borderRadius="xl" p={4} border="1px solid var(--border)">
                 <HStack spacing={3} mb={3}>
-                  <Flex w="32px" h="32px" borderRadius="xl" bg="rgba(99,102,241,.08)" align="center" justify="center" flexShrink={0}>
-                    <Cookie size={15} color="#6366f1" />
+                  <Flex w="32px" h="32px" borderRadius="xl" bg="var(--bg2)" align="center" justify="center" flexShrink={0}>
+                    <Cookie size={15} color="var(--ink2)" />
                   </Flex>
                   <Box>
                     <Text fontWeight={700} fontSize="13px" color="var(--ink)">Cookie Preferences</Text>
@@ -613,7 +613,7 @@ export const CustProfile: FC = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  colorScheme="purple"
+                  colorScheme="navy"
                   borderRadius="full"
                   fontWeight={700}
                   fontSize="12px"
@@ -628,12 +628,12 @@ export const CustProfile: FC = () => {
               </Box>
 
               {/* Data request */}
-              <Box mt={4} p={4} borderRadius="xl" bg="#fffbeb" border="1px solid #fde68a">
-                <Text fontWeight={700} fontSize="13px" color="#d97706" mb={1}>Your Data Rights</Text>
+              <Box mt={4} p={4} borderRadius="xl" bg="var(--navy-soft)" border="1px solid var(--navy-border)">
+                <Text fontWeight={700} fontSize="13px" color="var(--navy)" mb={1}>Your Data Rights</Text>
                 <Text fontSize="12px" color="#44403c" lineHeight={1.6}>
                   You have the right to access, correct, or delete your personal data.
                   To submit a data request, contact us at{" "}
-                  <a href="mailto:privacy@gocon.co.bw" style={{ color: "#d97706", fontWeight: 700 }}>privacy@gocon.co.bw</a>
+                  <a href="mailto:privacy@gocon.co.bw" style={{ color: "var(--navy)", fontWeight: 700 }}>privacy@gocon.co.bw</a>
                 </Text>
               </Box>
             </Box>

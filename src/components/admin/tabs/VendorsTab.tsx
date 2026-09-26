@@ -261,7 +261,7 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
                     </Button>
                   )}
                   {v.status === "active" && (
-                    <Button flex={1} colorScheme="orange" variant="outline" fontSize="12px"
+                    <Button flex={1} colorScheme="gray" variant="outline" fontSize="12px"
                       onClick={() => onSuspend(v.id)}>
                       Suspend
                     </Button>
@@ -273,7 +273,7 @@ export const VendorsTab: FC<VendorsTabProps> = ({ vendors, onApprove, onSuspend,
                     </Button>
                   )}
                   {!v.verified && (
-                    <Button flex={1} colorScheme="teal" variant="outline" fontSize="12px"
+                    <Button flex={1} colorScheme="navy" variant="outline" fontSize="12px"
                       leftIcon={<ShieldCheck size={13} />}
                       onClick={() => { if (window.confirm(`Verify ${v.name}?`)) onVerify(v.id); }}>
                       Verify

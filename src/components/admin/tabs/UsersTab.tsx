@@ -78,7 +78,7 @@ export const UsersTab: FC<UsersTabProps> = ({ customers, onApprove, onSuspend, o
                   {expanded === u.id ? "Hide" : "View"}
                 </Button>
                 {u.status === "active" && (
-                  <Button flex={1} colorScheme="orange" variant="outline" fontSize="12px"
+                  <Button flex={1} colorScheme="gray" variant="outline" fontSize="12px"
                     onClick={() => onSuspend(u.id)}>
                     Suspend
                   </Button>

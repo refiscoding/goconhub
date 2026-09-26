@@ -14,7 +14,7 @@ export default async function PrivacyPage() {
     <LegalShell
       title="Privacy Policy"
       subtitle="Last updated: March 2026"
-      icon={<ShieldCheck size={22} color="#d97706" />}
+      icon={<ShieldCheck size={22} color="var(--navy)" />}
       role={role}
       current="privacy"
     >
@@ -29,14 +29,14 @@ export default async function PrivacyPage() {
         area, and profile photo. We also collect usage data: booking history, messages, payment
         records, and reviews generated through use of the platform.
         {role === "vendor" && (
-          <RoleCallout color="#0d9488" bg="#f0fdfa" border="#ccfbf1" label="Additional data collected from Vendors">
+          <RoleCallout color="#3f3f46" bg="#f4f4f5" border="#d4d4d8" label="Additional data collected from Vendors">
             As a vendor, we also collect your professional information: trade category, skills,
             bio, verification documents (ID/CIPA number), and bank account details for payouts.
             This information is required to process payments and verify your identity.
           </RoleCallout>
         )}
         {role === "customer" && (
-          <RoleCallout color="#d97706" bg="#fffbeb" border="#fde68a" label="Data collected from Customers">
+          <RoleCallout color="var(--navy)" bg="var(--navy-soft)" border="var(--navy-border)" label="Data collected from Customers">
             As a customer, we collect your service preferences, booking history, and any job
             descriptions or photos you upload when requesting a booking. Payment confirmation
             details are also stored for your records.
@@ -49,7 +49,7 @@ export default async function PrivacyPage() {
         facilitate communication between customers and vendors; send service-related notifications;
         improve platform features; and comply with legal obligations.
         {role === "vendor" && (
-          <RoleCallout color="#0d9488" bg="#f0fdfa" border="#ccfbf1" label="How we use your vendor data">
+          <RoleCallout color="#3f3f46" bg="#f4f4f5" border="#d4d4d8" label="How we use your vendor data">
             Your bank account and identity details are used exclusively for processing payouts and
             verifying your account. They are never shared with customers or used for any purpose
             other than facilitating payments and compliance.
@@ -63,14 +63,14 @@ export default async function PrivacyPage() {
         service providers under strict confidentiality obligations; and with authorities where
         required by Botswana law.
         {role === "customer" && (
-          <RoleCallout color="#d97706" bg="#fffbeb" border="#fde68a" label="What vendors see about you">
+          <RoleCallout color="var(--navy)" bg="var(--navy-soft)" border="var(--navy-border)" label="What vendors see about you">
             When you book a handyman, they will see your name, service area, and the job description
             you provided. Your full home address is only shared after a booking is confirmed.
             Your contact number is shared to allow coordination.
           </RoleCallout>
         )}
         {role === "vendor" && (
-          <RoleCallout color="#0d9488" bg="#f0fdfa" border="#ccfbf1" label="What customers see about you">
+          <RoleCallout color="#3f3f46" bg="#f4f4f5" border="#d4d4d8" label="What customers see about you">
             Customers can see your name, profile photo, category, rating, reviews, and service
             area. Your bank account details, identity documents, and contact number are never
             visible to customers.
@@ -93,13 +93,13 @@ export default async function PrivacyPage() {
       <Section title="7. Your Rights">
         You have the right to access, correct, or delete your personal data. You may update your
         profile at any time from account settings. To exercise data rights, contact:{" "}
-        <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#d97706", fontWeight: 600 }}>privacy@handyhub.co.bw</a>
+        <a href="mailto:privacy@handyhub.co.bw" style={{ color: "var(--navy)", fontWeight: 600 }}>privacy@handyhub.co.bw</a>
       </Section>
 
       <Section title="8. Cookies">
         We use cookies and similar technologies to maintain your session and remember preferences.
         See our{" "}
-        <Link href="/legal/cookies" style={{ color: "#d97706", fontWeight: 600 }}>Cookie Policy</Link>{" "}
+        <Link href="/legal/cookies" style={{ color: "var(--navy)", fontWeight: 600 }}>Cookie Policy</Link>{" "}
         for full details.
       </Section>
 
@@ -116,7 +116,7 @@ export default async function PrivacyPage() {
 
       <Section title="11. Contact">
         Privacy enquiries:{" "}
-        <a href="mailto:privacy@handyhub.co.bw" style={{ color: "#d97706", fontWeight: 600 }}>privacy@handyhub.co.bw</a>
+        <a href="mailto:privacy@handyhub.co.bw" style={{ color: "var(--navy)", fontWeight: 600 }}>privacy@handyhub.co.bw</a>
       </Section>
     </LegalShell>
   );
@@ -136,8 +136,8 @@ function LegalShell({
     { href: "/legal/cookies", label: "Cookie Policy"      },
   ];
   return (
-    <div style={{ minHeight: "100vh", background: "#f8f7f5", fontFamily: "inherit" }}>
-      <div style={{ background: "white", borderBottom: "1px solid #e7e5e4", position: "sticky", top: 0, zIndex: 40 }}>
+    <div style={{ minHeight: "100vh", background: "#f4f4f5", fontFamily: "inherit" }}>
+      <div style={{ background: "white", borderBottom: "1px solid #e4e4e7", position: "sticky", top: 0, zIndex: 40 }}>
         <div style={{ maxWidth: 860, margin: "0 auto", padding: "0 20px", height: 52, display: "flex", alignItems: "center", gap: 8 }}>
           <BackButton />
           <ChevronRight size={12} color="#9ca3af" />
@@ -150,19 +150,19 @@ function LegalShell({
         <div style={{ width: 200, flexShrink: 0, position: "sticky", top: 72 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 10 }}>Policies</p>
           {links.map((l) => (
-            <Link key={l.href} href={l.href} style={{ display: "block", padding: "9px 14px", borderRadius: 10, marginBottom: 4, fontSize: 13, fontWeight: l.href.includes(current) ? 700 : 500, color: l.href.includes(current) ? "#d97706" : "#374151", background: l.href.includes(current) ? "#fffbeb" : "transparent", border: l.href.includes(current) ? "1px solid #fde68a" : "1px solid transparent", textDecoration: "none" }}>
+            <Link key={l.href} href={l.href} style={{ display: "block", padding: "9px 14px", borderRadius: 10, marginBottom: 4, fontSize: 13, fontWeight: l.href.includes(current) ? 700 : 500, color: l.href.includes(current) ? "var(--navy)" : "#374151", background: l.href.includes(current) ? "var(--navy-soft)" : "transparent", border: l.href.includes(current) ? "1px solid var(--navy-border)" : "1px solid transparent", textDecoration: "none" }}>
               {l.label}
             </Link>
           ))}
           <div style={{ marginTop: 20, padding: "12px 14px", background: "white", borderRadius: 12, border: "1px solid #e7e5e4" }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 6 }}>Need help?</p>
-            <a href="mailto:privacy@handyhub.co.bw" style={{ fontSize: 12, color: "#d97706", fontWeight: 700, textDecoration: "none" }}>privacy@handyhub.co.bw</a>
+            <a href="mailto:privacy@handyhub.co.bw" style={{ fontSize: 12, color: "var(--navy)", fontWeight: 700, textDecoration: "none" }}>privacy@handyhub.co.bw</a>
           </div>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: "1px solid #e7e5e4" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "#fffbeb", border: "1px solid #fde68a", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</div>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--navy-soft)", border: "1px solid var(--navy-border)", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</div>
               <div>
                 <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1c1917", letterSpacing: "-0.02em", margin: 0 }}>{title}</h1>
                 <p style={{ fontSize: 13, color: "#9ca3af", marginTop: 2 }}>{subtitle}</p>
@@ -180,7 +180,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div style={{ paddingBottom: 24, marginBottom: 24, borderBottom: "1px solid #f3f4f6" }}>
       <h2 style={{ fontSize: 15, fontWeight: 700, color: "#1c1917", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ display: "inline-block", width: 4, height: 16, borderRadius: 2, background: "#d97706", flexShrink: 0 }} />
+        <span style={{ display: "inline-block", width: 4, height: 16, borderRadius: 2, background: "var(--navy)", flexShrink: 0 }} />
         {title}
       </h2>
       <div style={{ fontSize: 14, color: "#44403c", lineHeight: 1.75 }}>{children}</div>

@@ -49,9 +49,9 @@ export const AdminLogin: FC = () => {
   return (
     <div data-theme="admin" style={{ minHeight: "100vh", display: "flex" }}>
       {/* Left brand panel — hidden on small screens */}
-      <div style={{ display: "none", width: 380, background: "linear-gradient(160deg, #1E1B4B 0%, #312E81 60%, #4338CA 100%)", flexDirection: "column", justifyContent: "space-between", padding: "48px 40px", flexShrink: 0 }} className="admin-login-panel">
+      <div style={{ display: "none", width: 380, background: "linear-gradient(160deg, #18181b 0%, #27435f 100%)", flexDirection: "column", justifyContent: "space-between", padding: "48px 40px", flexShrink: 0 }} className="admin-login-panel">
         <div>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#6366F1,#4F46E5)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 40 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "#27435f", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 40 }}>
             <IconShield style={{ width: 22, height: 22, color: "#fff" }} />
           </div>
           <h2 style={{ fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: "-.02em", lineHeight: 1.3, marginBottom: 12 }}>
@@ -69,7 +69,7 @@ export const AdminLogin: FC = () => {
             { label: "Real-time platform metrics" },
           ].map((f) => (
             <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#818CF8", flexShrink: 0 }} />
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#a1b4c6", flexShrink: 0 }} />
               <span style={{ fontSize: 13, color: "rgba(255,255,255,.6)" }}>{f.label}</span>
             </div>
           ))}
@@ -80,7 +80,7 @@ export const AdminLogin: FC = () => {
       <div style={{ flex: 1, background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 28px" }}>
         <div style={{ width: "100%", maxWidth: 380 }}>
           <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <div style={{ width: 52, height: 52, background: "linear-gradient(135deg,#6366F1,#4F46E5)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 6px 20px rgba(79,70,229,.35)" }}>
+            <div style={{ width: 52, height: 52, background: "#27435f", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 6px 20px rgba(39,67,95,.24)" }}>
               <IconShield style={{ width: 24, height: 24, color: "#fff" }} />
             </div>
             <h1 className="serif" style={{ fontSize: 26, letterSpacing: "-.02em", color: "var(--ink)" }}>
@@ -114,7 +114,7 @@ export const AdminLogin: FC = () => {
                 </button>
               </div>
             </div>
-            <button className="btn-pri" style={{ marginTop: 4, opacity: loading ? 0.7 : 1, background: "linear-gradient(135deg,#6366F1,#4F46E5)", boxShadow: "0 4px 14px rgba(79,70,229,.35)" }} onClick={attempt} disabled={loading}>
+            <button className="btn-pri" style={{ marginTop: 4, opacity: loading ? 0.7 : 1 }} onClick={attempt} disabled={loading}>
               {loading ? "Signing in…" : "Sign in to Admin Panel →"}
             </button>
           </div>

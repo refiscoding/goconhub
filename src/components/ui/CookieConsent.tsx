@@ -43,8 +43,8 @@ export function CookieConsent() {
         flexWrap: "wrap",
       }}
     >
-      <div style={{ width: 36, height: 36, borderRadius: 10, background: "#fffbeb", border: "1px solid #fde68a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        <Cookie size={18} color="#d97706" />
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--navy-soft)", border: "1px solid var(--navy-border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Cookie size={18} color="var(--navy)" />
       </div>
 
       <p style={{ flex: 1, fontSize: 13, color: "#44403c", lineHeight: 1.5, margin: 0, minWidth: 200 }}>
@@ -60,7 +60,7 @@ export function CookieConsent() {
         </Link>
         <button
           onClick={accept}
-          style={{ fontSize: 13, fontWeight: 700, color: "white", background: "#d97706", border: "none", padding: "7px 18px", borderRadius: 999, cursor: "pointer" }}
+          style={{ fontSize: 13, fontWeight: 700, color: "white", background: "var(--navy)", border: "none", padding: "7px 18px", borderRadius: 999, cursor: "pointer" }}
         >
           Accept
         </button>

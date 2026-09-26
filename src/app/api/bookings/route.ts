@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     where,
     select: {
       id: true, serviceName: true, date: true, time: true, location: true, note: true,
+      issueDesc: true, photos: true,
       amount: true, status: true, completedByVendor: true, adminApprovedComplete: true,
       paymentStatus: true, paymentMethod: true, paymentReference: true, paidAt: true,
       customer: { select: { id: true, firstName: true, lastName: true, phone: true, avatarUrl: true } },
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { vendorId, serviceId, serviceName, date, time, location, note, amount } = parsed.data;
+  const { vendorId, serviceId, serviceName, date, time, location, note, issueDesc, photos, amount } = parsed.data;
 
   try {
     // Server-side amount: always use the price stored in DB when a serviceId is provided
@@ -101,6 +102,8 @@ export async function POST(req: NextRequest) {
         time,
         location:    location.slice(0, 300),
         note:        note.slice(0, 1000),
+        issueDesc:   issueDesc.slice(0, 2000),
+        photos:      photos.slice(0, 10),
         amount:      finalAmount,
         status:      "pending",
       },

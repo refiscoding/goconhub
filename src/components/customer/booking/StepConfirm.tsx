@@ -43,10 +43,10 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
         ))}
         <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 4px", fontSize: 16 }}>
           <span style={{ fontWeight: 700 }}>Estimated Total</span>
-          <span style={{ fontWeight: 800, color: "#1A7A5E" }}>{fmtPrice(selection.service?.price ?? 0)}</span>
+          <span style={{ fontWeight: 800, color: "var(--navy)" }}>{fmtPrice(selection.service?.price ?? 0)}</span>
         </div>
         <p style={{ fontSize: 12, color: "var(--ink3)", marginBottom: 6 }}>Final price may vary depending on inspection and work required.</p>
-        <div style={{ background: "rgba(26,122,94,.06)", border: "1px solid rgba(26,122,94,.15)", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1A7A5E" }}>
+        <div style={{ background: "var(--navy-soft)", border: "1px solid var(--navy-border)", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "var(--navy)" }}>
           Payment is securely held by GoCon and released to the contractor only after the job is completed.
         </div>
       </div>
@@ -99,7 +99,7 @@ export const StepConfirm: FC<StepConfirmProps> = ({ vendor, selection, onNoteCha
             {selection.photos.length > 0 ? (
               <div>
                 <p style={{ fontSize: 20, marginBottom: 4 }}>📷</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "#1A7A5E" }}>{selection.photos.length} photo{selection.photos.length > 1 ? "s" : ""} selected</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--navy)" }}>{selection.photos.length} photo{selection.photos.length > 1 ? "s" : ""} selected</p>
                 <p style={{ fontSize: 12, marginTop: 2 }}>Tap to change</p>
               </div>
             ) : (

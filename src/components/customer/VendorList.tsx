@@ -93,7 +93,7 @@ export const VendorList: FC = () => {
       <div className="page-top cust-page-header">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <div>
-            <p style={{ fontSize: 12, color: "#1A7A5E", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", display: "flex", alignItems: "center", gap: 4 }}>
+            <p style={{ fontSize: 12, color: "var(--navy)", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", display: "flex", alignItems: "center", gap: 4 }}>
               <MapPinIcon /> Gaborone
             </p>
             <h1 className="serif" style={{ fontSize: 28, marginTop: 4, letterSpacing: "-.03em", fontWeight: 800 }}>Find Handymen</h1>

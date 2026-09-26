@@ -193,7 +193,7 @@ export const VendorProfile: FC = () => {
       {/* ── Stats row ── */}
       <div style={{ display: "flex", gap: 10, margin: "14px 20px 0" }}>
         {[
-          { label: "Rating",   value: user?.vendor?.rating?.toFixed(1) ?? "—",     color: "#f59e0b", icon: "⭐" },
+          { label: "Rating",   value: user?.vendor?.rating?.toFixed(1) ?? "—",     color: "var(--navy)", icon: "⭐" },
           { label: "Reviews",  value: String(user?.vendor?.reviewCount ?? 0),       color: "var(--acc)", icon: "💬" },
           { label: "Verified", value: user?.vendor?.verified ? "Yes" : "No",        color: "var(--green)", icon: "" },
         ].map((s) => (
@@ -244,8 +244,8 @@ export const VendorProfile: FC = () => {
         {/* ── Bio ── */}
         <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(99,102,241,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <IconWrench style={{ width: 16, height: 16, color: "#6366f1" }} />
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--navy-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <IconWrench style={{ width: 16, height: 16, color: "var(--navy)" }} />
             </div>
             <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>About / Bio</p>
           </div>
@@ -285,11 +285,11 @@ export const VendorProfile: FC = () => {
                 <div style={{ width: 32, height: 32, borderRadius: 10, background: isVerified ? "rgba(68,146,53,.12)" : "rgba(209,170,31,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {isVerified
                     ? <CircleCheckBig size={16} color="#449235" />
-                    : <CircleDot size={16} color="#d1aa1f" />}
+                    : <CircleDot size={16} color="var(--ink3)" />}
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Identity Verification</p>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: isVerified ? "#449235" : "#d1aa1f", marginTop: 1 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: isVerified ? "#449235" : "var(--ink3)", marginTop: 1 }}>
                     {isVerified ? "Verified by admin" : "Pending admin review"}
                   </p>
                 </div>
@@ -297,8 +297,8 @@ export const VendorProfile: FC = () => {
               <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                 {/* Entity type */}
                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: isIndividual ? "rgba(99,102,241,.1)" : "rgba(217,119,6,.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {isIndividual ? <IconUser style={{ width: 15, height: 15, color: "#6366f1" }} /> : <Building2 size={15} color="#d97706" />}
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: isIndividual ? "var(--navy-soft)" : "var(--bg2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {isIndividual ? <IconUser style={{ width: 15, height: 15, color: "var(--navy)" }} /> : <Building2 size={15} color="var(--navy)" />}
                   </div>
                   <div>
                     <p style={{ fontSize: 11, fontWeight: 700, color: "var(--ink3)", textTransform: "uppercase", letterSpacing: ".05em" }}>Entity Type</p>
@@ -340,7 +340,7 @@ export const VendorProfile: FC = () => {
           <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
             <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(16,163,127,.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Banknote size={16} color="#10a37f" />
+                <Banknote size={16} color="var(--navy)" />
               </div>
               <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Bank Account</p>
             </div>
@@ -404,16 +404,16 @@ export const VendorProfile: FC = () => {
         {/* ── Privacy Centre ── */}
         <div style={{ background: "var(--card)", borderRadius: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(13,148,136,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ShieldCheck size={16} color="#0d9488" />
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "var(--navy-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShieldCheck size={16} color="var(--navy)" />
             </div>
             <p style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>Privacy Centre</p>
           </div>
           <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
             {[
-              { href: "/legal/privacy", icon: <ShieldCheck size={15} color="#0d9488" />, label: "Privacy Policy",      desc: "How we handle your data as a vendor",    bg: "rgba(13,148,136,.08)" },
-              { href: "/legal/terms",   icon: <FileText    size={15} color="#d97706" />, label: "Terms & Conditions", desc: "Your obligations and rights on GoCon", bg: "rgba(217,119,6,.08)"  },
-              { href: "/legal/cookies", icon: <Cookie      size={15} color="#6366f1" />, label: "Cookie Policy",      desc: "How we use cookies and local storage",    bg: "rgba(99,102,241,.08)" },
+              { href: "/legal/privacy", icon: <ShieldCheck size={15} color="var(--navy)" />, label: "Privacy Policy",      desc: "How we handle your data as a vendor",    bg: "var(--navy-soft)" },
+              { href: "/legal/terms",   icon: <FileText    size={15} color="var(--ink2)" />, label: "Terms & Conditions", desc: "Your obligations and rights on GoCon", bg: "var(--bg2)"  },
+              { href: "/legal/cookies", icon: <Cookie      size={15} color="var(--ink2)" />, label: "Cookie Policy",      desc: "How we use cookies and local storage",    bg: "var(--bg2)" },
             ].map((item) => (
               <a key={item.href} href={item.href} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 12, background: "var(--bg)", border: "1px solid var(--border)", textDecoration: "none" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 9, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{item.icon}</div>
@@ -426,8 +426,8 @@ export const VendorProfile: FC = () => {
             ))}
             <div style={{ marginTop: 4, padding: "12px 14px", borderRadius: 12, background: "var(--bg)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(99,102,241,.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Cookie size={15} color="#6366f1" />
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: "var(--bg2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Cookie size={15} color="var(--ink2)" />
                 </div>
                 <div>
                   <p style={{ fontWeight: 700, fontSize: 13, color: "var(--ink)", margin: 0 }}>Cookie Preferences</p>
@@ -439,11 +439,11 @@ export const VendorProfile: FC = () => {
                 Reset
               </button>
             </div>
-            <div style={{ padding: "12px 14px", borderRadius: 12, background: "#f0fdfa", border: "1px solid #ccfbf1" }}>
-              <p style={{ fontWeight: 700, fontSize: 12, color: "#0d9488", marginBottom: 4 }}>Your Data Rights</p>
+            <div style={{ padding: "12px 14px", borderRadius: 12, background: "var(--navy-soft)", border: "1px solid var(--navy-border)" }}>
+              <p style={{ fontWeight: 700, fontSize: 12, color: "var(--navy)", marginBottom: 4 }}>Your Data Rights</p>
               <p style={{ fontSize: 12, color: "#44403c", lineHeight: 1.6, margin: 0 }}>
                 To access, correct, or delete your personal data, contact{" "}
-                <a href="mailto:privacy@gocon.co.bw" style={{ color: "#0d9488", fontWeight: 700 }}>privacy@gocon.co.bw</a>
+                <a href="mailto:privacy@gocon.co.bw" style={{ color: "var(--navy)", fontWeight: 700 }}>privacy@gocon.co.bw</a>
               </p>
             </div>
           </div>

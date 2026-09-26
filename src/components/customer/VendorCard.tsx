@@ -27,19 +27,15 @@ const SKILL_STYLES: Record<string, SkillStyle> = {
   "Sockets":         { bg: "rgba(245,158,11,.1)",   color: "#b45309", icon: ({ s = 11 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={W} strokeLinecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><path d="M9 16h6"/></svg> },
 };
 
-/* Fallback palette for skills not in the map — cycles through distinct colors */
+/* Alternate neutral skill tags with a restrained navy accent. */
 const FALLBACK_COLORS = [
-  { bg: "rgba(139,92,246,.1)",  color: "#7c3aed" },  // violet
-  { bg: "rgba(236,72,153,.1)",  color: "#db2777" },  // pink
-  { bg: "rgba(6,182,212,.1)",   color: "#0891b2" },  // cyan
-  { bg: "rgba(34,197,94,.1)",   color: "#16a34a" },  // green
-  { bg: "rgba(249,115,22,.1)",  color: "#ea580c" },  // orange
-  { bg: "rgba(99,102,241,.1)",  color: "#4f46e5" },  // indigo
+  { bg: "var(--navy-soft)", color: "var(--navy)" },
+  { bg: "var(--bg2)", color: "var(--ink2)" },
 ];
 
 function getSkillStyle(skill: string, index: number): { bg: string; color: string; icon: FC<{ s?: number }> | null } {
   const mapped = SKILL_STYLES[skill];
-  if (mapped) return mapped;
+  if (mapped) return { ...mapped, bg: "var(--navy-soft)", color: "var(--navy)" };
   const fb = FALLBACK_COLORS[index % FALLBACK_COLORS.length];
   return { ...fb, icon: null };
 }
@@ -62,7 +58,7 @@ export const VendorCard: FC<VendorCardProps> = ({ vendor: v }) => {
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5, overflow: "hidden" }}>
                 <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 15, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.name}</p>
-                {v.verified && <BadgeCheck size={15} color="#339AF0" fill="#339AF0" stroke="#fff" style={{ flexShrink: 0 }} />}
+                {v.verified && <BadgeCheck size={15} color="var(--navy)" fill="var(--navy)" stroke="#fff" style={{ flexShrink: 0 }} />}
               </div>
               <p style={{ fontSize: 12, color: "var(--ink2)", marginTop: 2 }}>{v.cat}</p>
             </div>
@@ -83,7 +79,7 @@ export const VendorCard: FC<VendorCardProps> = ({ vendor: v }) => {
             <MapPin size={12} style={{ flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.loc}</span>
             <span style={{ margin: "0 3px", flexShrink: 0 }}>·</span>
-            <strong style={{ color: "#1A7A5E", flexShrink: 0 }}>{fmtPrice(v.price)}/{v.unit}</strong>
+            <strong style={{ color: "var(--navy)", flexShrink: 0 }}>{fmtPrice(v.price)}/{v.unit}</strong>
           </div>
         </div>
       </div>

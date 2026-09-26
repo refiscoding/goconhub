@@ -3,12 +3,16 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+const databaseUrl = process.env["DATABASE_URL"];
+const datasourceUrl = databaseUrl ? new URL(databaseUrl) : undefined;
+datasourceUrl?.searchParams.set("sslmode", "require");
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: datasourceUrl?.toString(),
   },
 });

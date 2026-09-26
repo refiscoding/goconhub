@@ -40,6 +40,8 @@ export interface Booking {
   status: BookingStatus;
   amount: number;
   loc: string;
+  issueDesc?: string;
+  photos?: string[];
 }
 
 export interface AppUser {
@@ -141,6 +143,7 @@ export interface ServiceDraft {
 }
 
 export interface SelectedService {
+  id?: string | null;
   name: string;
   price: number;
 }
